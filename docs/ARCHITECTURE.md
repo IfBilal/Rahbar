@@ -70,7 +70,7 @@ Deployment with `strategy: Recreate`, which avoids the overlap for the one cache
    question asks about an older version, with clause numbers and course codes pulled
    forward by Chroma's full-text `$contains` (exact-term assist).
    **Floor**: if no passage reaches `RELEVANCE_FLOOR`, abstain without calling the model.
-5. **Augment**: system rules, then up to `MAX_CONTEXT_PASSAGES` numbered `<evidence>`
+5. **Augment**: system rules, then up to `MAX_CONTEXT_PASSAGES` enumerated `<evidence>` (ids A, B, C, so they never collide with clause numbers)
    blocks (untrusted data, with imperatives neutralised), then the `<question>`.
 6. **Generate**: Ollama with `format` = the `Answer` JSON schema, temperature 0.2.
 7. **Validate**: Pydantic, then the citation guard; one retry with the reason; then a

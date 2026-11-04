@@ -19,14 +19,14 @@ def _answer(text: str, citations: list[Citation], answered: bool = True) -> Answ
 
 
 def test_valid_answer_passes_and_markers_become_readable_citations() -> None:
-    out = check_answer(grounded(P[0], "Last day of the makeup week [1]."), P)
+    out = check_answer(grounded(P[0], "Last day of the makeup week [A]."), P)
     assert out.answer == ("Last day of the makeup week "
                           "[rules.pdf / 4. Registration > Withdrawal from a Course].")
     assert out.citations == [Citation(source="rules.pdf", section=P[0].section, page=22)]
 
 
 def test_shortened_section_maps_to_the_real_chunk() -> None:
-    out = check_answer(_answer("x [2]", [Citation(source="rules.pdf",
+    out = check_answer(_answer("x [B]", [Citation(source="rules.pdf",
                                                   section="Attendance Requirements", page=10)]), P)
     assert [c.section for c in out.citations] == [P[1].section]
 
@@ -42,8 +42,8 @@ def test_fabricated_citations_are_rejected(citation: Citation) -> None:
 
 
 def test_markers_must_point_at_real_passages() -> None:
-    with pytest.raises(GuardError, match=r"\[7\]"):
-        check_answer(_answer("x [7]", [Citation(source="rules.pdf", section=P[0].section,
+    with pytest.raises(GuardError, match="'G'"):
+        check_answer(_answer("x [G]", [Citation(source="rules.pdf", section=P[0].section,
                                                 page=22)]), P)
 
 
@@ -53,7 +53,7 @@ def test_grounded_claim_without_any_citation_is_rejected() -> None:
 
 
 def test_markers_alone_are_enough_citations() -> None:
-    out = check_answer(_answer("It is in [2].", []), P)
+    out = check_answer(_answer("It is in [B].", []), P)
     assert out.citations[0].section == P[1].section
 
 
@@ -66,7 +66,7 @@ def test_declined_answer_drops_citations() -> None:
 
 def test_declining_while_citing_evidence_is_contradictory() -> None:
     with pytest.raises(GuardError, match="false but the answer cites"):
-        check_answer(_answer("Attendance is not optional [2].", [], answered=False), P)
+        check_answer(_answer("Attendance is not optional [B].", [], answered=False), P)
 
 
 def test_match_passage_without_page_uses_source_and_section() -> None:
@@ -84,3 +84,11 @@ def test_match_passage_without_page_uses_source_and_section() -> None:
 ])
 def test_follow_up_detection(question: str, expected: bool) -> None:
     assert is_follow_up(question) is expected
+
+
+def test_bracketed_numbers_are_not_citations_and_are_removed() -> None:
+    """Measured on the cluster: with numbered evidence a 3B model wrote [6] for clause 6.6.
+    Evidence ids are now letters; a bracketed number is dropped, never trusted."""
+    out = check_answer(_answer("Repeat at most 2 courses [6] in summer [A].", []), P)
+    assert out.answer == f"Repeat at most 2 courses in summer [rules.pdf / {P[0].section}]."
+    assert [c.section for c in out.citations] == [P[0].section]

@@ -96,7 +96,7 @@ class ScriptedProvider:
         return reply
 
 
-def grounded(p: Passage, text: str = "The rule is X [1].") -> Answer:
+def grounded(p: Passage, text: str = "The rule is X [A].") -> Answer:
     return Answer(reasoning="secret chain of thought", answer=text,
                   citations=[Citation(source=p.source, section=p.section, page=p.page)],
                   answered_from_context=True, confidence="high")

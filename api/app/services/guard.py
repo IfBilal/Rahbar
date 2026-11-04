@@ -9,7 +9,8 @@ import re
 
 from ..schemas import Answer, Citation, Passage
 
-_MARKER = re.compile(r"\[(\d{1,2})\]")
+_MARKER = re.compile(r"\[([A-Z])\]")            # evidence letters, see prompt.evidence_id
+_NUMBER = re.compile(r"\s*\[\d{1,3}\]")          # a bracketed number is never a citation
 
 
 class GuardError(ValueError):
@@ -36,11 +37,13 @@ def match_passage(citation: Citation, passages: list[Passage]) -> Passage | None
 
 def check_answer(answer: Answer, passages: list[Passage]) -> Answer:
     """Return a cleaned copy of `answer`, or raise GuardError."""
-    numbers = [int(n) for n in _MARKER.findall(answer.answer)]
-    bad = [n for n in numbers if not 1 <= n <= len(passages)]
+    letters = _MARKER.findall(answer.answer)
+    bad = [x for x in letters if ord(x) - ord("A") >= len(passages)]
     if bad:
-        raise GuardError(f"evidence marker(s) {bad} do not exist; there are "
-                         f"{len(passages)} passages")
+        raise GuardError(f"evidence marker(s) {bad} do not exist; the evidence ids are "
+                         f"A to {chr(ord('A') + len(passages) - 1)}")
+    numbers = [ord(x) - ord("A") + 1 for x in letters]
+    answer = answer.model_copy(update={"answer": _NUMBER.sub("", answer.answer)})
     if not answer.answered_from_context:
         if numbers:
             raise GuardError("answered_from_context is false but the answer cites evidence "
@@ -60,8 +63,11 @@ def check_answer(answer: Answer, passages: list[Passage]) -> Answer:
     unique = list({p.chunk_id: p for p in cited}.values())
     if not unique:
         raise GuardError("answered_from_context is true but nothing is cited")
-    text = _MARKER.sub(lambda m: f"[{passages[int(m.group(1)) - 1].source} / "
-                                 f"{passages[int(m.group(1)) - 1].section}]", answer.answer)
+    def readable(m: re.Match[str]) -> str:
+        p = passages[ord(m.group(1)) - ord("A")]
+        return f"[{p.source} / {p.section}]"
+
+    text = _MARKER.sub(readable, answer.answer)
     return answer.model_copy(update={
         "answer": text,
         "citations": [Citation(source=p.source, section=p.section, page=p.page) for p in unique],
