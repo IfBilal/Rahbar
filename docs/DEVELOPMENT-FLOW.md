@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** followed: tests first, `make test`/`make lint` green, CI on every push to `dev`. This guide is kept as the plan of record.
+
 # End-to-end workflow, integration gates, risk and done criteria
 
 This is the **execution control plane** for the pair. A PR is neither complete nor unblocking until the *consumer* verifies its contract at the next gate. Use `G0` → `G8` as go/no-go decisions, log real results in PRs and `docs/evidence/` after you create that directory, and stop if a prerequisite fails. For task-level dependencies see `CRITICAL-PATH.md`, for instructions by phase see `PHASES.md`.

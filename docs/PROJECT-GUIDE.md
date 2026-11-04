@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** implemented; see `README.md` (clean-clone path) and `docs/TRACEABILITY.md`. This guide is kept as the plan of record.
+
 # RAHBAR — 25-file Agent Development Documentation
 
 > **Supplementary documentation only — not a replacement for the starter kit.** This ZIP intentionally contains **25 new standalone Markdown guides, all at ZIP root**. It does **not** contain or overwrite any Markdown supplied with `rahbar-starter.zip` (`README.md`, `STARTER.md`, `docs/CORPUS.md`, `docs/PIPELINE.md`, `docs/FAILURE-ANALYSIS.md`, `docs/ENGINEERING-NOTES.md`, `docs/AI-USAGE.md`, the fixture Markdown, or the ADR template). Keep all of those original files in your project. The instructor requires several **exact submission paths**; implement and update the originals in those paths using these guides as working plans. If names appear similar, this guide is for implementation and the starter file is the deliverable.

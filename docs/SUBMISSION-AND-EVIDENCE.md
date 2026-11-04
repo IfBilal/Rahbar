@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** evidence collected under `docs/evidence/`; the release sign-off below is filled in. This guide is kept as the plan of record.
+
 # Submission package, evidence register and demo procedure
 
 Due **2026-11-08 23:59 PKT**, one team entry. Must submit (1) GitHub repository URL (public or instructor access), (2) successful `cd.yml` run link proving test/publish/deploy, (3) Docker Hub SHA-tagged image links, and (4) committed `eval/results.json` and `eval/baseline.json`. Run `python scripts/check_submission.py` from repo root; it is only a mechanical precheck, not grading proof.

@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** the disclosure is `docs/AI-USAGE.md`. This guide is kept as the plan of record.
+
 > **Required output file:** Implement the material in this *supplementary planning guide* and record the final, evidence-backed results in the instructor-provided `docs/AI-USAGE.md`. That original file is not included in this archive.
 
 # AI assistance and attribution for the submitted repository

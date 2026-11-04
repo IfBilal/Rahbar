@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** implemented in `api/app/services/` (answer, prompt, guard, cache); see `docs/PIPELINE.md`. This guide is kept as the plan of record.
+
 # Query path, LLM safety, citations and semantic caching
 
 **Eight-step request path:** validate length (3–500) → eligible cache lookup → embed with shared model → top-k version-filtered Chroma retrieval → evidence-only numbered prompt → JSON-schema-constrained generation at configured low temperature → Pydantic parse/validate, one retry then fallback → response/log/cache only if valid. Make each step independently testable under `api/app/services/`.

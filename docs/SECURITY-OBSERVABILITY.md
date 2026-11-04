@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** implemented; see `docs/ARCHITECTURE.md` (security closures), `docs/evidence/networkpolicy-tests.txt` and `docs/evidence/metrics.txt`. Residual risk: Redis and Chroma have no authentication; NetworkPolicy (enforced by Calico) is the control, as section 4.7 specifies. This guide is kept as the plan of record.
+
 # Security threat model, network graph, logs and metrics
 
 Assignment security closures: **(1)** never commit secrets, **(2)** distinct ServiceAccounts and disable token automount when unnecessary, **(3)** non-root read-only containers with dropped capabilities, **(4)** default-deny and explicit required network flows including DNS and Ollama host egress, **(5)** treat retrieved documents and LLM outputs as untrusted. Restrict Chroma to API/indexer and Redis to API; UI must not reach Chroma.

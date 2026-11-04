@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** the tested runbook is `README.md` (clean clone → answered question) with `docs/evidence/clean-clone.log`. This guide is kept as the plan of record.
+
 # Cluster bootstrap, rollouts, re-indexing and recovery
 
 This document is an **operator runbook**; commands are planning examples until executed on the target machine. The starter's Makefile and `STARTER.md` supersede guesses about available targets. Local development should work with stubs before real RAG, with Chroma PVC persistence and no API-startup writes. Reserve separate time to collect real command output for submission.

@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** all 25 WBS tasks done except the owner-only steps (branch protection, Docker Hub secrets, the reviewed merge that triggers cd.yml), listed in `docs/SUBMISSION-AND-EVIDENCE.md`. This guide is kept as the plan of record.
+
 # Critical path, 25-task WBS and safe parallelism
 
 **Do not confuse CPM estimates with the deadline.** The original task DAG's unrestricted, precedence-only longest-path calculation is **58 focused-hours**, with four tied critical paths; this is a *lower bound* before imposing the reality of two developers, waiting on models, flaky links and cluster debugging. Treat task durations as estimates, not completed effort or a promise. The calendar and gate evidence override estimates.
