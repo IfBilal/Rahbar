@@ -18,7 +18,7 @@ mkdir -p "$OUT"
 
 reindex() {   # reindex <name> <json patch for the ConfigMap>
   kubectl patch configmap rahbar-config -n $NS --type merge -p "$2"
-  local job="fail-$1-$(date +%s)"
+  local job="fail-$(echo "$1" | tr "[:upper:]" "[:lower:]")-$(date +%s)"   # names are lowercase
   kubectl create job --from=cronjob/reindex "$job" -n $NS
   kubectl wait --for=condition=complete "job/$job" -n $NS --timeout=3600s
   kubectl logs -n $NS "job/$job" -c indexer > "$OUT/$1-indexer.log"
