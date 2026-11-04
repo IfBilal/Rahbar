@@ -202,6 +202,13 @@ def test_network_graph_matches_the_architecture(objs) -> None:
     assert not _allows_ingress(objs, "redis", "indexer", 6379)  # only the api reaches redis
 
 
+def test_ui_may_call_only_the_api(objs) -> None:
+    ui = one(objs, "NetworkPolicy", "ui-from-ingress")["spec"]
+    targets = [(t["podSelector"]["matchLabels"]["app"], p["port"])
+               for rule in ui["egress"] for t in rule["to"] for p in rule["ports"]]
+    assert targets == [("api", 8000)]
+
+
 def test_dns_egress_is_allowed(objs) -> None:
     dns = one(objs, "NetworkPolicy", "allow-dns-egress")["spec"]["egress"][0]
     assert {(p["protocol"], p["port"]) for p in dns["ports"]} == {("UDP", 53), ("TCP", 53)}

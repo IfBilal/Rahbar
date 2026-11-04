@@ -1,0 +1,58 @@
+# NetworkPolicy, enforced by Calico on minikube (2026-11-04T18:50:56Z). Real connections from inside the pods.
+$ kubectl get networkpolicy -n rahbar
+NAME                          POD-SELECTOR   AGE
+allow-dns-egress              <none>         59m
+api-policy                    app=api        59m
+chroma-from-api-and-indexer   app=chroma     59m
+default-deny-all              <none>         59m
+indexer-policy                app=indexer    59m
+redis-from-api                app=redis      59m
+ui-from-ingress               app=ui         59m
+
+$ kubectl get pods -n kube-system -l k8s-app=calico-node
+NAME                READY   STATUS    RESTARTS   AGE
+calico-node-lzp9v   1/1     Running   0          7h12m
+
+## from ui (ui-b84f8ffd9-28qj8) -> http://chroma:8000/api/v2/heartbeat   [DENIED expected]
+$ kubectl exec -n rahbar ui-b84f8ffd9-28qj8 -- wget -T 4 -q -O - http://chroma:8000/api/v2/heartbeat
+wget: download timed out
+command terminated with exit code 1
+exit code: 1
+
+## from ui (ui-b84f8ffd9-28qj8) -> http://redis:6379/   [DENIED expected]
+$ kubectl exec -n rahbar ui-b84f8ffd9-28qj8 -- wget -T 4 -q -O - http://redis:6379/
+wget: download timed out
+command terminated with exit code 1
+exit code: 1
+
+## from ui (ui-b84f8ffd9-28qj8) -> http://api:8000/healthz   [allowed? (ui->api is allowed by api-policy ingress, but ui has no egress rule: expected DENIED)]
+$ kubectl exec -n rahbar ui-b84f8ffd9-28qj8 -- wget -T 4 -q -O - http://api:8000/healthz
+wget: download timed out
+command terminated with exit code 1
+exit code: 1
+
+## from api (api-c7dffd698-5lhrr) -> http://chroma:8000/api/v2/heartbeat
+$ kubectl exec -n rahbar api-c7dffd698-5lhrr -- python -c "urllib.request.urlopen('http://chroma:8000/api/v2/heartbeat', timeout=4)"
+b'{"nanosecond heartbeat":1793818273584279168}'
+CONNECTED
+
+## from api (api-c7dffd698-5lhrr) -> http://redis:6379/
+$ kubectl exec -n rahbar api-c7dffd698-5lhrr -- python -c "urllib.request.urlopen('http://redis:6379/', timeout=4)"
+error: RemoteDisconnected Remote end closed connection without response
+CONNECTED (TCP open, non-HTTP reply)
+
+## from api (api-c7dffd698-5lhrr) -> http://ui:8080/healthz
+$ kubectl exec -n rahbar api-c7dffd698-5lhrr -- python -c "urllib.request.urlopen('http://ui:8080/healthz', timeout=4)"
+error: URLError <urlopen error timed out>
+BLOCKED
+
+## DNS resolves inside the policy (allow-dns-egress)
+chroma -> 10.96.96.97
+
+## after adding ui egress to api:8000 (the 'api from the ui' path of 4.7)
+$ kubectl exec -n rahbar ui-b84f8ffd9-28qj8 -- wget -T 4 -q -O - http://api:8000/healthz
+{"status":"alive"}exit code: 0
+$ kubectl exec -n rahbar ui-b84f8ffd9-28qj8 -- wget -T 4 -q -O - http://chroma:8000/api/v2/heartbeat
+wget: download timed out
+command terminated with exit code 1
+exit code: 1 (still denied)
