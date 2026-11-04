@@ -17,9 +17,10 @@ data:
   CHROMA_PORT: "8000"
   CHROMA_COLLECTION: "rahbar"
   REDIS_URL: "redis://redis:6379/0"
-  # Chunking: whitespace tokens. 400/60 won the three-way measurement (docs/PIPELINE.md).
-  CHUNK_SIZE: "400"
-  CHUNK_OVERLAP: "60"
+  # Chunking: whitespace tokens. 300/40 won the three-way measurement on recall@3 (the
+  # passages the model sees); recall@5 tied at 0.906 (docs/PIPELINE.md).
+  CHUNK_SIZE: "300"
+  CHUNK_OVERLAP: "40"
   TOP_K: "5"
   # Abstain below this cosine similarity: highest floor that keeps every answerable golden
   # question's relevant passage above it (lowest: 0.650); measured in docs/PIPELINE.md.
