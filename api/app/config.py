@@ -43,6 +43,23 @@ class Settings:
 
     log_level: str = "INFO"
 
+    # Grounding (3.4): the best retrieved similarity must reach this or the API abstains.
+    relevance_floor: float = 0.55
+    # Exact-term assist (5.2 / note 5): pull chunks that literally contain a clause number
+    # or course code named in the question to the front of the dense results.
+    exact_term_assist: bool = True
+    llm_timeout: float = 120.0       # seconds; generation on a laptop CPU is slow
+
+    # Semantic cache (3.3). Disabled when REDIS_URL is empty (make dev, unit tests).
+    redis_url: str = ""
+    cache_threshold: float = 0.95
+    cache_max_entries: int = 500
+    cache_ttl_seconds: int = 7 * 24 * 3600
+
+
+def _bool(name: str, default: bool) -> bool:
+    return os.environ.get(name, str(default)).strip().lower() in ("1", "true", "yes", "on")
+
 
 def get_settings() -> Settings:
     return Settings(
@@ -59,4 +76,11 @@ def get_settings() -> Settings:
         hosted_base_url=os.environ.get("HOSTED_BASE_URL", ""),
         llm_api_key=os.environ.get("LLM_API_KEY", ""),
         log_level=os.environ.get("LOG_LEVEL", "INFO"),
+        relevance_floor=_float("RELEVANCE_FLOOR", 0.55),
+        exact_term_assist=_bool("EXACT_TERM_ASSIST", True),
+        llm_timeout=_float("LLM_TIMEOUT_SECONDS", 120.0),
+        redis_url=os.environ.get("REDIS_URL", ""),
+        cache_threshold=_float("CACHE_THRESHOLD", 0.95),
+        cache_max_entries=_int("CACHE_MAX_ENTRIES", 500),
+        cache_ttl_seconds=_int("CACHE_TTL_SECONDS", 7 * 24 * 3600),
     )

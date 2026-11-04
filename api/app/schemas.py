@@ -26,6 +26,10 @@ class Passage(BaseModel):
     section: str
     page: int | None = None
     score: float = Field(description="Similarity, higher is closer (1 - cosine distance).")
+    # Added (ADR 0004): the prompt labels each passage current or superseded, so an
+    # answer about an old rule can say it is old. Optional, so the stub stays valid.
+    doc_version: str | None = None
+    superseded: bool = False
 
 
 class Citation(BaseModel):
@@ -62,3 +66,6 @@ class AskResponse(BaseModel):
     confidence: Literal["high", "medium", "low"]
     retrieved: list[RetrievedRef]
     provider: str
+    # Added (ADR 0003): true when this response came from the semantic cache. The UI
+    # shows a cache chip for it. Defaults to false, so existing clients are unaffected.
+    cached: bool = False
