@@ -58,6 +58,9 @@ def test_only_passages_above_the_floor_reach_the_model() -> None:
 
     answer_question("q?", FakeRetriever(P), Spy(), S)
     assert seen["ids"] == ["c1", "c2"]
+    many = [passage(i, 0.9 - i / 100) for i in range(1, 6)]
+    answer_question("q?", FakeRetriever(many), Spy(), Settings(relevance_floor=0.5, max_context_passages=3))
+    assert seen["ids"] == ["c1", "c2", "c3"]                    # best three reach the model
 
 
 def test_fabricated_citation_is_retried_once_then_succeeds() -> None:
@@ -140,3 +143,32 @@ def test_one_log_line_per_turn_with_ids_scores_and_no_text(caplog) -> None:
     assert rec.chunk_ids == ["c1", "c2", "c3"] and rec.scores == [0.82, 0.71, 0.4]
     assert rec.top_k == 5 and rec.abstained is False
     assert "Secret question" not in json.dumps(vars(rec), default=str)
+
+
+def test_a_settings_change_starts_a_fresh_cache_scope() -> None:
+    """Found on the cluster: answers cached under the old floor and another provider were
+    served after a ConfigMap change. Every answer-shaping knob is now part of the key."""
+    from dataclasses import replace
+
+    from app.services.answer import cache_scope
+
+    base = cache_scope("g1", "ollama", S)
+    assert cache_scope("g1", "stub", S) != base
+    for change in ({"relevance_floor": 0.6}, {"top_k": 3}, {"temperature": 0.1},
+                   {"max_context_passages": 2}, {"llm_model": "llama3.2:1b"},
+                   {"embed_model": "other"}):
+        assert cache_scope("g1", "ollama", replace(S, **change)) != base, change
+    assert cache_scope("g1", "ollama", S) == base
+
+
+def test_answers_from_a_different_provider_are_not_reused() -> None:
+    redis, cache = _cached_stack()
+    first = ScriptedProvider(grounded(P[0]))
+    answer_question("What is the rule?", FakeRetriever(P), first, S, cache)
+
+    class Other(ScriptedProvider):
+        name = "ollama"
+
+    second = Other(grounded(P[0]))
+    r = answer_question("What is the rule?", FakeRetriever(P), second, S, cache)
+    assert not r.cached and len(second.calls) == 1

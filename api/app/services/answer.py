@@ -14,6 +14,7 @@ A user never sees a 500 because a model misbehaved: every failure ends in a cann
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import time
 from typing import Any
@@ -48,6 +49,16 @@ def _declined(text: str, passages: list[Passage], provider: str) -> AskResponse:
                        retrieved=_refs(passages), provider=provider)
 
 
+def cache_scope(generation: str, provider: str, settings: Settings) -> str:
+    """Everything that shapes an answer is in the key, so an answer is only reused under
+    the exact rules that produced it: a new index generation, model, provider, floor,
+    top_k, passage count or temperature starts a fresh, empty scope."""
+    knobs = (f"{provider}|{settings.llm_model}|{settings.temperature}|{settings.relevance_floor}|"
+             f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}")
+    digest = hashlib.sha256(knobs.encode()).hexdigest()[:10]
+    return f"{generation}:{settings.embed_model}:{digest}"
+
+
 def generate_checked(question: str, passages: list[Passage],
                      provider: LLMProvider) -> tuple[Answer | None, str | None, int]:
     """Steps 6-7: generate, validate, retry once. Returns (answer, failure reason, attempts)."""
@@ -76,7 +87,7 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
     embed = getattr(retriever, "embed_query", None)
     if cache is not None and embed is not None and not follow_up:
         try:
-            scope = f"{retriever.generation}:{settings.embed_model}:{settings.llm_model}"  # type: ignore[attr-defined]
+            scope = cache_scope(retriever.generation, provider.name, settings)  # type: ignore[attr-defined]
             cache.observe(scope)
             vector = embed(question)
             hit, similarity = cache.lookup(scope, vector)
@@ -107,6 +118,7 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
 
     # relevance floor: nothing relevant enough means an honest abstention, no model call
     relevant = [p for p in passages if p.score >= settings.relevance_floor]
+    relevant = sorted(relevant, key=lambda p: p.score, reverse=True)[:settings.max_context_passages]
     if not relevant:
         m.ABSTENTIONS.labels(reason="below_relevance_floor").inc()
         response = _declined(ABSTAIN_TEXT, passages, provider.name)
