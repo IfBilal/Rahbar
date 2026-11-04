@@ -1,0 +1,10 @@
+a01 run 1:   41.1s answered=False fallback=False expect=False :: The documents do not cover this question. There is no mention of a monthly hostel fee or the process of applying for a hostel room in the provided evidence pass
+a01 run 2:    8.6s answered=False fallback=False expect=False :: The documents do not cover this question. The evidence passages only discuss fee structure and admission fees, but do not mention monthly hostel fees or the app
+a02 run 1:   79.9s answered=False fallback=False expect=False :: The evidence passages do not provide information on hostel curfew timings for female students. The evidence passages only cover rules related to academic warnin
+a02 run 2:    7.4s answered=False fallback=False expect=False :: The evidence passages do not provide information on hostel curfew timings for female students.
+q09 run 1:  137.9s answered=True fallback=False expect=False :: According to the 2023-24 annual report, the Islamabad campus has a highly qualified, fully committed, and professionally stimulated faculty dedicated to academi
+q09 run 2:   35.6s answered=False fallback=False expect=False :: The Islamabad campus has a highly qualified, fully committed, and professionally stimulated faculty dedicated to academic excellence, with faculty members who e
+e01 run 1:   60.8s answered=False fallback=False expect=False :: The documents do not cover this question.
+e01 run 2:    5.5s answered=False fallback=False expect=False :: The documents do not cover this question.
+
+expect found 0/8, fallbacks 0/8, distinct answers per question {'a01': 2, 'a02': 2, 'q09': 2, 'e01': 1}, answered from context 1/8
