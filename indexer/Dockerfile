@@ -13,7 +13,9 @@ RUN apt-get update \
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /app
 COPY indexer/requirements.txt ./requirements.txt
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Nothing installs packages at runtime, so pip and setuptools leave the image: less attack
+# surface, and pip's vendored setuptools 70.3.0 copy (CVE-2025-47273) goes with it.
+RUN pip install -r requirements.txt && pip uninstall -y pip setuptools
 
 COPY indexer/pipeline ./pipeline
 # corpus/fetch.py + sources.yaml + MANIFEST.md: the Job's init container downloads the
