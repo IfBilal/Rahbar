@@ -121,9 +121,32 @@ Each row is a full re-index of the real corpus through the CronJob template
 is `nomic-embed-text` with the lowercase fix; `TOP_K=5`; exact-term assist on. Recall only
 depends on retrieval, so these runs use the stub generator.
 
-@@MEASURE: chunk table@@
+| Size (tokens) | Overlap (tokens) | recall@3 | recall@5 | Chunks stored | Storage amplification | Questions missed at k=5 |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| **300** | **40** | **0.906** | **0.906** | 532 | 1.085 | q09 (faculty table), e03 (½: grading page) |
+| 400 | 60 | 0.875 | 0.906 | 486 | 1.078 | q09, e03 (½); q06 drops to rank 4–5 |
+| 550 | 80 | 0.875 | 0.906 | 449 | 1.055 | q09, e03 (½); q06 drops to rank 4–5 |
+| 400 | 60 | 0.719 | 0.719 | 486 | 1.078 | *before the lowercase fix*: q04, q06, q09, e02, e03 (½) |
 
-**Shipped: @@MEASURE: choice and justification@@**
+Raw results: `docs/evidence/chunking/results-*.json` and the indexer's `chunking done`
+log lines (`index-*.log`). Amplification is a little above the overlap fraction because
+every chunk repeats its section label.
+
+**Shipped: 300 tokens with 40 overlap** (`CHUNK_SIZE`/`CHUNK_OVERLAP` in the ConfigMap).
+recall@5 ties at 0.906 across all three settings, so it cannot decide. **recall@3 does,
+and it is the number that matters here**: the API sends only the best three passages to
+the model (`MAX_CONTEXT_PASSAGES=3`). At 300/40, q06's "Unacceptable Uses of Generative AI
+Tools" sub-section ranks in the top three; at 400 and 550 a broader chunk of "Generative
+AI and Assessments" outranks it. Smaller chunks also shorten the prompt by about a quarter,
+and prompt evaluation dominates latency on our CPU (about 12 tokens/s). The cost is 46
+more chunks than 400/60 and slightly more amplification (1.085 against 1.078).
+**Caveat:** 16 answerable questions; the recall@3 difference is one question, so the
+decision rests as much on prompt length as on recall.
+
+The two misses that remain are both **tables**: q09 asks for one cell (Islamabad, Total)
+of a numeric grid that embeds as a bag of numbers, and e03's second source is a grade
+table on the web page. That is where embeddings struggle most (`docs/ENGINEERING-NOTES.md`,
+note 5).
 
 ## Embedding
 

@@ -27,7 +27,7 @@ precision and prompt length, and on our CPU every extra token in the prompt cost
 - **Unit: whitespace tokens.** Model-independent and easy to audit.
 - **Size and overlap from the ConfigMap, chosen by measurement**: three settings, each a
   full re-index through the CronJob and the 19-question golden set. Shipped:
-  @@MEASURE: shipped setting and its numbers@@.
+  **300/40**: recall@5 ties at 0.906 with 400/60 and 550/80, but recall@3 is 0.906 against 0.875, and the top three passages are what the model receives; 532 chunks, amplification 1.085.
 - **Exact terms**: dense retrieval blurs clause numbers, so the API also asks Chroma for
   chunks that literally `$contains` a clause number or course code named in the question,
   and puts them first. Cheap, deterministic, and it uses the chunk text we already store.
@@ -50,5 +50,5 @@ precision and prompt length, and on our CPU every extra token in the prompt cost
 - Harder: heading detection is heuristic (numbering, capitalisation, standalone short
   lines) and tuned to these documents. A new document style may need a new rule, and OCR'd
   headings are noisier.
-- Storage amplification is about 1.08 at the shipped setting, a little above the overlap
+- Storage amplification is 1.085 at the shipped setting, a little above the overlap
   alone, because every chunk repeats its section label.

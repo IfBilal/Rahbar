@@ -41,10 +41,10 @@ Full design: `docs/ARCHITECTURE.md`.
 
 | Measured on our stack | Value | Where |
 | --- | --- | --- |
-| Corpus | 9 public documents, 279 PDF pages + 2 web pages, 486 chunks | `docs/CORPUS.md` |
+| Corpus | 9 public documents, 279 PDF pages + 2 web pages, 532 chunks | `docs/CORPUS.md` |
 | recall@3 / recall@5 (19-question golden set) | @@MEASURE@@ | `eval/results.json` |
 | Citation validity / must-abstain correctness | @@MEASURE@@ | `eval/results.json` |
-| Chunking shipped | 400 tokens, 60 overlap, chosen from three measured settings | `docs/PIPELINE.md` |
+| Chunking shipped | 300 tokens, 40 overlap (best recall@3 of three measured settings) | `docs/PIPELINE.md` |
 | Semantic cache threshold | 0.95, the lowest with zero false hits | `docs/evidence/cache-threshold.txt` |
 | Indexer peak memory | 910 Mi (limit 1536 Mi) | `docs/evidence/kubectl-top-indexer-run.txt` |
 
