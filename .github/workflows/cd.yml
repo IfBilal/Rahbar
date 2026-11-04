@@ -1,0 +1,114 @@
+# CD (case study section 6): on every push to main (only reachable through a reviewed PR).
+#   test -> build-push (Docker Hub, tagged with the commit SHA) -> deploy (ephemeral kind
+#   cluster, rollout status, smoke test through the Ingress).
+# Needs two repository secrets: DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (an access token,
+# never the account password).
+name: cd
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: false      # never cancel a deploy half-way
+
+env:
+  PYTHON_VERSION: "3.12"
+  KUSTOMIZE_VERSION: "5.7.1"
+  KIND_VERSION: "v0.31.0"
+  OLLAMA_VERSION: "v0.17.6"
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: "**/requirements*.txt"
+      - run: sudo apt-get update -q && sudo apt-get install -yq --no-install-recommends tesseract-ocr poppler-utils
+      - run: pip install -r api/requirements-dev.txt -r indexer/requirements-dev.txt
+      - run: cd api && pytest -q --cov=app --cov-fail-under=60
+      - run: cd indexer && pytest -q --cov=pipeline --cov-fail-under=60
+      - run: cd eval && pytest -q tests
+
+  build-push:
+    needs: test                       # never publish an image built from failing code
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: api
+        uses: docker/build-push-action@v6
+        with:
+          context: api
+          push: true
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/rahbar-api:${{ github.sha }}
+      - name: ui
+        uses: docker/build-push-action@v6
+        with:
+          context: ui
+          push: true
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/rahbar-ui:${{ github.sha }}
+      - name: indexer
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: indexer/Dockerfile
+          push: true
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/rahbar-indexer:${{ github.sha }}
+
+  deploy:
+    needs: build-push                 # deploys exactly the images this run published
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: install kind and kustomize
+        run: |
+          curl -sSLo kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64"
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" | tar xz
+          chmod +x kind && sudo mv kind kustomize /usr/local/bin/
+      - name: Ollama on the runner (ollama-host mode)
+        run: |
+          mkdir -p "$HOME/ollama"
+          curl -sSL "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst" \
+            | tar --zstd -x -C "$HOME/ollama" --exclude='lib/ollama/cuda_*' --exclude='lib/ollama/rocm*' --exclude='lib/ollama/vulkan*'
+          OLLAMA_HOST=0.0.0.0:11434 nohup "$HOME/ollama/bin/ollama" serve > ollama.log 2>&1 &
+          for _ in $(seq 1 30); do curl -sf localhost:11434/api/version && break; sleep 1; done
+          OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull nomic-embed-text
+      - name: pin the prod overlay to this commit's images (never :latest)
+        env:
+          REPO: docker.io/${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          cd k8s/overlays/prod
+          kustomize edit set image "rahbar-api=$REPO/rahbar-api:$GITHUB_SHA" \
+            "rahbar-ui=$REPO/rahbar-ui:$GITHUB_SHA" "rahbar-indexer=$REPO/rahbar-indexer:$GITHUB_SHA"
+          kustomize edit add component ../../components/ephemeral-cluster
+          kustomize build . | grep -E "image: .*rahbar-" | sort -u
+      - name: deploy to an ephemeral kind cluster (real corpus, fetched by the indexer Job)
+        run: KUBECONFIG_E2E=$HOME/.kube/config PRELOADED=0 INDEX_TIMEOUT=1500s scripts/e2e-kind.sh prod
+      - name: what is running (one word, pasteable into git show)
+        run: |
+          kubectl get deployment api -n rahbar -o jsonpath='{.spec.template.spec.containers[0].image}'; echo
+          kubectl rollout status -n rahbar deployment/api --timeout=120s
+      - name: smoke test through the Ingress
+        run: |
+          python3 scripts/smoke.py --api http://localhost:8080 --host rahbar.local
+      - name: diagnostics
+        if: failure()
+        run: |
+          kubectl get pods,jobs,endpoints -n rahbar || true
+          kubectl logs -n rahbar job/indexer --all-containers --tail=40 || true
+          kubectl logs -n rahbar deployment/api --tail=40 || true
