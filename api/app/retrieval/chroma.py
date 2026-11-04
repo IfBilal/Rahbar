@@ -141,7 +141,8 @@ class ChromaRetriever:
         problem = pin_problem(info, self.settings, len(vector))
         if problem:
             raise EmbeddingPinError(problem)
-        where = None if wants_history(question) else {"superseded": False}
+        current_only = self.settings.superseded_filter and not wants_history(question)
+        where = {"superseded": False} if current_only else None
         passages = self._query(col, vector, k, where)
         if self.settings.exact_term_assist:
             for term in exact_terms(question):

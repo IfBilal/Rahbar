@@ -91,6 +91,11 @@ def test_superseded_chunks_only_come_back_when_asked_for() -> None:
     assert "c2" in [p.chunk_id for p in old] and next(p for p in old if p.chunk_id == "c2").superseded
 
 
+def test_failure_experiment_e_switch_lets_repealed_rules_through() -> None:
+    r = _retriever(superseded_filter=False)
+    assert "c2" in [p.chunk_id for p in r.retrieve("What is the withdrawal deadline?", 5)]
+
+
 @pytest.mark.parametrize("question,expected", [
     ("Under the older 2023 academic rules, what was the deadline?", True),
     ("What did the previous handbook say?", True),
