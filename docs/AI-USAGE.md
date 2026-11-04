@@ -47,6 +47,14 @@ measured and reviewed by us; we can explain every line of it.
    setuptools copy that pip vendors).
    We bumped the pins and removed pip from the runtime images.
 
+9. **Numbered evidence collided with numbered rules.** In the first real-model evaluation
+   the model cited `[6]` and `[12]` with three passages in front of it: it was copying
+   clause and list numbers from the text. The guard rejected those replies, so an
+   answerable question fell back to the canned answer. Evidence is now labelled A, B, C.
+10. **The cache outlived a prompt change.** The second evaluation was served the first
+    run's answers (`docs/evidence/eval-run2-cache-hits.json`, 15 hits in about 0.1 s each)
+    because the cache key did not include the prompt. It does now.
+
 ## What we did not let the AI decide
 - The corpus choice and the absent topic. Every golden answer was read off the source
   documents before any tuning; the golden set was committed before the chunk sweep.
