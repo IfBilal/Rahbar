@@ -1,201 +1,125 @@
-# System architecture, data ownership and sequences
+# RAHBAR architecture (as built)
 
-**Architecture at a glance:** Browser → Ingress (`/` UI, `/api` API) → three read-only FastAPI replicas → Chroma StatefulSet (PVC), Redis Deployment (PVC) and chosen LLM provider. A separate one-shot Job and weekly CronJob perform document extraction, chunking and embedding, then write to Chroma. All objects live in namespace `rahbar`. **Only the indexer writes corpus vectors.**
+RAHBAR answers questions about FAST-NUCES academic rules from a fixed corpus of public
+documents, cites the passages it used, and declines when the corpus does not cover the
+question. It runs on Kubernetes as two paths that never share a process: an **indexer**
+that writes the vector store when the documents change, and an **API** that only reads it
+on every question.
+
+> Planning history: this file replaces the pre-implementation plan that was here. The
+> decisions are recorded in `docs/adr/0001`–`0004`; the measurements behind every tuned
+> number are in `docs/PIPELINE.md`.
+
+## Components and data flow
 
 ```mermaid
 flowchart LR
-  U[Browser] --> ING[Ingress]
-  ING --> UI[nginx UI]
-  ING --> API[FastAPI Deployment x3]
-  API -->|read only| CH[(Chroma StatefulSet PVC)]
-  API -->|semantic cache| RE[(Redis Deployment PVC)]
-  API --> LLM[Ollama host or hosted LLM]
-  JOB[Indexer Job / CronJob] -->|write only| CH
-  JOB --> EMB[Shared embedding provider]
-  API --> EMB
-  CM[ConfigMap EMBED_MODEL] -.-> API
+  U[Browser] -->|rahbar.local| ING[Ingress nginx]
+  ING -->|/| UI[ui Deployment<br/>nginx :8080]
+  ING -->|/api| API[api Deployment x3<br/>FastAPI :8000<br/>HPA 3..8]
+  API -->|read: registry + active generation| CH[(chroma StatefulSet<br/>PVC via volumeClaimTemplates)]
+  API <-->|semantic cache| R[(redis Deployment<br/>PVC, append-only)]
+  API -->|embed query + generate| OL[Ollama on the host<br/>nomic-embed-text, llama3.2:3b]
+  JOB[indexer Job / reindex CronJob] -->|write new generation, publish pointer| CH
+  JOB -->|embed chunks| OL
+  JOB -->|fetch corpus, verify SHA-256| WEB[nu.edu.pk]
+  CM[ConfigMap rahbar-config<br/>EMBED_MODEL pin + tunables] -.-> API
   CM -.-> JOB
+  SEC[Secret rahbar-secret<br/>created on the command line] -.-> API
 ```
 
-**Safety constraint for live re-indexing:** a staging/publish mechanism is a proposed implementation detail, not present in the starter; verify atomic cutover on the selected Chroma version and do not destructively replace the active collection in production. Review ADR 0003 before implementation.
+| Object | Kind | Why it is this kind |
+| --- | --- | --- |
+| `api` | Deployment, 3 replicas, HPA 3–8 | Stateless readers; interchangeable pods behind one Service |
+| `ui` | Deployment, 1 replica | Static files; nginx as uid 101, read-only root |
+| `chroma` | **StatefulSet**, 1 replica, `volumeClaimTemplates` | See below |
+| `redis` | Deployment + PVC `redis-data`, `Recreate` | One pod owns the cache volume; append-only file survives restarts |
+| `indexer` | Job | Runs once, writes, exits (ADR 0001) |
+| `reindex` | CronJob, Sundays 03:00, `Forbid` | Same pod template as the Job; never two writers |
+| `api`, `ui`, `chroma`, `redis` | Service, ClusterIP | Only the Ingress is reachable from outside |
+| `rahbar` | Ingress | One host: `/` to ui, `/api` to api, unchanged |
+| `rahbar-config` | ConfigMap | Every tunable and the embedding pin, read by api and indexer |
+| 7 policies | NetworkPolicy | Default deny, then the graph below |
 
----
+### Why Chroma is a StatefulSet, not a Deployment
 
-<!-- This file consolidates related plans. Any unchecked boxes, MEASURE placeholders or example values require actual implementation and evidence. -->
+Chroma is the one component whose identity is its data. A StatefulSet gives the pod a
+stable name (`chroma-0`) and, through `volumeClaimTemplates`, a PersistentVolumeClaim
+(`data-chroma-0`) that belongs to that identity. When `chroma-0` is deleted, rescheduled or
+upgraded, its replacement is again `chroma-0` and re-attaches the **same** volume, so the
+index survives. The StatefulSet also never runs two copies of `chroma-0` at once, which
+matters because Chroma's SQLite and HNSW files support one writer process.
 
-<a id="merged-docs-07-architecture-md"></a>
+A Deployment gives the opposite guarantees. Pods get random names and are interchangeable.
+A rolling update starts the new pod *before* the old one stops, so with a ReadWriteOnce
+volume the new pod either cannot mount it and hangs in `ContainerCreating`, or, on storage
+that allows it, two Chroma processes open the same files. Without a claim the index lives in
+the container's filesystem and disappears with the pod. A Deployment fits the API (any copy
+is as good as another); it does not fit the store. Redis has its own PVC as a single-replica
+Deployment with `strategy: Recreate`, which avoids the overlap for the one cache pod.
 
-## System architecture — deployed target
+## The query path (every question)
 
+`POST /api/ask` → `api/app/services/answer.py`:
 
-> **Target architecture, not as-built evidence.** See `AGENTS.md` for current starter state. This document defines concrete separation, data flow, resource ownership and planned failure handling.
+1. **Validate**: 3–500 characters (`AskRequest`), else 422.
+2. **Cache**: skip follow-ups; otherwise embed the question and look for a stored answer
+   with cosine ≥ `CACHE_THRESHOLD` in this generation's scope (ADR 0003).
+3. **Embed** with the pinned model, using the same prefix and casing as the indexer.
+4. **Retrieve** top `TOP_K` from the active generation, `superseded == false` unless the
+   question asks about an older version, with clause numbers and course codes pulled
+   forward by Chroma's full-text `$contains` (exact-term assist).
+   **Floor**: if no passage reaches `RELEVANCE_FLOOR`, abstain without calling the model.
+5. **Augment**: system rules, then up to `MAX_CONTEXT_PASSAGES` numbered `<evidence>`
+   blocks (untrusted data, with imperatives neutralised), then the `<question>`.
+6. **Generate**: Ollama with `format` = the `Answer` JSON schema, temperature 0.2.
+7. **Validate**: Pydantic, then the citation guard; one retry with the reason; then a
+   canned answer. Never a 500.
+8. **Store**: one JSON log line (top_k, chunk ids, scores, abstained, cached, latencies,
+   tokens); cache the answer only if it is grounded and validated.
 
-### Context / container diagram
-```mermaid
-flowchart LR
-  U[Browser user] -->|one host, /| ING[Ingress]
-  ING -->|/| UI[nginx UI Deployment 1+]
-  ING -->|/api| API[FastAPI Deployment 3 replicas]
-  API -->|HTTP read/query| CH[(Chroma StatefulSet + PVC)]
-  API <-->|semantic cache only| R[(Redis Deployment + PVC)]
-  API -->|generate + embed| LLM[Host Ollama or hosted provider]
-  SRC[Public/owned document sources] -->|fetched from manifest| JOB[Indexer Job / weekly CronJob]
-  JOB -->|only writer| CH
-  JOB -->|publish active generation metadata| CH
-  JOB -->|embed| LLM
-  CFG[ConfigMap EMBED_MODEL + tuning values] -.-> API
-  CFG -.-> JOB
-  SEC[Kubernetes Secret] -.-> API
-```
+## The indexing path (when the documents change)
 
-### Kubernetes layout
-- Namespace: `rahbar`, never `default`.
-- API: `Deployment` replicas=3, startup/liveness/readiness, requests/limits, rolling update maxSurge=1/maxUnavailable=0, preStop and grace period; CPU HPA min=3/max=8.
-- UI: nginx `Deployment` port 8080 and ClusterIP service; static supplied UI, same origin Ingress routes `/` vs `/api`.
-- Chroma: `StatefulSet` replicas=1, `volumeClaimTemplates`, matching `chromadb/chroma:1.0.12`, ClusterIP only. Chroma state must outlive pod recreation.
-- Redis: persistent `Deployment`+PVC, ClusterIP only, AOF (plus readiness). It holds eligible cached answers; the active collection pointer remains in Chroma registry metadata (safe-reindex design (consolidated in ADR 0003)).
-- Indexer: `Job` restartPolicy=OnFailure/backoffLimit set, weekly `CronJob` using same image/args, isolated ServiceAccount; single-writer safety lock against overlapping jobs.
-- 4 Services: UI, API, Chroma, Redis. Ingress single host `rahbar.local` using minikube addon, not external access to data stores.
-- ConfigMap and Secret; service accounts and default-deny NetworkPolicy with narrow allowed ingress/egress (including DNS and Ollama host).
+`python -m pipeline.run` in the Job: init container `fetch-corpus` downloads the committed
+source list and fails closed if any SHA-256 differs from `corpus/MANIFEST.md`; then
+extract (pdfplumber, Tesseract OCR for pages without a text layer, tables as rows) →
+clean → structure-aware chunk → embed (batched, checked) → store a new generation →
+publish the registry pointer → garbage-collect older generations (keep active and previous).
 
-### Indexing boundary
-The API **never** extracts documents, chunks, writes vectors or starts indexing during lifespan. The indexer does: discover/fetch -> extract (OCR if needed) -> clean -> structure-aware chunk -> embed with pinned model -> store and metadata -> publish ready index -> invalidate old cache entries. The Job exits. Running the CronJob again does not require an API image change or redeployment.
+## Network graph (default deny)
 
-### Query boundary
-`POST /api/ask` -> validate -> identify whether conversation/follow-up (the starter schema has only a question; see constraint below) -> eligible cache lookup -> embed -> active collection retrieval using Chroma HTTP + exclude superseded except explicit historical question -> relevance floor -> prompt from numbered passages -> schema-constrained provider output -> Pydantic validation/retry once -> citation matching -> abstain/safe fallback when necessary -> log/metrics -> optionally cache and return `AskResponse`.
+| From | To | Port | Policy |
+| --- | --- | --- | --- |
+| ingress-nginx namespace | ui | 8080 | `ui-from-ingress` |
+| ingress-nginx namespace, ui | api | 8000 | `api-policy` |
+| api | chroma, redis, Ollama host | 8000, 6379, 11434 | `api-policy` (egress) |
+| indexer | chroma, Ollama host, public web | 8000, 11434, 443/80 | `indexer-policy` |
+| api, indexer | chroma | 8000 | `chroma-from-api-and-indexer` |
+| api | redis | 6379 | `redis-from-api` |
+| every pod | kube-dns | 53 UDP/TCP | `allow-dns-egress` |
+| **ui** | **chroma** | 8000 | **nothing allows it: denied** |
 
-### Conversation limitation (important)
-The provided `AskRequest` has **only `question`**, no session/history. Therefore do **not invent follow-up state**. Safe baseline: **disable caching for any question detected as follow-up/ambiguous** (conservative heuristic); do not claim full multi-turn context support. Changing request schema for conversation IDs requires a reviewed contract ADR.
+Verified on minikube with Calico (`docs/evidence/networkpolicy-tests.txt`).
 
-### Deployment failure domains
-- One API pod dies: Service continues via other ready endpoints; HPA retains at least 3 desired replicas.
-- Chroma slow/unreachable: `/readyz` returns 503; `/healthz` remains 200; no dependency-induced restart storm.
-- Redis unavailable: per assignment `/readyz` fails; no stale cache fallback; recovery preserves PVC. Optionally bypass cache at application level only if readiness semantics are explicitly preserved.
-- Model mismatch: API checks active collection metadata `embed_model` and `dimension`; mismatch blocks readiness with precise log.
-- Reindex failure: never publish a partial collection; old active collection still serves until successful cutover.
-- Redis cache contains outdated content: after a verified Chroma registry generation switch, API readers never reuse previous-generation cache keys. Atomicity must be demonstrated.
+## Failure domains, as observed
 
-### Trust boundaries
-Questions and retrieved documents may contain instructions but are **data**. System instructions dominate. Enforce Pydantic `Answer` schema; whitelist citations against request retrieved passages; strip `reasoning`; never use `eval` or run text as code. Secret values only from Kubernetes Secret, never logs/manifests. Use non-root read-only root filesystems and tight NetworkPolicy.
+| Failure | What happens | Why |
+| --- | --- | --- |
+| One api pod deleted | Service keeps answering from the other two; the Deployment replaces it | 3 replicas, readiness gates traffic |
+| Chroma down or slow | api pods go 0/1 READY (503 names `chroma`), are **not** restarted; recover by themselves | `/readyz` checks Chroma; `/healthz` touches nothing; Chroma calls time out after 5 s |
+| No index yet / empty collection | api pods stay 0/1 READY | `/readyz` requires a non-empty collection |
+| `EMBED_MODEL` changed on the API only | api pods 0/1 READY with a log line naming both models | the pin check (ADR 0004) |
+| Indexer dies half-way | old generation keeps serving; the half-written one is never published | registry pointer moves only after a full count check |
+| Website publishes new bytes | indexer Job fails closed; old generation keeps serving | manifest SHA-256 check |
+| Redis down | api pods 0/1 READY (case study requires it); requests in flight answer without cache | readiness vs request-path handling |
+| Model returns prose or fake citations | one retry, then a canned answer; `rahbar_fallbacks_total` increments | guard + fallback |
 
-### Choices and evidence
-See the four consolidated ADRs in `ADR-0001-indexer-as-job.md` through `ADR-0004-llm-provider-and-data-governance.md` for decisions and `PRD.md` for the code/test/evidence that must prove each design. If versioned publish exceeds the assignment timeline, document a tested alternate zero-downtime strategy **before** switching; no destructive rebuild of the only live collection while serving traffic.
+## Security closures (section 4.7)
 
----
-
-<a id="merged-docs-09-data-model-and-metadata-md"></a>
-
-## Data model and metadata lineage
-
-
-### Entities and source of truth
-**Source descriptor** (`corpus/sources.yaml`): name, public URL, version, superseded flag. `corpus/fetch.py` writes SHA-256 to `corpus/MANIFEST.md` and file metadata to `corpus/raw/_index.json`; those are inputs to `indexer/pipeline/run.py::discover`. This metadata is not determined by an LLM.
-
-**Page** (`indexer/pipeline/models.py`): `source: str`, `page: int` (one-based), `text: str`, `ocr: bool`. An OCR page remains linked to its exact page number. **Document**: `source`, `doc_version`, `superseded`, `pages`.
-
-**Chunk**: `id`, `text`, `source`, `section`, `page`, `doc_version`, `superseded`. Required metadata shown in `Chunk.metadata()`; optional suggested fields: `sha256`, `start_offset`, `end_offset`, `corpus_generation`, `extraction_method`. Only add fields after tests and alignment with Chroma value types.
-
-**Vector collection**: stored `(id, document, embedding, metadata)`. Collection-level metadata `embed_model` and `dimension` must be actual values from the model response, not guessed; set Chroma metric `hnsw:space=cosine` if compatible with selected server. Use stable chunk ID based on source digest + version + section/page + ordinal/content hash to avoid accidental cross-document overwrites.
-
-**Golden question** (`eval/golden.yaml`): `id`, `type`, `question`, `relevant: [{source,section}]`, optional `expect`, `must_abstain`. Labels are authored from documents **before retrieval tuning**, never reverse-engineered from returned chunks. Citation validation is a separate metric from answer factual correctness.
-
-### Identity/integrity rules
-1. Do not rename a source between fetch, chunk, golden reference, and `AskResponse`: doing so breaks recall/citation matching.
-2. `doc_version` reflects source revision, `superseded` reflects applicability—not file creation timestamp. A report from 2020 is **not** automatically superseded by a report from 2024; for same-topic policy revisions mark the old policy true.
-3. On a current-policy query filter `superseded=false`. A clearly historical query can request older versions; test explicit intent parsing to avoid silent version leakage.
-4. Never use document text as an index metadata key (large/untrusted). Never store user secrets in Chroma/Redis/logs.
-5. Empty extraction/text pages need per-file logs; total page count includes scanned pages, while measured indexed page count should be reported separately.
-
-### Logical active index (proposed safe-reindex design (consolidated in ADR 0003))
-New index generation has a unique Chroma collection (for example `rahbar__g_<shortdigest>`) and metadata (`embed_model`, `dimension`, `generation`). Only after write + count + smoke retrieval does the indexer update an internal **Chroma registry control collection** metadata with active collection name and generation. The API reads the Chroma active pointer and scopes Redis cache keys by generation, purging/expiring old keys on observed switch. This preserves the rubric NetworkPolicy: **only API accesses Redis**, never indexer. The old collection is retained for rollback until the next verified publish. Atomicity of the Chroma metadata update requires live testing. This is a proposal, not implemented in starter.
-
-### Failure prevention
-Partial writes must not become active. Changing EMBED_MODEL without rebuilding the vectors must leave API unready. Delete/corpus-change semantics require a new generation so removed documents cannot remain retrievable. Test zero-chunk index, incorrect vector dimension, missing section metadata, changed source URL, duplicate chunks, and false `superseded` flags.
-
----
-
-<a id="merged-docs-10-sequences-md"></a>
-
-## Sequence diagrams and contract touchpoints
-
-
-### Query (normal, cache hit, fallback)
-```mermaid
-sequenceDiagram
-  participant U as Browser
-  participant A as FastAPI
-  participant R as Redis
-  participant C as Chroma
-  participant O as Embed/LLM provider
-  U->>A: POST /api/ask(question)
-  A->>A: Validate 3..500; request_id
-  A->>C: Resolve active index and generation from registry
-  opt cache-eligible exact/semantic match
-    A->>R: Cache lookup within same generation
-    R-->>A: Validated previous answer
-    A-->>U: AskResponse (cache hit)
-  end
-  A->>O: Embed question (pinned EMBED_MODEL)
-  O-->>A: Query vector
-  A->>C: top_k with superseded policy
-  C-->>A: Passages + cosine distances
-  A->>A: Convert to similarity and relevance floor
-  alt no grounded evidence
-    A-->>U: Answered_from_context=false; no fabricated citations
-  else grounded evidence
-    A->>O: System rules + numbered context + question + JSON schema
-    O-->>A: Candidate Answer
-    A->>A: Validate, retry once, citation whitelist, safe fallback
-    opt safe eligible answer
-      A->>R: Cache only with current index generation
-    end
-    A-->>U: AskResponse (no reasoning field)
-  end
-```
-
-### Indexing / publication
-```mermaid
-sequenceDiagram
-  participant J as Indexer Job
-  participant S as Document source or mounted corpus
-  participant O as Embedding provider
-  participant C as Chroma
-  participant R as Redis
-  participant A as API (3 replicas)
-  J->>J: Ensure no overlapping Job (CronJob Forbid; operator checks manual Jobs)
-  J->>S: Fetch/verify or read corpus
-  J->>J: Extract/OCR -> clean -> chunk
-  J->>O: Embed batches with pinned model
-  O-->>J: Vectors with observed dimension
-  J->>C: Create staging collection and add chunks
-  J->>C: Verify count and model metadata
-  J->>C: Publish active pointer in Chroma registry (verify atomicity)
-  A->>C: Resolve active collection for next request
-  A->>C: Read new active collection
-  A->>R: Purge/expire old-generation cache keys
-```
-
-### Kubernetes readiness, deploy and failure
-```mermaid
-sequenceDiagram
-  participant K as Kubelet
-  participant A as API pod
-  participant C as Chroma
-  participant R as Redis
-  K->>A: GET /healthz
-  A-->>K: 200 (process only)
-  K->>A: GET /readyz
-  A->>C: heartbeat, collection count + metadata
-  A->>R: PING Redis semantic cache
-  alt all checks good
-    A-->>K: 200; include in Service endpoints
-  else missing / wrong pin / dependency down
-    A-->>K: 503; remove from endpoints (do not restart due to liveness)
-  end
-```
-
-### Integration obligations
-A owns generation and index semantics; B owns probe/manifest rollout. At G3 validate that B's probe reads the *same active collection* as A's retriever, and that B's NetworkPolicy allows both dependencies. At G5 validate cache generation invalidation against a real reindex and ensure a stale cached answer cannot be served.
-
----
-
+| Hole | Closure here |
+| --- | --- |
+| Secrets in Git | `*secret*.yaml` gitignored; `k8s/base/secret.placeholder.yaml` holds `REPLACE_ME` only and is not in `kustomization.yaml`; the key is created with `kubectl create secret` (`make secret`) |
+| Everything is admin | One ServiceAccount per workload, `automountServiceAccountToken: false` everywhere (nothing calls the API server) |
+| Containers as root | `runAsNonRoot`, numeric users, `readOnlyRootFilesystem: true`, `capabilities.drop: [ALL]`, `allowPrivilegeEscalation: false`, `seccompProfile: RuntimeDefault`; writable paths are emptyDirs and PVCs |
+| Flat network | NetworkPolicy deny-by-default plus the graph above; Calico enforces it |
+| Unsafe model output | Schema-constrained and validated; citations checked against retrieved chunks; never passed to `eval`, never used to build a query |
