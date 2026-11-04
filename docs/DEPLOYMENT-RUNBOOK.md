@@ -1,4 +1,4 @@
-> **Status (5 November 2026):** the tested runbook is `README.md` (clean clone → answered question) with `docs/evidence/clean-clone.log`. This guide is kept as the plan of record.
+> **Status (5 November 2026):** the tested runbook is `README.md` (clean clone → answered question) with `docs/evidence/clean-clone.txt`. This guide is kept as the plan of record.
 
 # Cluster bootstrap, rollouts, re-indexing and recovery
 

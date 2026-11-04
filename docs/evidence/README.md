@@ -27,7 +27,7 @@ carry the command that produced them and a UTC timestamp.
 | `gate-demo.txt` | the CI eval gate failing on PR #1, then passing after the fix | GitHub Actions runs 41891435694 and 41892555788 |
 | `ci-runs.txt` | CI run URLs per commit | `gh run list` |
 | `check-submission.txt` | the starter's checker output on the final tree | `python scripts/check_submission.py` |
-| `clean-clone.log` | README path from a fresh clone to an answered question | the README commands, in a new directory |
+| `clean-clone.txt` | README path from a fresh clone to an answered question | the README commands, in a new directory |
 
 Not here, because only the repository owner can produce them: the branch-protection
 screenshot and a successful `cd.yml` run with Docker Hub links (see `README.md`, CI/CD).

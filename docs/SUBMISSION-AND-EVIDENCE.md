@@ -53,7 +53,7 @@ No secret in **any Git history** (rotate if one entered), no base64 live Secret 
 | Indexer, provider, safety and cache | PENDING | PENDING | `docs/PIPELINE.md`; `api/tests/test_injection.py`; `docs/evidence/cache-threshold.txt` |
 | Cluster, network, probes, rollout | PENDING | PENDING | `docs/evidence/networkpolicy-tests.txt`, `pin-mismatch.txt`, `rollout-and-endpoints.txt`, `chroma-outage-probes.txt` |
 | CI/CD and real eval gate | PENDING | PENDING | CI green on `dev`; gate red/green on PR #1 (`docs/evidence/gate-demo.txt`); **cd.yml needs the owner's Docker Hub secrets and a reviewed merge** |
-| Clean clone + README + checker | PENDING | PENDING | `docs/evidence/clean-clone.log`, `docs/evidence/check-submission.txt` |
+| Clean clone + README + checker | PENDING | PENDING | `docs/evidence/clean-clone.txt`, `docs/evidence/check-submission.txt` |
 | Submitted before deadline | PENDING | PENDING | Google Classroom (by the team) |
 
 ### Submission data template
@@ -133,7 +133,7 @@ The grader requires visible proof of both functioning features and operational b
 | Real QA and abstain | `ingress-qa.json` and `ingress-abstain.json` | sanitized curl JSON with `Host: rahbar.local` |
 | Evaluation | `../eval/results.json`, `../eval/baseline.json` | actual eval runner output; no manual made-up numbers |
 | CI and CD | `ci-run-url.txt`, `cd-run-url.txt` | verified Github Actions URLs/SHAs and statuses |
-| Clean clone/reproducibility | `clean-clone.log` | fresh-directory execution with actual exit codes |
+| Clean clone/reproducibility | `clean-clone.txt` | fresh-directory execution with actual exit codes |
 | Submission checker | `submission-checker.txt` | `python scripts/check_submission.py` actual stdout |
 
 ### For each evidence file
