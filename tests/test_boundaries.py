@@ -62,7 +62,10 @@ def test_no_eval_or_exec_on_model_or_document_text() -> None:
                                         if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)}), path
 
 
-def test_the_embedding_prefix_rule_is_the_same_on_both_sides() -> None:
+def test_both_sides_prepare_text_identically_for_the_pinned_model() -> None:
+    """The pin is more than a model name: prefix and casing must match too, or vectors
+    from the indexer and the API stop being comparable without any error."""
+    import importlib
     import importlib.util
 
     def load(path: Path, name: str):
@@ -72,9 +75,14 @@ def test_the_embedding_prefix_rule_is_the_same_on_both_sides() -> None:
         spec.loader.exec_module(mod)
         return mod
 
-    q = load(ROOT / "api/app/retrieval/embedder.py", "q_embedder")
+    import sys
+
+    query = load(ROOT / "api/app/retrieval/embedder.py", "q_embedder")
+    sys.path.insert(0, str(ROOT / "indexer"))
+    doc = importlib.import_module("pipeline.embed")
     for model in ("nomic-embed-text", "nomic-embed-text:latest", "mxbai-embed-large"):
-        d = (ROOT / "indexer/pipeline/embed.py").read_text()
-        uses_prefix = model.startswith("nomic-embed-text")
-        assert bool(q.query_prefix(model)) == uses_prefix
-        assert 'startswith("nomic-embed-text")' in d
+        for text in ("Rector's List of Honors", "BS fee per credit hour", "clause 1.21"):
+            q = query.prepare_query(model, text)
+            d = doc.prepare_document(model, text)
+            # identical apart from the task prefix
+            assert q.removeprefix(query.query_prefix(model)) == d.removeprefix(doc.document_prefix(model))

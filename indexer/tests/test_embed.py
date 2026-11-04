@@ -31,6 +31,15 @@ def test_batches_use_the_pinned_model_and_the_document_prefix(monkeypatch) -> No
     assert seen[0]["input"][0] == "search_document: t0"
 
 
+def test_uncased_model_input_is_lowercased() -> None:
+    """Regression: Ollama sent 'Rector' and 'Dean' to an uncased vocabulary unchanged and
+    both became [UNK]. Lowercasing restores what the reference tokenizer does."""
+    from pipeline.embed import prepare_document
+    assert prepare_document("nomic-embed-text", "Rector's List, BS") == \
+        "search_document: rector's list, bs"
+    assert prepare_document("mxbai-embed-large", "Rector") == "Rector"
+
+
 def test_prefix_only_for_models_that_use_one() -> None:
     assert document_prefix("nomic-embed-text:latest") == "search_document: "
     assert document_prefix("mxbai-embed-large") == ""

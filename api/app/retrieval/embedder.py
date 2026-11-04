@@ -2,7 +2,8 @@
 
 The indexer embeds chunks with the same EMBED_MODEL (indexer/pipeline/embed.py). For
 nomic-embed-text both sides add the model's task prefix ('search_document: ' there,
-'search_query: ' here), derived from the model name, so they cannot drift apart.
+'search_query: ' here) and lowercase the text (the model is uncased), both derived from
+the model name, so they cannot drift apart.
 """
 
 from __future__ import annotations
@@ -15,6 +16,15 @@ import httpx
 
 def query_prefix(model: str) -> str:
     return "search_query: " if model.startswith("nomic-embed-text") else ""
+
+
+def prepare_query(model: str, text: str) -> str:
+    """Mirror of indexer/pipeline/embed.py::prepare_document. nomic-embed-text is uncased
+    and Ollama does not lowercase for it, so capitalised words collapsed to one unknown
+    token ('Rector' == 'Dean'); both sides lowercase, so the pin still holds."""
+    if model.startswith("nomic-embed-text"):
+        return query_prefix(model) + text.lower()
+    return text
 
 
 class OllamaEmbedder:
@@ -36,7 +46,7 @@ class OllamaEmbedder:
                 self._recent.move_to_end(text)
                 return self._recent[text]
         r = self.http.post(self.url, json={"model": self.model,
-                                           "input": [query_prefix(self.model) + text]})
+                                           "input": [prepare_query(self.model, text)]})
         r.raise_for_status()
         vectors = r.json().get("embeddings") or []
         if len(vectors) != 1 or not vectors[0]:

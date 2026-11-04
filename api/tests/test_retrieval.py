@@ -140,7 +140,7 @@ def test_query_embedder_uses_the_pin_prefix_and_reuses_vectors() -> None:
 
     e = OllamaEmbedder("http://ollama:11434/", "nomic-embed-text",
                        client=httpx.Client(transport=httpx.MockTransport(handler)))
-    assert e.embed("hello") == e.embed("hello") == [0.5, 0.5]
+    assert e.embed("Hello") == e.embed("Hello") == [0.5, 0.5]
     assert len(calls) == 1 and calls[0] == {"model": "nomic-embed-text",
                                              "input": ["search_query: hello"]}
     assert query_prefix("all-minilm") == ""

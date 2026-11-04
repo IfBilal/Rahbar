@@ -20,6 +20,19 @@ def document_prefix(model: str) -> str:
     return "search_document: " if model.startswith("nomic-embed-text") else ""
 
 
+def prepare_document(model: str, text: str) -> str:
+    """What is actually sent to the model for one chunk.
+
+    nomic-embed-text uses an UNCASED BERT vocabulary, but Ollama 0.17 does not lowercase
+    its input, so every capitalised word became the unknown token: 'Rector' and 'Dean',
+    'Islamabad' and 'Lahore', 'BS' and 'MS' embedded identically (cosine 1.0000,
+    docs/evidence/cache-threshold.txt). Lowercasing is what the reference tokenizer does;
+    the API does exactly the same to queries (prepare_query), so the pin still holds."""
+    if model.startswith("nomic-embed-text"):
+        return document_prefix(model) + text.lower()
+    return text
+
+
 def embed(texts: list[str], settings: IndexerSettings,
           client: httpx.Client | None = None) -> list[list[float]]:
     """Embed with settings.embed_model and nothing else.
@@ -32,11 +45,10 @@ def embed(texts: list[str], settings: IndexerSettings,
         return []
     own = client is None
     http = client or httpx.Client(timeout=httpx.Timeout(300.0, connect=10.0))
-    prefix = document_prefix(settings.embed_model)
     vectors: list[list[float]] = []
     try:
         for start in range(0, len(texts), BATCH):
-            batch = [prefix + t for t in texts[start:start + BATCH]]
+            batch = [prepare_document(settings.embed_model, t) for t in texts[start:start + BATCH]]
             vectors.extend(_embed_batch(http, settings, batch))
     finally:
         if own:
