@@ -80,7 +80,7 @@ jobs:
       - name: kustomize build | kubeconform -strict
         run: |
           set -o pipefail
-          for overlay in prod dev ci; do
+          for overlay in prod dev ci incluster; do
             echo "== $overlay"
             kustomize build "k8s/overlays/$overlay" | kubeconform -strict -summary
           done

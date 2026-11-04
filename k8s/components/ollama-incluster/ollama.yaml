@@ -1,0 +1,132 @@
+# Bonus mode (case study 3.5): Ollama inside the cluster, weights on a PVC.
+# Needs minikube with at least 8 GB (`minikube start ... --memory=8192`).
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: ollama, namespace: rahbar}
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: ollama-models, namespace: rahbar}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: {storage: 6Gi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: rahbar
+  labels: {app: ollama}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}           # one pod owns the weights volume
+  selector:
+    matchLabels: {app: ollama}
+  template:
+    metadata:
+      labels: {app: ollama}
+    spec:
+      serviceAccountName: ollama
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      initContainers:
+        # Pull the two models into the PVC once; later starts find them and skip the download.
+        - name: pull-models
+          image: ollama/ollama:0.17.6
+          command: ["sh", "-c"]
+          args:
+            - >-
+              ollama serve & sleep 3;
+              ollama pull nomic-embed-text && ollama pull llama3.2:3b;
+              kill %1
+          env:
+            - {name: OLLAMA_MODELS, value: /models}
+            - {name: HOME, value: /tmp}
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: "1", memory: 1Gi}
+          volumeMounts:
+            - {name: models, mountPath: /models}
+            - {name: tmp, mountPath: /tmp}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+      containers:
+        - name: ollama
+          image: ollama/ollama:0.17.6
+          args: ["serve"]
+          env:
+            - {name: OLLAMA_MODELS, value: /models}
+            - {name: OLLAMA_HOST, value: "0.0.0.0:11434"}
+            - {name: OLLAMA_KEEP_ALIVE, value: "30m"}
+            - {name: HOME, value: /tmp}
+          ports:
+            - {name: http, containerPort: 11434}
+          # Loading weights takes minutes: liveness must not start until this passes,
+          # or it kills the pod half-way through every load (case study 3.5).
+          startupProbe:
+            httpGet: {path: /api/version, port: 11434}
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet: {path: /api/version, port: 11434}
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: {path: /api/tags, port: 11434}
+            periodSeconds: 10
+          resources:
+            requests: {cpu: "1", memory: 3Gi}
+            limits: {cpu: "4", memory: 5Gi}
+          volumeMounts:
+            - {name: models, mountPath: /models}
+            - {name: tmp, mountPath: /tmp}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+      volumes:
+        - name: models
+          persistentVolumeClaim: {claimName: ollama-models}
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: ollama, namespace: rahbar, labels: {app: ollama}}
+spec:
+  type: ClusterIP
+  selector: {app: ollama}
+  ports: [{name: http, port: 11434, targetPort: 11434}]
+---
+# Ollama is reached only by the api and the indexer; it may reach the web to pull models.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: ollama-policy, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: ollama}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app: api}
+        - podSelector:
+            matchLabels: {app: indexer}
+      ports: [{protocol: TCP, port: 11434}]
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16,
+                     100.64.0.0/10, 127.0.0.0/8]
+      ports: [{protocol: TCP, port: 443}]

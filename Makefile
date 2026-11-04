@@ -82,6 +82,7 @@ check: ## run the submission checker
 manifests: ## render both overlays and validate them strictly (what CI runs)
 	kustomize build k8s/overlays/dev | kubeconform -strict -summary
 	kustomize build k8s/overlays/prod | kubeconform -strict -summary
+	kustomize build k8s/overlays/incluster | kubeconform -strict -summary
 
 ollama-host: ## serve Ollama on the minikube gateway so pods reach host.minikube.internal:11434
 	OLLAMA_HOST=$$(minikube ssh "grep host.minikube.internal /etc/hosts" | awk '{print $$1}' | tr -d '\r'):11434 ollama serve
