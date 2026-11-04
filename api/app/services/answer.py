@@ -29,6 +29,11 @@ from ..routes import metrics as m
 from ..schemas import Answer, AskResponse, Passage, RetrievedRef
 from .cache import SemanticCache
 from .guard import GuardError, check_answer, is_follow_up
+from .prompt import REMINDER, SYSTEM
+
+# A prompt change changes answers, so it must start a fresh cache scope (found when run 2
+# of the evaluation was served run 1's answers after the evidence ids changed).
+PROMPT_VERSION = hashlib.sha256((SYSTEM + REMINDER).encode()).hexdigest()[:8]
 
 log = logging.getLogger("rahbar.answer")
 
@@ -53,7 +58,8 @@ def cache_scope(generation: str, provider: str, settings: Settings) -> str:
     """Everything that shapes an answer is in the key, so an answer is only reused under
     the exact rules that produced it: a new index generation, model, provider, floor,
     top_k, passage count or temperature starts a fresh, empty scope."""
-    knobs = (f"{provider}|{settings.llm_model}|{settings.temperature}|{settings.relevance_floor}|"
+    knobs = (f"{PROMPT_VERSION}|{provider}|{settings.llm_model}|{settings.temperature}|"
+             f"{settings.relevance_floor}|"
              f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}|"
              f"{settings.superseded_filter}")
     digest = hashlib.sha256(knobs.encode()).hexdigest()[:10]

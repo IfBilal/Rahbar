@@ -68,6 +68,8 @@ def check_answer(answer: Answer, passages: list[Passage]) -> Answer:
         return f"[{p.source} / {p.section}]"
 
     text = _MARKER.sub(readable, answer.answer)
+    if not letters:     # 3.4: the answer text itself must show its sources, not only the list
+        text = text.rstrip() + " " + " ".join(f"[{p.source} / {p.section}]" for p in unique)
     return answer.model_copy(update={
         "answer": text,
         "citations": [Citation(source=p.source, section=p.section, page=p.page) for p in unique],

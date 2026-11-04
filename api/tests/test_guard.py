@@ -92,3 +92,10 @@ def test_bracketed_numbers_are_not_citations_and_are_removed() -> None:
     out = check_answer(_answer("Repeat at most 2 courses [6] in summer [A].", []), P)
     assert out.answer == f"Repeat at most 2 courses in summer [rules.pdf / {P[0].section}]."
     assert [c.section for c in out.citations] == [P[0].section]
+
+
+def test_an_answer_without_markers_gets_its_validated_citations_inline() -> None:
+    out = check_answer(_answer("Admission is closed after three semesters.",
+                               [Citation(source="rules.pdf", section=P[1].section, page=10)]), P)
+    assert out.answer == ("Admission is closed after three semesters. "
+                          f"[rules.pdf / {P[1].section}]")
