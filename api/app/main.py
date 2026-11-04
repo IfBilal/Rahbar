@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
+import threading
 import time
 import uuid
 from collections.abc import AsyncIterator
@@ -42,7 +43,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # conflict loudly. /readyz repeats the check on every probe and stays 503 while they
     # disagree, so a mismatched pod never joins the Service. This process only READS the
     # index; the indexer Job writes it (4.2).
-    _check_pin_at_startup(app)
+    # In a thread: startup must never wait on a dependency, or a slow Chroma turns into a
+    # startup-probe restart loop. Readiness enforces the pin on every probe anyway.
+    threading.Thread(target=_check_pin_at_startup, args=(app,), daemon=True).start()
     log.info(
         "api started",
         extra={"retriever": settings.retriever, "llm_provider": settings.llm_provider,

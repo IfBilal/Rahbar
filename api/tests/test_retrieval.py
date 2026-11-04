@@ -151,3 +151,18 @@ def test_query_embedder_rejects_an_empty_reply() -> None:
         lambda r: httpx.Response(200, json={"embeddings": []}))))
     with pytest.raises(ValueError):
         e.embed("x")
+
+
+def test_an_unreachable_chroma_fails_fast_instead_of_hanging(monkeypatch) -> None:
+    calls = []
+
+    def fake_get(url, timeout):
+        calls.append((url, timeout))
+        raise httpx.ConnectTimeout("dropped by policy")
+
+    monkeypatch.setattr(ch.httpx, "get", fake_get)
+    r = ChromaRetriever(Settings(retriever="chroma", chroma_host="chroma", chroma_port=8000),
+                        embedder=FixedEmbedder())
+    with pytest.raises(httpx.ConnectTimeout):
+        r.index_info()
+    assert calls == [("http://chroma:8000/api/v2/heartbeat", ch.CHROMA_TIMEOUT)]

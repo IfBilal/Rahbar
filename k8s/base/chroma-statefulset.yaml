@@ -18,6 +18,8 @@ spec:
     spec:
       serviceAccountName: chroma
       automountServiceAccountToken: false
+      # No CHROMA_PORT=tcp://... service links: Chroma reads CHROMA_* as its own config.
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

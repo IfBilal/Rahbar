@@ -96,6 +96,8 @@ def test_every_container_is_hardened(objs) -> None:
         assert spec["securityContext"]["runAsNonRoot"] is True, o["metadata"]["name"]
         assert spec["automountServiceAccountToken"] is False
         assert spec["serviceAccountName"] != "default"
+        # a Service named chroma injects CHROMA_PORT=tcp://..., which crashes Chroma itself
+        assert spec["enableServiceLinks"] is False, o["metadata"]["name"]
         for c in spec.get("containers", []) + spec.get("initContainers", []):
             sc = c["securityContext"]
             assert sc["readOnlyRootFilesystem"] is True and sc["allowPrivilegeEscalation"] is False

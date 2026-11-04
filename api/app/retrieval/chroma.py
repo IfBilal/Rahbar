@@ -16,6 +16,8 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
+import httpx
+
 from ..config import Settings
 from ..schemas import Passage
 from .embedder import OllamaEmbedder
@@ -23,6 +25,7 @@ from .embedder import OllamaEmbedder
 log = logging.getLogger("rahbar.retrieval")
 
 POINTER_TTL = 5.0       # seconds between registry reads
+CHROMA_TIMEOUT = 5.0    # seconds; readiness probes time out at 3, queries should not hang
 
 # The user explicitly asks about an older edition: only then may superseded chunks come back.
 _HISTORY = re.compile(r"\b(older|old|previous|earlier|former|superseded|repealed|outdated|"
@@ -85,9 +88,16 @@ class ChromaRetriever:
             import chromadb  # the thin client, from chromadb-client in requirements.txt
             from chromadb.config import Settings as ChromaSettings
 
-            self._client = chromadb.HttpClient(
+            # chromadb-client 1.0.12 talks over httpx.Client(timeout=None): against a Service
+            # with no ready endpoint (packets dropped by NetworkPolicy) every call would hang
+            # forever. Fail fast first, then bound every later call.
+            base = f"http://{self.settings.chroma_host}:{self.settings.chroma_port}"
+            httpx.get(f"{base}/api/v2/heartbeat", timeout=CHROMA_TIMEOUT).raise_for_status()
+            client = chromadb.HttpClient(
                 host=self.settings.chroma_host, port=self.settings.chroma_port,
                 settings=ChromaSettings(anonymized_telemetry=False))
+            client._server._session.timeout = httpx.Timeout(CHROMA_TIMEOUT)  # type: ignore[attr-defined]
+            self._client = client
         return self._client
 
     def _resolve(self, fresh: bool = False) -> tuple[Any, IndexInfo]:
@@ -96,12 +106,13 @@ class ChromaRetriever:
             if not fresh and self._cached and now - self._cached[0] < POINTER_TTL:
                 return self._cached[1], self._cached[2]
         base = self.settings.collection
+        client = self.client             # an unreachable Chroma raises here, never falls back
         try:
-            pointer = self.client.get_collection(f"{base}-registry").metadata or {}
+            pointer = client.get_collection(f"{base}-registry").metadata or {}
             name = str(pointer.get("active") or base)
         except Exception:  # no registry: week-1 dummy index, read the base collection
             name = base
-        col = self.client.get_collection(name)
+        col = client.get_collection(name)
         meta = col.metadata or {}
         dim = meta.get("dimension")
         info = IndexInfo(collection=name, count=int(col.count()),
