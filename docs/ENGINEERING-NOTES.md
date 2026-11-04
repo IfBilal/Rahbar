@@ -53,8 +53,12 @@ api containers' CPU by their 100m request (`k8s/base/api.yaml:60`). While a ques
 being answered, an api pod spends almost all its time **waiting**: on the Ollama host for
 generation (one to four minutes per answer on our laptop CPU), and briefly on Chroma and
 the embedder. Generation burns the *host's* CPU, not the pod's. The pod's own CPU is JSON
-parsing, a cosine scan and a prompt string. Measured during the 19-question evaluation:
-@@MEASURE: kubectl top api under load@@ (`docs/evidence/hpa.txt`). So the HPA measures how
+parsing, a cosine scan and a prompt string. Measured while the 19-question evaluation ran against
+the real model (`docs/evidence/hpa.txt`, sampled every 15 s): each api pod used **3m CPU
+and about 70 Mi** with a question in flight, and the HPA read **`cpu: 3%/70%`** the whole
+time. One request takes one to four minutes, and the HPA saw a service at rest. (Right after
+a rollout it briefly showed `<unknown>/70%` until metrics-server had a sample from every
+new pod.) So the HPA measures how
 busy Python is between waits. It reads near-idle precisely when the service is saturated:
 every worker thread blocked on the model, requests queueing, latency climbing. It will
 scale on a burst of cheap cache hits, and not on a queue of expensive generations.
@@ -94,7 +98,37 @@ same way every time. The registry pointer only moves after a complete write
 
 ## 5. recall@5 by question type: where is it worst, and why?
 
-@@MEASURE: recall by type table and discussion@@
+Shipped index (300/40), 19 golden questions, through the Ingress
+(`docs/evidence/failures/restored-results.json`; the exact-assist-off run is
+`docs/evidence/exact-assist-off-results.json`):
+
+| Question type | n | recall@3 | recall@5 | recall@5 with the exact-term assist off |
+| --- | ---: | ---: | ---: | ---: |
+| version | 3 | 1.000 | 1.000 | 1.000 |
+| injection | 1 | 1.000 | 1.000 | 1.000 |
+| ordinary | 9 | 0.889 | 0.889 | 0.889 |
+| **exact** | 3 | **0.833** | **0.833** | **0.500** |
+| overall (answerable) | 16 | 0.906 | 0.906 | 0.844 |
+
+**Worst: exact terms.** Without help they are the worst by far (0.500). e01, "What does
+clause 1.21 of the academic rules require?", does not retrieve clause 1.21 at all. An
+embedding encodes meaning, and "1.21" carries almost none: as a token sequence it is about
+as close to "1.12" or "2.11" as to itself, and the query is dominated by "academic rules
+require", which matches dozens of clauses equally well. Fees and table cells blur the same
+way. e02 (paper rechecking fee, Rs. 500) ranks the handbook's *clause about* rechecking fees
+above the fee table that states the amount. e03 (B- = 2.67) finds the handbook's grade table
+but not the grading page's. Our remaining ordinary miss is also a table: q09 asks for one
+cell (Islamabad, total faculty: 236) of a numeric grid that embeds as a bag of numbers.
+
+**The technique that addresses it** is lexical matching alongside dense retrieval:
+**hybrid retrieval** (BM25 or keyword search fused with the vector ranking), so a query
+containing "1.21" gets the chunk that literally contains "1.21". We implemented the
+cheapest form: `api/app/retrieval/chroma.py` extracts clause numbers and course codes
+(`_EXACT`, line 34) and asks Chroma for chunks that `$contains` them, ranked first
+(`retrieve`, lines 151–155). That alone moved exact-term recall@5 from 0.500 to 0.833. A
+full BM25 leg would also catch fee names and table labels ("Paper Rechecking Fee"), which
+our regex does not look for. Metadata helps too: indexing table rows with their header
+cells, so "Islamabad | ... | 236" is embedded as "Islamabad total faculty 236".
 
 ## 6. EMBED_MODEL changed on the API only: what does your system do?
 
@@ -130,11 +164,14 @@ Foreword (the Rector's welcome letter), not clause 7.3; "How many faculty member
 **Islamabad** campus have?" retrieved the Peshawar campus page; the fee-table question
 missed the fee table.
 
-**What we wrongly believed first.** That these were extraction and chunking problems,
-the usual suspects for stage A and B. We spent the time there. Was the faculty table split
-across chunks? (No: `docs/evidence/extraction-before-after.txt` shows it extracted as clean
-rows inside one chunk.) Was the "Rector's List" heading detected? (Yes.) Was our golden
-label wrong? (We re-read the handbook: it was right.) Should we add BM25 for proper nouns?
+**What we wrongly believed first.** That this was the known weakness of dense
+retrieval: embeddings blur proper nouns and table cells, so a lexical (BM25) leg would fix
+it. We checked the usual suspects for stages A and B. Was the faculty table split across
+chunks? No: `docs/evidence/extraction-before-after.txt` shows clean rows inside one chunk.
+Was the "Rector's List of Honors" heading detected? Yes. Was our golden label wrong? We
+re-read the handbook; it was right. Believing the embeddings were merely weak, we went on
+building on them: we tuned the relevance floor on those scores and recorded 0.72 as our
+recall.
 
 **What told us the truth.** A different experiment. Tuning the cache threshold
 (`scripts/cache_threshold.py`) printed:
@@ -156,11 +193,15 @@ curl -s localhost:11434/api/embed -d '{"model":"nomic-embed-text","input":["Dean
 nomic-embed-text uses an **uncased** BERT vocabulary, and Ollama 0.17 passes text to it
 without lowercasing, so every capitalised word (Rector, Dean, Islamabad, Lahore, BS, MS,
 most headings) became the same `[UNK]` token. The embedding silently ignored exactly the
-words that distinguish our questions. The fix is two lines, lowercasing on both sides as
-part of the pin (`indexer/pipeline/embed.py:23`, `api/app/retrieval/embedder.py:21`). The
-real cost was a full re-index and re-running every measurement:
-@@MEASURE: before/after recall@5@@. The lesson we wrote into the code is that the pin is
-not just a model name: prefix and casing must match too, and
+words that distinguish our questions. The fix is two lines, lowercasing on both sides
+as part of the pin (`indexer/pipeline/embed.py:23`, `api/app/retrieval/embedder.py:21`).
+**What it cost** was everything we had built on the broken vectors. The relevance floor,
+the cache threshold and the recall numbers were all invalid. We re-indexed the corpus for
+each of the three chunk settings (about 75 minutes of indexing on the laptop CPU) and
+measured everything again. recall@5 at 400/60 went from **0.719 to 0.906**, exact terms
+from 0.50 to 0.83, and the cache threshold that had no safe value now has one (0.95). The
+lesson is written into the code: the pin is not just a model name. Prefix and casing must
+match too, and
 `tests/test_boundaries.py::test_both_sides_prepare_text_identically_for_the_pinned_model`
 now enforces it.
 
