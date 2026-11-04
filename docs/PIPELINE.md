@@ -171,6 +171,26 @@ note 5).
 - Batches of 32 per `POST /api/embed`, 3 attempts with backoff; the Job fails rather than
   store a missing, non-finite or mixed-dimension vector.
 
+## Store
+
+`indexer/pipeline/store.py`, Chroma 1.0.12 over HTTP. **532 chunks** at the shipped
+setting. Each run writes a new generation collection `rahbar-g<UTC timestamp>-<digest>`,
+checks the count, then points the registry collection `rahbar-registry` at it (ADR 0001).
+
+| Level | Field | Type | Example |
+| --- | --- | --- | --- |
+| record | `id` | str, stable | `academic-rules-handbook-jun-2026-pdf-2026-06-0028-4dcbdc1e` (file, version, ordinal, content hash) |
+| record | `document` | str | the chunk text, starting with its section label |
+| record | `embedding` | 768 floats | `nomic-embed-text` |
+| metadata | `source` | str | `academic-rules-handbook-jun-2026.pdf` |
+| metadata | `section` | str | `4. Registration > Withdrawal from a Course` |
+| metadata | `page` | int, 1-based | `22` (the page where the chunk's own text starts) |
+| metadata | `doc_version` | str | `2026-06` |
+| metadata | `superseded` | bool | `false` (the API filters on it) |
+| collection | `embed_model`, `dimension` | str, int | `nomic-embed-text`, `768`: the pin the API checks |
+| collection | `generation`, `chunk_size`, `chunk_overlap`, `hnsw:space` | | `20261104230304-a7b3528e`, `300`, `40`, `cosine` |
+| registry | `active`, `previous`, `generation`, `embed_model`, `dimension` | | the pointer the API follows, and the one kept for rollback |
+
 ## Semantic cache
 
 Redis (ADR 0003). We embedded paraphrase pairs (same answer) and near-miss pairs

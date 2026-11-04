@@ -81,8 +81,13 @@ make ask Q="What is the monthly hostel fee?"             # declines: not in the 
 # or open the chat UI: add "$(minikube ip) rahbar.local" to /etc/hosts, browse http://rahbar.local
 ```
 
-The first indexer run takes about 15 minutes on a laptop CPU: it downloads the corpus,
-OCRs 34 scanned pages and embeds 486 chunks. Until it finishes, the API pods correctly
+**Embeddings go through the same host Ollama.** In ollama-host mode both the indexer Job
+and the API call `http://host.minikube.internal:11434` for `nomic-embed-text` embeddings as
+well as `llama3.2:3b` generation; the model is pinned by `EMBED_MODEL` in the ConfigMap.
+
+The first indexer run takes about 10 minutes on a laptop CPU: it downloads the corpus,
+OCRs 32 scanned pages and embeds 532 chunks (the clean-clone run took 7 minutes,
+`docs/evidence/clean-clone.txt`). Until it finishes, the API pods correctly
 report `0/1 READY`.
 
 ### The apply order

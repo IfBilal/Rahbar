@@ -8,11 +8,11 @@ stack (evidence under `docs/evidence/`).
 **The failure:** three concurrent writers on one index. `k8s/base/api.yaml:9` runs
 `replicas: 3`, and Chroma has exactly one volume (`k8s/base/chroma-statefulset.yaml:62`,
 `volumeClaimTemplates`, one replica). If indexing ran in the API's lifespan, the three pods
-would start together, each downloading the corpus, OCRing 34 pages and writing 486 chunks
+would start together, each downloading the corpus, OCRing 32 pages and writing 532 chunks
 into the same collection at the same time. Each would be half-way through a different PDF,
 and the result would be an index that no single run produced: duplicate ids overwritten
 mid-batch, counts that never settle, one pod's `delete_collection` pulling the floor from
-under another. It gets worse from there. Every restart re-pays the full 13 minutes (our Job
+under another. It gets worse from there. Every restart re-pays the full 7–13 minutes (our Job
 log: `"indexer finished", "seconds": 797.9`), and that is far beyond the startup probe's 60 s
 (`k8s/base/api.yaml:44-47`, 30 × 2 s). So a rollout would kill pods half-way through
 indexing, forever. Re-indexing would also need a redeploy.
