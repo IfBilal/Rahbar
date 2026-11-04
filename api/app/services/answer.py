@@ -54,7 +54,8 @@ def cache_scope(generation: str, provider: str, settings: Settings) -> str:
     the exact rules that produced it: a new index generation, model, provider, floor,
     top_k, passage count or temperature starts a fresh, empty scope."""
     knobs = (f"{provider}|{settings.llm_model}|{settings.temperature}|{settings.relevance_floor}|"
-             f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}")
+             f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}|"
+             f"{settings.superseded_filter}")
     digest = hashlib.sha256(knobs.encode()).hexdigest()[:10]
     return f"{generation}:{settings.embed_model}:{digest}"
 
