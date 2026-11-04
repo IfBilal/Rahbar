@@ -22,8 +22,9 @@ spec:
       # No CHROMA_PORT=tcp://... service links: Chroma reads CHROMA_* as its own config.
       enableServiceLinks: false
       # preStop sleeps 10 s so the endpoint is removed before uvicorn stops accepting
-      # connections; 30 s leaves room for an in-flight generation to finish.
-      terminationGracePeriodSeconds: 30
+      # connections; then uvicorn finishes in-flight answers. A CPU generation takes up to
+      # ~190 s here: with the old 30 s grace a rollout cut answers off with a 502 (measured).
+      terminationGracePeriodSeconds: 240
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
