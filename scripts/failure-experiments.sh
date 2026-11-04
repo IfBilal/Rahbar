@@ -63,6 +63,9 @@ generation)
     api_env TEMPERATURE=$t REDIS_URL=     # cache off: every repeat must reach the model
     python scripts/repeat_questions.py --api "http://$IP" --runs 2 \
       --out "$OUT/F-temperature-$t.json" | tee "$OUT/F-temperature-$t.txt"
+    # the hard cases: two must-abstain questions and the two weakest answers
+    python scripts/repeat_questions.py --api "http://$IP" --runs 2 --ids a01,a02,q09,e01 \
+      --out "$OUT/F-hard-temperature-$t.json" | tee "$OUT/F-hard-temperature-$t.txt"
   done
   api_env TEMPERATURE- REDIS_URL-
   ;;

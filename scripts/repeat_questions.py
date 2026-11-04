@@ -34,16 +34,23 @@ def main() -> int:
     ap.add_argument("--api", required=True)
     ap.add_argument("--runs", type=int, default=2)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--ids", help="golden ids instead of the default three, e.g. a01,a02,q06")
     a = ap.parse_args()
+    questions = QUESTIONS
+    if a.ids:
+        import yaml
+        golden = {q["id"]: q for q in yaml.safe_load(open("eval/golden.yaml"))["questions"]}
+        questions = {i: (golden[i]["question"], golden[i].get("expect") or "")
+                     for i in a.ids.split(",")}
     rows = []
-    for qid, (question, expect) in QUESTIONS.items():
+    for qid, (question, expect) in questions.items():
         for run in range(1, a.runs + 1):
             r, seconds = ask(a.api, question)
             retrieved = {(x["source"], x["section"], x["page"]) for x in r["retrieved"]}
             row = {"id": qid, "run": run, "seconds": round(seconds, 1),
                    "answered_from_context": r["answered_from_context"],
                    "fallback": r["answer"].startswith(FALLBACK),
-                   "expect_found": expect.lower() in r["answer"].lower(),
+                   "expect_found": bool(expect) and expect.lower() in r["answer"].lower(),
                    "citations_valid": all((c["source"], c["section"], c["page"]) in retrieved
                                           for c in r["citations"]),
                    "answer": r["answer"]}
@@ -55,7 +62,8 @@ def main() -> int:
     n = len(rows)
     print(f"\nexpect found {sum(r['expect_found'] for r in rows)}/{n}, fallbacks "
           f"{sum(r['fallback'] for r in rows)}/{n}, distinct answers per question "
-          f"{ {q: len({r['answer'] for r in rows if r['id'] == q}) for q in QUESTIONS} }")
+          f"{ {q: len({r['answer'] for r in rows if r['id'] == q}) for q in questions} }, "
+          f"answered from context {sum(r['answered_from_context'] for r in rows)}/{n}")
     return 0
 
 
