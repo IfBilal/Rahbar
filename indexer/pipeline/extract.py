@@ -21,6 +21,7 @@ from .models import Document, Page
 # A page with fewer letters/digits than this has no usable text layer: OCR it.
 MIN_TEXT_CHARS = 40
 OCR_DPI = 300
+MAX_PAGE_POINTS = 2400   # A0 is 2384 pt wide; a bigger page box is malformed or hostile
 
 
 def extract(path: str, doc_version: str, superseded: bool, ocr: bool = True) -> Document:
@@ -92,6 +93,8 @@ def column_splits(page: Any) -> list[float]:
         return []
     x0, _, x1, _ = page.bbox
     width = int(x1 - x0)
+    if width > MAX_PAGE_POINTS:           # no real page is wider than A0; refuse to allocate
+        return []
     cover = [0] * (width + 2)
     for c in chars:
         for x in range(max(0, int(c["x0"] - x0)), min(width, int(c["x1"] - x0)) + 1):
