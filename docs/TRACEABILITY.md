@@ -45,7 +45,7 @@ manifests, run on every CI build), and `tests/system/` (live cluster, `make syst
 | 3.3 Redis/second collection + ADR | `api/app/services/cache.py`; `k8s/base/redis.yaml` | `test_cache.py` | `docs/adr/0003-semantic-cache-store.md` |
 | 3.3 Threshold from ConfigMap, chosen with data | `CACHE_THRESHOLD` | | `docs/evidence/cache-threshold.txt` (0.95; 0.92 ruled out by Rector's vs Dean's List) |
 | 3.3 Never cache follow-ups/abstentions/failures | `answer.py` `cacheable` | `test_answer.py::test_unsafe_answers_are_not_cached`, `::test_fallbacks_are_not_cached` | |
-| 3.3 Invalidate on re-index | generation-scoped keys, `cache.observe` | `test_answer.py::test_reindex_expires_the_cache` | |
+| 3.3 Invalidate on re-index | generation-scoped keys, `cache.observe` | `test_answer.py::test_reindex_expires_the_cache` | `docs/evidence/cache-invalidation.txt` (live) |
 | 3.4 One Pydantic model as contract and validator | `schemas.py::Answer` sent as `format`, validated with `model_validate_json` | `test_providers.py::test_ollama_prose_instead_of_json_is_a_validation_error` | |
 | 3.4 Abstain below the relevance floor | `answer.py` floor | `test_answer.py::test_below_the_relevance_floor_abstains_without_calling_the_model` | floor 0.60 measured in `docs/PIPELINE.md` |
 | 3.4 Cite only what was retrieved | `api/app/services/guard.py::check_answer` | `test_guard.py::test_fabricated_citations_are_rejected` | citation validity in `eval/results.json` |

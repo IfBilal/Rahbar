@@ -1,0 +1,16 @@
+# 3.3 cache invalidation on re-index, live (2026-11-04T23:05:22Z)
+# The clean-clone run cached this answer under generation 20261104224649; manual-reindex-1 then published 20261104230304.
+
+## Redis keys before (the scope still names the old generation)
+  rahbar:cache:current-scope
+  rahbar:cache:20261104224649-a7b3528e:nomic-embed-text:8f41edba26:entries
+
+## ask (first request after the re-index)
+cached=False  answered=True  64.0s  The deadline to withdraw from a course is the last day of the makeup week of every semeste
+
+## Redis keys after: the old generation's entries are gone, a new scope exists
+  rahbar:cache:current-scope
+  rahbar:cache:20261104230304-a7b3528e:nomic-embed-text:8f41edba26:entries
+
+## ask again (same generation now)
+cached=True  answered=True  0.1s  The deadline to withdraw from a course is the last day of the makeup week of every semeste

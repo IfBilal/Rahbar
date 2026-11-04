@@ -18,6 +18,8 @@ carry the command that produced them and a UTC timestamp.
 | `metrics.txt`, `api-request-log.txt` | `/metrics` series and one JSON log line per request | `curl /metrics`, `kubectl logs` |
 | `ingress-qa.json`, `ingress-abstain.json` | a grounded cited answer and a declined absent-topic answer through the Ingress | `curl -H 'Host: rahbar.local'` |
 | `ui-screenshot.png` | the chat UI answering and declining through the Ingress | `scripts/screenshot.py` |
+| `cache-invalidation.txt` | after a re-index the old generation's cache keys are deleted and the next answer is regenerated | live `curl` + `redis-cli --scan` |
+| `indexer-job.txt` | Job + CronJob; a manual re-index from the CronJob while the same API pods keep serving | `kubectl create job --from=cronjob/reindex` |
 | `cache-threshold.txt` (+ `-before-lowercase-fix`) | cache threshold 0.95 chosen with data; the casing bug | `scripts/cache_threshold.py` |
 | `retrieval-scores-400-60.txt` | best similarity per golden question (relevance floor) | live API, stub generator |
 | `chunking/` | three chunk settings measured (+ the pre-fix run) | `scripts/chunk-sweep.sh` |
