@@ -44,11 +44,15 @@ class Settings:
     log_level: str = "INFO"
 
     # Grounding (3.4): the best retrieved similarity must reach this or the API abstains.
-    relevance_floor: float = 0.55
+    relevance_floor: float = 0.60
     # Exact-term assist (5.2 / note 5): pull chunks that literally contain a clause number
     # or course code named in the question to the front of the dense results.
     exact_term_assist: bool = True
-    llm_timeout: float = 120.0       # seconds; generation on a laptop CPU is slow
+    llm_timeout: float = 600.0       # seconds; generation on a laptop CPU is slow
+    # Passages sent to the model (the best ones above the floor). `retrieved` still lists
+    # all TOP_K, so recall@5 is unaffected; fewer passages = shorter prompt, and a 3B model
+    # stays on the passage that answers instead of blending five.
+    max_context_passages: int = 3
 
     # Semantic cache (3.3). Disabled when REDIS_URL is empty (make dev, unit tests).
     redis_url: str = ""
@@ -76,9 +80,10 @@ def get_settings() -> Settings:
         hosted_base_url=os.environ.get("HOSTED_BASE_URL", ""),
         llm_api_key=os.environ.get("LLM_API_KEY", ""),
         log_level=os.environ.get("LOG_LEVEL", "INFO"),
-        relevance_floor=_float("RELEVANCE_FLOOR", 0.55),
+        relevance_floor=_float("RELEVANCE_FLOOR", 0.60),
         exact_term_assist=_bool("EXACT_TERM_ASSIST", True),
-        llm_timeout=_float("LLM_TIMEOUT_SECONDS", 120.0),
+        llm_timeout=_float("LLM_TIMEOUT_SECONDS", 600.0),
+        max_context_passages=_int("MAX_CONTEXT_PASSAGES", 3),
         redis_url=os.environ.get("REDIS_URL", ""),
         cache_threshold=_float("CACHE_THRESHOLD", 0.95),
         cache_max_entries=_int("CACHE_MAX_ENTRIES", 500),

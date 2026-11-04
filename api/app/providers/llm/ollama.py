@@ -31,7 +31,7 @@ class OllamaProvider:
             "messages": build_messages(question, passages, retry_reason),
             "stream": False,
             "format": Answer.model_json_schema(),
-            "options": {"temperature": self.settings.temperature, "num_ctx": 8192},
+            "options": {"temperature": self.settings.temperature, "num_ctx": 4096},
         }
         r = self.http.post(f"{self.settings.ollama_url.rstrip('/')}/api/chat", json=payload)
         r.raise_for_status()

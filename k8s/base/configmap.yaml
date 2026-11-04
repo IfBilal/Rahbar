@@ -21,14 +21,16 @@ data:
   CHUNK_SIZE: "400"
   CHUNK_OVERLAP: "60"
   TOP_K: "5"
-  # Abstain when the best passage scores below this cosine similarity (measured, PIPELINE.md).
-  RELEVANCE_FLOOR: "0.55"
+  # Abstain below this cosine similarity: highest floor that keeps every answerable golden
+  # question's relevant passage above it (lowest: 0.650); measured in docs/PIPELINE.md.
+  RELEVANCE_FLOOR: "0.60"
   # Lowest threshold with zero false hits on our paraphrase/negative pairs (PIPELINE.md).
   CACHE_THRESHOLD: "0.95"
   # 0.2: facts and JSON want near-deterministic decoding; 0 still hallucinates when evidence is absent.
   TEMPERATURE: "0.2"
   EXACT_TERM_ASSIST: "true"
-  LLM_TIMEOUT_SECONDS: "120"
+  LLM_TIMEOUT_SECONDS: "600"           # CPU-only Ollama on a laptop: minutes, not seconds
+  MAX_CONTEXT_PASSAGES: "3"
   LOG_LEVEL: "INFO"
   CORPUS_DIR: "/work/corpus/raw"
   OCR_ENABLED: "true"
