@@ -25,7 +25,8 @@ spec:
       initContainers:
         # Fetch the public corpus at start-up from the committed source list (PIPELINE.md):
         # third-party PDFs are never baked into a public image. A diff against the committed
-        # MANIFEST.md shows in the log when the website has published new bytes.
+        # MANIFEST.md fails closed: changed bytes are never indexed until a reviewed
+    # commit updates the manifest (the old generation keeps serving meanwhile).
         - name: fetch-corpus
           image: rahbar-indexer
           imagePullPolicy: IfNotPresent
@@ -37,9 +38,10 @@ spec:
               cp /app/corpus/fetch.py /app/corpus/sources.yaml /work/corpus/;
               cp /app/corpus/MANIFEST.md /work/MANIFEST.committed;
               cd /work && python corpus/fetch.py;
-              if diff /work/MANIFEST.committed /work/corpus/MANIFEST.md; then
-              echo "corpus matches the committed MANIFEST.md";
-              else echo "CORPUS CHANGED since the committed MANIFEST.md"; fi
+              if ! diff /work/MANIFEST.committed /work/corpus/MANIFEST.md; then
+              echo "CORPUS CHANGED: refusing to index bytes that differ from the committed MANIFEST.md";
+              exit 1; fi;
+              echo "corpus matches the committed MANIFEST.md"
           env:
             - {name: HOME, value: /tmp}
           resources:
