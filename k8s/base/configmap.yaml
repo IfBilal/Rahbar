@@ -1,0 +1,34 @@
+# One ConfigMap for the API and the indexer (case study 4.1). Both read EMBED_MODEL from
+# the same key, so the writer and the reader cannot be configured apart; the API also
+# checks the index's recorded model at runtime (4.4). Values are justified in
+# docs/PIPELINE.md and docs/ENGINEERING-NOTES.md.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rahbar-config
+  namespace: rahbar
+data:
+  RETRIEVER: "chroma"
+  LLM_PROVIDER: "ollama-host"             # ollama-host | ollama-incluster | hosted | stub
+  LLM_MODEL: "llama3.2:3b"
+  EMBED_MODEL: "nomic-embed-text"          # THE pin: indexer and API, one key
+  OLLAMA_URL: "http://host.minikube.internal:11434"
+  CHROMA_HOST: "chroma"
+  CHROMA_PORT: "8000"
+  CHROMA_COLLECTION: "rahbar"
+  REDIS_URL: "redis://redis:6379/0"
+  # Chunking: whitespace tokens. 400/60 won the three-way measurement (docs/PIPELINE.md).
+  CHUNK_SIZE: "400"
+  CHUNK_OVERLAP: "60"
+  TOP_K: "5"
+  # Abstain when the best passage scores below this cosine similarity (measured, PIPELINE.md).
+  RELEVANCE_FLOOR: "0.55"
+  # Lowest threshold with zero false hits on our paraphrase/negative pairs (PIPELINE.md).
+  CACHE_THRESHOLD: "0.95"
+  # 0.2: facts and JSON want near-deterministic decoding; 0 still hallucinates when evidence is absent.
+  TEMPERATURE: "0.2"
+  EXACT_TERM_ASSIST: "true"
+  LLM_TIMEOUT_SECONDS: "120"
+  LOG_LEVEL: "INFO"
+  CORPUS_DIR: "/work/corpus/raw"
+  OCR_ENABLED: "true"

@@ -1,0 +1,11 @@
+# Images from Docker Hub, tagged by commit SHA, never :latest (section 6). cd.yml rewrites
+# the three tags to ${{ github.sha }} with `kustomize edit set image` before it deploys;
+# the value committed here is the last SHA that was released by hand.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - {name: rahbar-api, newName: docker.io/rahbar/rahbar-api, newTag: 8c0b87f1}
+  - {name: rahbar-ui, newName: docker.io/rahbar/rahbar-ui, newTag: 8c0b87f1}
+  - {name: rahbar-indexer, newName: docker.io/rahbar/rahbar-indexer, newTag: 8c0b87f1}

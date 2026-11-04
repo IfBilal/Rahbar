@@ -1,0 +1,78 @@
+# The indexer is a Job (4.2, docs/adr/0001-indexer-as-job.md): it runs once, writes a new
+# index generation, publishes it and exits. It is the only writer of Chroma.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: indexer
+  namespace: rahbar
+  labels: {app: indexer}
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 3600
+  template:
+    metadata:
+      labels: {app: indexer}
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: indexer
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      initContainers:
+        # Fetch the public corpus at start-up from the committed source list (PIPELINE.md):
+        # third-party PDFs are never baked into a public image. A diff against the committed
+        # MANIFEST.md shows in the log when the website has published new bytes.
+        - name: fetch-corpus
+          image: rahbar-indexer
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - >-
+              set -e;
+              mkdir -p /work/corpus;
+              cp /app/corpus/fetch.py /app/corpus/sources.yaml /work/corpus/;
+              cp /app/corpus/MANIFEST.md /work/MANIFEST.committed;
+              cd /work && python corpus/fetch.py;
+              if diff /work/MANIFEST.committed /work/corpus/MANIFEST.md; then
+              echo "corpus matches the committed MANIFEST.md";
+              else echo "CORPUS CHANGED since the committed MANIFEST.md"; fi
+          env:
+            - {name: HOME, value: /tmp}
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+          volumeMounts:
+            - {name: work, mountPath: /work}
+            - {name: tmp, mountPath: /tmp}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+      containers:
+        - name: indexer
+          image: rahbar-indexer
+          imagePullPolicy: IfNotPresent
+          args: []                       # `python -m pipeline.run`; the week-1 dummy used ["--dummy"]
+          envFrom:
+            - configMapRef: {name: rahbar-config}
+          env:
+            - {name: HOME, value: /tmp}
+          resources:
+            requests: {cpu: 500m, memory: 512Mi}
+            limits: {cpu: "2", memory: 1536Mi}
+          volumeMounts:
+            - {name: work, mountPath: /work}
+            - {name: tmp, mountPath: /tmp}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+      volumes:
+        - name: work
+          emptyDir: {sizeLimit: 512Mi}
+        - name: tmp
+          emptyDir: {sizeLimit: 512Mi}

@@ -1,0 +1,68 @@
+# The API: three read-only replicas (4.1). It never indexes; the indexer Job does (4.2).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: rahbar
+  labels: {app: api}
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}     # never below 3 ready pods (4.6)
+  selector:
+    matchLabels: {app: api}
+  template:
+    metadata:
+      labels: {app: api}
+    spec:
+      serviceAccountName: api
+      automountServiceAccountToken: false
+      # preStop sleeps 10 s so the endpoint is removed before uvicorn stops accepting
+      # connections; 30 s leaves room for an in-flight generation to finish.
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: api
+          image: rahbar-api
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 8000}
+          envFrom:
+            - configMapRef: {name: rahbar-config}
+            - secretRef: {name: rahbar-secret, optional: true}   # LLM_API_KEY, hosted mode only
+          env:
+            - {name: HOME, value: /tmp}
+          startupProbe:          # finished booting? liveness and readiness wait for it
+            httpGet: {path: /healthz, port: 8000}
+            failureThreshold: 30
+            periodSeconds: 2
+          livenessProbe:         # process alive? touches no dependency (4.3)
+            httpGet: {path: /healthz, port: 8000}
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:        # Chroma + non-empty collection + embedding pin + Redis
+            httpGet: {path: /readyz, port: 8000}
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 3
+          lifecycle:
+            preStop:
+              exec: {command: ["sleep", "10"]}
+          resources:
+            requests: {cpu: 100m, memory: 160Mi}
+            limits: {cpu: 500m, memory: 384Mi}
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+      volumes:
+        - name: tmp
+          emptyDir: {}

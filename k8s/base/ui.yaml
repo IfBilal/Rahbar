@@ -1,0 +1,49 @@
+# The chat UI: nginx, non-root, read-only root, writes only to an emptyDir at /tmp.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui
+  namespace: rahbar
+  labels: {app: ui}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}
+  selector:
+    matchLabels: {app: ui}
+  template:
+    metadata:
+      labels: {app: ui}
+    spec:
+      serviceAccountName: ui
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: ui
+          image: rahbar-ui
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /healthz, port: 8080}
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /healthz, port: 8080}
+            periodSeconds: 20
+          resources:
+            requests: {cpu: 5m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+      volumes:
+        - name: tmp
+          emptyDir: {}
