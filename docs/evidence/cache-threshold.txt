@@ -1,0 +1,23 @@
+0.9355  near-miss   Which students are placed on the Rector's List of Honors?  |  Which students are placed on the Dean's List of Honors?
+0.9255  paraphrase  How many courses can a student repeat in a summer semester?  |  What is the maximum number of courses I can repeat in summer?
+0.9123  near-miss   What minimum CGPA does an undergraduate need to avoid academic warning?  |  What minimum CGPA does an MS student need to avoid academic warning?
+0.8946  paraphrase  What does clause 1.21 of the academic rules require?  |  What does rule 1.21 of the academic regulations say?
+0.8942  paraphrase  What is the paper rechecking fee per course?  |  How much does it cost to get a paper rechecked?
+0.8935  near-miss   What is the deadline to withdraw from a course?  |  Under the older 2023 rules, what was the deadline to withdraw from a course?
+0.8905  near-miss   What is the retake final exam fee per course?  |  What is the retake sessional exam fee per course?
+0.8793  paraphrase  What minimum CGPA does an undergraduate need to avoid academic warning?  |  What CGPA do I need to stay off academic warning?
+0.8768  paraphrase  What is the deadline to withdraw from a course?  |  When is the last day I can withdraw from a course?
+0.8650  paraphrase  What percentage of tuition fee is refunded if I leave within the first 15 days of classes?  |  How much tuition do I get back if I drop out in the first 15 days?
+0.8635  near-miss   What is the tuition fee per credit hour for BS?  |  What is the tuition fee per credit hour for MS?
+0.8575  near-miss   How many courses can a student repeat in a summer semester?  |  How many courses can a student take in a regular semester?
+0.8424  near-miss   What is the deadline to withdraw from a course?  |  What is the deadline to add or drop a course?
+0.5737  near-miss   What is the paper rechecking fee per course?  |  What is the campus transfer fee?
+
+threshold  paraphrase hits  false hits (near-misses at or above)
+  0.85     6/6               6  [('Under the older 2023 rules, what was the deadline to withdraw from a course?', 0.8935), ('What minimum CGPA does an MS student need to avoid academic warning?', 0.9123)]
+  0.90     1/6               2  [('What minimum CGPA does an MS student need to avoid academic warning?', 0.9123), ("Which students are placed on the Dean's List of Honors?", 0.9355)]
+  0.92     1/6               1  [("Which students are placed on the Dean's List of Honors?", 0.9355)]
+  0.95     0/6               0  []
+  0.97     0/6               0  []
+
+lowest threshold with zero false hits: 0.95
