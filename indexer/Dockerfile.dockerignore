@@ -1,0 +1,15 @@
+# BuildKit uses this file when building with  -f indexer/Dockerfile  from the repo root.
+.git
+**/__pycache__
+**/*.pyc
+.venv
+venv
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+corpus/raw
+docs
+k8s
+api
+ui
+**/tests
