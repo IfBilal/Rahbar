@@ -1,88 +1,74 @@
-> **Submission integration:** This standalone ADR is included at ZIP root by request. For the final graded repository, maintain the accepted ADR in `docs/adr/0004-llm-provider-and-data-governance.md` (and update any related links). The original `docs/adr/0000-template.md` remains untouched.
+# ADR 0004: Pluggable LLM provider, the embedding pin, and data governance
 
-# ADR 0004 — Provider, data governance and readiness pin
+## Status
+Accepted · 4 November 2026 · `ollama-host` fully supported; `hosted` implemented and
+unit-tested; `stub` for tests and CI
 
-Combines provider and public-corpus policies with the mandatory separation of readiness vs liveness and embedding-model compatibility. Internal reasoning must never be sent to clients; no answer may claim more evidence than the current retrieved passages support.
+## Context
+The generator must be swappable without touching the pipeline. It must produce
+schema-valid JSON every time, at low temperature, with citations. The embedding model
+must be identical for the indexer and the API: vectors from two models are not
+comparable, and the failure is silent. The corpus is public, but documents and
+questions are untrusted text. Our laptop has no GPU and runs minikube in 6 GB.
 
----
+## Decision
+**Provider behind one interface.** `LLMProvider.generate(question, passages,
+retry_reason)` in `api/app/providers/llm/base.py`, selected by `LLM_PROVIDER` in the
+ConfigMap. A new provider is one file:
+- `ollama-host` (default): Ollama on the laptop, reached at `host.minikube.internal:11434`,
+  model `llama3.2:3b`. Decoding is constrained with Ollama's `format` set to the `Answer`
+  JSON schema. Temperature 0.2. Context 4096 tokens.
+- `hosted`: any OpenAI-compatible endpoint (Groq, OpenRouter, ...), JSON mode via
+  `response_format`, key from the `rahbar-secret` Secret created on the command line.
+- `stub`: deterministic, no network. Every unit test and the CI gate use it.
 
-<!-- This file consolidates related plans. Any unchecked boxes, MEASURE placeholders or example values require actual implementation and evidence. -->
+**Enforce, then validate.** The schema constrains decoding, then `Answer.model_validate_json`
+checks the result, then `services/guard.py` checks what a schema cannot: every citation
+must name a passage retrieved for this request, evidence markers must point at real
+passages, and a grounded answer must cite something. One retry with the rejection reason
+fed back, then a canned answer. A user never sees a 500.
 
-<a id="merged-docs-adr-0004-llm-provider-and-data-governance-md"></a>
+**Temperature 0.2** (ConfigMap, with a one-line reason): facts and JSON want
+near-deterministic decoding, and 0 does not cure hallucination when evidence is absent.
 
-## ADR 0004 — Pluggable low-temperature schema-enforced model and public corpus
+**The embedding pin.** `EMBED_MODEL` (`nomic-embed-text`) is one ConfigMap key read by the
+indexer Job and the API. The indexer records the model name and the observed vector
+dimension (768) in the collection metadata. The API compares them with its own setting at
+startup (logged) and on every `/readyz` (503 on mismatch, the pod stays 0/1 READY), and
+compares the query vector's dimension on every request. The nomic task prefixes
+(`search_document:` / `search_query:`) derive from the model name on both sides, so they
+cannot drift either.
 
+**Data governance.**
+- Corpus: public FAST-NUCES pages and PDFs only, never SLATE, Flex or anything behind a
+  login. We commit `corpus/MANIFEST.md` (URL + SHA-256) and the fetch script, never the PDFs.
+- Untrusted text: retrieved passages and the question are wrapped in `<evidence>` and
+  `<question>` tags, `<` inside them is neutralised so no tag can be closed from inside,
+  and instruction-like spans ("ignore all previous instructions ...") are replaced with a
+  marker before the model sees them. Output is never passed to `eval` or used to build a
+  query.
+- Logs carry chunk ids, scores and flags, never the question text, the passage text or
+  the model's `reasoning`. The API key never appears in the settings `repr`.
+- No personal data is collected; the API has no user accounts or sessions.
 
-- **Status:** Proposed default: Ollama on host
-- **Date:** 2026-11-03 (documentation design draft; implementation sign-off pending)
-- **Owners:** Developer A + Developer B
-- **Sources:** Assignment 02, starter `STARTER.md`, actual Python contracts
+**Contract changes** (STARTER.md asks for an ADR for these). All are additive, with
+defaults, so the UI, `eval/run_eval.py` and the starter tests are unaffected:
+`AskResponse.cached: bool = False` (drives the UI's cache chip); `Passage.doc_version` and
+`Passage.superseded` (the prompt labels passages current or superseded);
+`LLMProvider.generate(..., retry_reason=None)`; `extract(..., ocr=True)` (failure
+experiment A).
 
+## Options considered
+- **ollama-incluster**: needs 8 GB for minikube and a startupProbe with failureThreshold 30
+  while weights load. Our 6 GB laptop budget goes to the three API replicas instead.
+- **A hosted model as default**: faster, but our corpus questions would leave the machine,
+  and CI would depend on a third party.
+- **No `format`, parse prose**: works most of the time, which is the problem.
 
-### Context
-Need low-memory cluster, truthful citations and prompt-injection resistance. Public FAST-NUCES PDF content can contain obsolete policy; model output has no implicit authority.
-### Decision
-Keep `LLMProvider.generate` contract; support `ollama-host` fully with 0.2 temperature (within 0..0.3), JSON schema mode and strict Pydantic validation. Hosted provider remains optional future adapter behind same Protocol and Kubernetes Secret. Embedding pin remains a **separate** ConfigMap key shared by writer/reader. All retrieved content is untrusted data; no private SLATE/Flex data or third-party PDF bytes committed. Retry once then safe fallback; only return citations matching retrieved chunks; strip `reasoning`.
-### Consequences
-+ No LLM weights needed in minikube, deterministic-ish structured output and provider swap. − Ollama host requires network bind + egress; generating answer can still hallucinate, necessitating evidence checks and abstention. Hosted fallback requires token/Secret and updated network policy.
-### Proof
-Contract tests, poisoned chunk test, malformed JSON fallback, no secret in Git and live model answer with valid citations.
-
-
-### Review and follow-up
-- [ ] Both developers affirm this decision against assignment requirements.
-- [ ] Code and tests implement the decision (or update ADR status and replacement).
-- [ ] Actual file:line citations and evidence attached in final engineering notes.
-
----
-
-<a id="merged-docs-adr-0007-readiness-embedding-pin-md"></a>
-
-## readiness design (consolidated in ADR 0004) — Dependency-aware readiness and dependency-free liveness
-
-
-- **Status:** Accepted as assignment requirement
-- **Date:** 2026-11-03 (documentation design draft; implementation sign-off pending)
-- **Owners:** Developer A + Developer B
-- **Sources:** Assignment 02, starter `STARTER.md`, actual Python contracts
-
-
-### Context
-An incompatible embedding model causes silent nonsense; Chroma/Redis outage makes an API unfit for traffic but does not mean its process is crashed. Kubernetes needs separate failure semantics.
-### Decision
-`/healthz` pure process check; startupProbe checks `/healthz` with generous threshold; livenessProbe uses same shallow endpoint; `/readyz` checks active Chroma reachable/non-empty, collection metadata embed_model == `EMBED_MODEL`, observed vector dim compatible with query embedder, and Redis reachable. On any failure return 503 naming dependency without secrets. HPA CPU must have requests.cpu; API Deployment rolling maxUnavailable:0/maxSurge:1.
-### Consequences
-+ Pod removed from Service without restart storm; incompatible index never silently served. − API can be unavailable while Redis is down (required behavior); readiness checks must be cheap and timed out. Test Chroma 90-second slowdown, Redis failure, initial empty collection and ConfigMap-only pin change.
-
-
-### Review and follow-up
-- [ ] Both developers affirm this decision against assignment requirements.
-- [ ] Code and tests implement the decision (or update ADR status and replacement).
-- [ ] Actual file:line citations and evidence attached in final engineering notes.
-
----
-
-<a id="merged-docs-adr-0000-template-md"></a>
-
-## ADR NNNN: Title in a few words
-
-
-Copy this file to `0001-indexer-as-job.md` and so on. Keep each ADR to about a page.
-
-### Status
-Accepted · date
-
-### Context
-What forced a decision. The constraints, in your own words.
-
-### Decision
-What you chose.
-
-### Options considered
-What else you could have done, and why you did not.
-
-### Consequences
-What this makes easier, what it makes harder, and what you would watch for.
-
----
-
+## Consequences
+- Easier: the provider is one config key; CI is deterministic; schema failures cost one
+  retry, never an error page.
+- Harder: on our CPU, a 3B model answers in minutes. We cut the prompt to the best three
+  passages and sized every timeout for it (Ingress 600 s, provider 600 s).
+- Watch: a 3B model can still misjudge whether evidence answers the question. Abstention
+  therefore has two layers (relevance floor, then the model) and the eval gates it at 100%.
