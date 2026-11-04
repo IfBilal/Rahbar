@@ -24,7 +24,7 @@ def render(overlay: str) -> list[dict]:
     return [d for d in yaml.safe_load_all(out) if d]
 
 
-@pytest.fixture(scope="module", params=["dev", "prod"])
+@pytest.fixture(scope="module", params=["dev", "prod", "ci"])
 def objs(request) -> list[dict]:
     return render(request.param)
 
@@ -137,8 +137,8 @@ def test_indexer_job_and_cronjob_share_image_and_args(objs) -> None:
     assert cron["spec"]["concurrencyPolicy"] == "Forbid"
     a, b = pod_spec(job), pod_spec(cron)
     for key in ("containers", "initContainers"):
-        assert [(c["image"], c.get("args"), c.get("command")) for c in a[key]] == \
-               [(c["image"], c.get("args"), c.get("command")) for c in b[key]]
+        assert [(c["image"], c.get("args"), c.get("command")) for c in a.get(key, [])] == \
+               [(c["image"], c.get("args"), c.get("command")) for c in b.get(key, [])]
 
 
 def test_ingress_routes_api_and_ui_on_one_host(objs) -> None:

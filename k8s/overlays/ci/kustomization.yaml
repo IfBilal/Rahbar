@@ -1,0 +1,23 @@
+# The e2e-eval job: the whole stack on kind, indexing the three fixture documents baked
+# into the indexer image (eval/fixtures) instead of fetching the real corpus, so the job
+# takes minutes. Images are built in the workflow and loaded with `kind load`.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+components:
+  - ../../components/ephemeral-cluster
+images:
+  - {name: rahbar-api, newTag: ci}
+  - {name: rahbar-ui, newTag: ci}
+  - {name: rahbar-indexer, newTag: ci}
+patches:
+  - target: {kind: ConfigMap, name: rahbar-config}
+    patch: |-
+      - {op: replace, path: /data/CORPUS_DIR, value: /app/eval/fixtures}
+  - target: {kind: Job, name: indexer}
+    patch: |-
+      - {op: remove, path: /spec/template/spec/initContainers}
+  - target: {kind: CronJob, name: reindex}
+    patch: |-
+      - {op: remove, path: /spec/jobTemplate/spec/template/spec/initContainers}

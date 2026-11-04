@@ -1,0 +1,20 @@
+# For throwaway kind clusters in GitHub Actions (ci.yml e2e-eval, cd.yml deploy).
+# Ollama runs on the runner host (the same ollama-host mode as minikube), reached through
+# the kind network gateway; the workflow replaces OLLAMA_HOST_IP with that address.
+# Generation uses the stub provider: CI gates measurable pipeline properties (recall,
+# citation validity, abstention), never a model's wording (case study 5.4).
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+  - target: {kind: ConfigMap, name: rahbar-config}
+    patch: |-
+      - {op: replace, path: /data/OLLAMA_URL, value: "http://OLLAMA_HOST_IP:11434"}
+      - {op: replace, path: /data/LLM_PROVIDER, value: "stub"}
+  - target: {kind: NetworkPolicy, name: api-policy}
+    patch: |-
+      - {op: test, path: /spec/egress/2/ports/0/port, value: 11434}
+      - {op: replace, path: /spec/egress/2/to/0/ipBlock/cidr, value: "OLLAMA_HOST_IP/32"}
+  - target: {kind: NetworkPolicy, name: indexer-policy}
+    patch: |-
+      - {op: test, path: /spec/egress/1/ports/0/port, value: 11434}
+      - {op: replace, path: /spec/egress/1/to/0/ipBlock/cidr, value: "OLLAMA_HOST_IP/32"}
