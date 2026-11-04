@@ -121,10 +121,10 @@ kubectl apply -f k8s/base/api.yaml -f k8s/base/ui.yaml -f k8s/base/hpa.yaml -f k
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/ask` | `{"question": "..."}` (3–500 chars) → answer, citations, `answered_from_context`, confidence, retrieved passages with scores, provider, `cached`. 422 on a bad question. |
-| `GET` | `/healthz` | Liveness: the process is alive. Touches nothing else. |
-| `GET` | `/readyz` | Readiness: Chroma reachable, active collection non-empty, its embedding model equal to `EMBED_MODEL`, Redis reachable. 503 names the failed check. |
-| `GET` | `/metrics` | Prometheus: requests and latency per route, retrieval and generation latency, cache lookups/hits/ratio, abstentions, fallbacks, tokens in/out per request. |
+| POST | `/api/ask` | `{"question": "..."}` (3–500 chars) → answer, citations, `answered_from_context`, confidence, retrieved passages with scores, provider, `cached`. 422 on a bad question. |
+| GET | `/healthz` | Liveness: the process is alive. Touches nothing else. |
+| GET | `/readyz` | Readiness: Chroma reachable, active collection non-empty, its embedding model equal to `EMBED_MODEL`, Redis reachable. 503 names the failed check. |
+| GET | `/metrics` | Prometheus: requests and latency per route, retrieval and generation latency, cache lookups/hits/ratio, abstentions, fallbacks, tokens in/out per request. |
 
 Every response carries `X-Request-ID` (yours, or generated), and every log line for that
 request carries the same id.

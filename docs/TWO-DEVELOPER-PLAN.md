@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** executed on the `dev` branch with pull requests to `main`; history in `git log`. This guide is kept as the plan of record.
+
 # Two-person responsibilities, calendar, Git and handoffs
 
 **Goal:** let each person and their coding agent work at the same time without touching the same unstable files. One developer cannot approve their own changes on protected `main`; use task branches from `dev` and cross-review. Preserve actual commit authorship and show meaningful work by both people.
@@ -111,7 +113,7 @@ Then review, merge, delete task branch; rebase new tasks on current dev. Move `d
 Task ID + rubric IDs; what/why; files owned/touched; contract changes; exact commands and observed test results; evidence paths; dependency task unblocked; security checklist (secrets, external calls, permissions); rollback effects; any AI assistance and human modifications.
 
 ### Merge-blocking conditions
-Any changed `AskResponse`, `Chunk.metadata()`, shared ConfigMap key or port without cross-owner approval. Failing coverage, CI status or evaluation gate. `STARTER-TODO` reintroduced in production paths. Real key/secret or downloaded third-party PDF in commit. Unverified claims pasted into documentation. Manifest adds forbidden Service exposure, `:latest`, no resource requests or a default namespace resource.
+Any changed `AskResponse`, `Chunk.metadata()`, shared ConfigMap key or port without cross-owner approval. Failing coverage, CI status or evaluation gate. `starter TODO` reintroduced in production paths. Real key/secret or downloaded third-party PDF in commit. Unverified claims pasted into documentation. Manifest adds forbidden Service exposure, `:latest`, no resource requests or a default namespace resource.
 
 ### Conflict prevention
 Agree at G0 on exact key names and Python signatures. A should add new modules in A directories, B should add manifests in B directories, and shared files must be edited by one person at a time. At a conflict, identify contract owner, pair for 15 min, add a regression test, then resolve; never auto-choose one side blindly.
