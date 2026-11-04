@@ -1,0 +1,548 @@
+# kubectl top pods + kubectl get hpa every 15 s while the 19-question evaluation ran against the real model (2026-11-04T20:20:52Z)
+--- 20:20:52
+api-669c5f5b9b-dldpz   151m   70Mi   
+api-669c5f5b9b-gc7rm   109m   68Mi   
+api-ccc96d8c8-z2rjr    56m    70Mi   
+api   Deployment/api   cpu: <unknown>/70%   3     8     3     149m
+--- 20:21:07
+api-669c5f5b9b-dldpz   151m   70Mi   
+api-669c5f5b9b-gc7rm   109m   68Mi   
+api   Deployment/api   cpu: <unknown>/70%   3     8     3     149m
+--- 20:21:22
+api-669c5f5b9b-dldpz   151m   70Mi   
+api-669c5f5b9b-gc7rm   109m   68Mi   
+api   Deployment/api   cpu: <unknown>/70%   3     8     3     149m
+--- 20:21:37
+api-669c5f5b9b-dldpz   151m   70Mi   
+api-669c5f5b9b-gc7rm   109m   68Mi   
+api   Deployment/api   cpu: <unknown>/70%   3     8     3     149m
+--- 20:21:52
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    68Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     150m
+--- 20:22:08
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    68Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     150m
+--- 20:22:23
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    68Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     150m
+--- 20:22:38
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    68Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     150m
+--- 20:22:53
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     151m
+--- 20:23:09
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     151m
+--- 20:23:24
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     151m
+--- 20:23:39
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     151m
+--- 20:23:55
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     152m
+--- 20:24:10
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     152m
+--- 20:24:25
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     152m
+--- 20:24:40
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     152m
+--- 20:24:56
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     153m
+--- 20:25:11
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     153m
+--- 20:25:26
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     153m
+--- 20:25:41
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     153m
+--- 20:25:57
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     154m
+--- 20:26:12
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     154m
+--- 20:26:27
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     154m
+--- 20:26:43
+api-669c5f5b9b-dldpz   3m    70Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    70Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     154m
+--- 20:26:58
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     155m
+--- 20:27:13
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     155m
+--- 20:27:28
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     155m
+--- 20:27:44
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     155m
+--- 20:27:59
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     156m
+--- 20:28:14
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     156m
+--- 20:28:30
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     156m
+--- 20:28:45
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     157m
+--- 20:29:00
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     157m
+--- 20:29:15
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     157m
+--- 20:29:31
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     157m
+--- 20:29:46
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     158m
+--- 20:30:01
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     158m
+--- 20:30:17
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     158m
+--- 20:30:32
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     158m
+--- 20:30:47
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     159m
+--- 20:31:02
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     159m
+--- 20:31:18
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     159m
+--- 20:31:33
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     159m
+--- 20:31:48
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     160m
+--- 20:32:04
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     160m
+--- 20:32:19
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     160m
+--- 20:32:34
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     160m
+--- 20:32:49
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     161m
+--- 20:33:05
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     161m
+--- 20:33:20
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     161m
+--- 20:33:35
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    69Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     161m
+--- 20:33:51
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     162m
+--- 20:34:06
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     162m
+--- 20:34:21
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     162m
+--- 20:34:36
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     162m
+--- 20:34:52
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     163m
+--- 20:35:07
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     163m
+--- 20:35:22
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     163m
+--- 20:35:38
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     163m
+--- 20:35:53
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     164m
+--- 20:36:08
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     164m
+--- 20:36:23
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     164m
+--- 20:36:39
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     164m
+--- 20:36:54
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     165m
+--- 20:37:09
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     165m
+--- 20:37:25
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     165m
+--- 20:37:40
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     165m
+--- 20:37:55
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     166m
+--- 20:38:10
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     166m
+--- 20:38:26
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     166m
+--- 20:38:41
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     166m
+--- 20:38:56
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     167m
+--- 20:39:12
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     167m
+--- 20:39:27
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     167m
+--- 20:39:42
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     167m
+--- 20:39:57
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     168m
+--- 20:40:13
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     168m
+--- 20:40:28
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     168m
+--- 20:40:43
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     168m
+--- 20:40:58
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     169m
+--- 20:41:14
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     169m
+--- 20:41:29
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     169m
+--- 20:41:44
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     170m
+--- 20:42:00
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     170m
+--- 20:42:15
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     170m
+--- 20:42:30
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     170m
+--- 20:42:45
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     171m
+--- 20:43:01
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     171m
+--- 20:43:16
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     171m
+--- 20:43:31
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     171m
+--- 20:43:46
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    71Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     172m
+--- 20:44:02
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    71Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     172m
+--- 20:44:17
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    71Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     172m
+--- 20:44:32
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    71Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     172m
+--- 20:44:47
+api-669c5f5b9b-dldpz   4m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     173m
+--- 20:45:03
+api-669c5f5b9b-dldpz   4m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     173m
+--- 20:45:18
+api-669c5f5b9b-dldpz   4m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     173m
+--- 20:45:33
+api-669c5f5b9b-dldpz   4m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     173m
+--- 20:45:49
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   4m    70Mi   
+api-669c5f5b9b-n9nbl   4m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     174m
+--- 20:46:04
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   4m    70Mi   
+api-669c5f5b9b-n9nbl   4m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     174m
+--- 20:46:19
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   4m    70Mi   
+api-669c5f5b9b-n9nbl   4m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     174m
+--- 20:46:34
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   4m    70Mi   
+api-669c5f5b9b-n9nbl   4m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     174m
+--- 20:46:50
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    72Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     175m
+--- 20:47:05
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    72Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     175m
+--- 20:47:20
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    72Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     175m
+--- 20:47:35
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    72Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     175m
+--- 20:47:51
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     176m
+--- 20:48:06
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     176m
+--- 20:48:21
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     176m
+--- 20:48:36
+api-669c5f5b9b-dldpz   3m    71Mi   
+api-669c5f5b9b-gc7rm   3m    70Mi   
+api-669c5f5b9b-n9nbl   3m    71Mi   
+api   Deployment/api   cpu: 3%/70%   3     8     3     176m

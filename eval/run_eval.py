@@ -122,6 +122,8 @@ def summarise(rows: list[dict]) -> dict:
             if expect else None,
             "cached": bool(resp.get("cached", False)),
             "seconds": row.get("seconds"),
+            # for the manual generation review of 5.3 (correct? grounded? on-topic?)
+            "answer": (resp.get("answer") or "")[:400],
         })
 
     def recall(key: str, kind: str | None = None) -> float | None:
