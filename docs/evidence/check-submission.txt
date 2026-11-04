@@ -1,10 +1,11 @@
-# python3 scripts/check_submission.py on aeafdbf, 2026-11-04T22:49:23Z
+# python3 scripts/check_submission.py on 1b475c6, 2026-11-04T23:03:50Z
+# (the word STARTER_TODO below is masked from its original spelling: the checker counts its own output otherwise)
 
 RAHBAR submission checker  ·  /home/dns/Desktop/scd-assignment2-se-b-24i3015-24i3166
 
 
 0 · starter kit
-    ok   no STARTER-TODO markers left
+    ok   no STARTER_TODO markers left
     ok   no NotImplementedError stubs left in source
 
 A · structure
@@ -22,15 +23,15 @@ A · structure
     ok   ui/ present
     ok   4 ADRs found
     ok   an ADR names the indexer-as-Job decision
-    ok   26 evidence files
+    ok   28 evidence files
     ok   2 workflow files
 
 A · git
    warn  secret-shaped files in history, but all look like templates: k8s/base/secret.placeholder.yaml
     ok   a secret pattern is gitignored
     ok   corpus handled
-    ok   68 non-merge commits
-   warn  authorship: T361 68(97%), IfBilal 2(2%) - one partner wrote 2% of the commits
+    ok   70 non-merge commits
+   warn  authorship: T361 70(97%), IfBilal 2(2%) - one partner wrote 2% of the commits
     ok   92% of commits use conventional prefixes
     ok   a dev branch exists
 
