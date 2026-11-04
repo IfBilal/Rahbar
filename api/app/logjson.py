@@ -43,5 +43,7 @@ def configure_logging(level: str = "INFO") -> None:
     root = logging.getLogger()
     root.handlers[:] = [handler]
     root.setLevel(level.upper())
-    for noisy in ("uvicorn.access",):
+    # httpx logs every Chroma call; readiness alone made 3 lines every 10 s per pod and buried
+    # the lines that matter (the embedding-pin conflict).
+    for noisy in ("uvicorn.access", "httpx", "httpcore", "chromadb"):
         logging.getLogger(noisy).setLevel("WARNING")
