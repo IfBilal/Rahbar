@@ -49,12 +49,12 @@ No secret in **any Git history** (rotate if one entered), no base64 live Secret 
 ### Release sign-off (fill, not pre-approved)
 | Item | Developer A | Developer B | Proof |
 |---|---|---|---|
-| Real corpus and golden quality | PENDING | PENDING | `MEASURE` |
-| Indexer, provider, safety and cache | PENDING | PENDING | `MEASURE` |
-| Cluster, network, probes, rollout | PENDING | PENDING | `MEASURE` |
-| CI/CD and real eval gate | PENDING | PENDING | `MEASURE` |
-| Clean clone + README + checker | PENDING | PENDING | `MEASURE` |
-| Submitted before deadline | PENDING | PENDING | `MEASURE` |
+| Real corpus and golden quality | PENDING | PENDING | `docs/CORPUS.md`; `eval/results.json` (recall@5 0.906, citations 100%, abstention 100%) |
+| Indexer, provider, safety and cache | PENDING | PENDING | `docs/PIPELINE.md`; `api/tests/test_injection.py`; `docs/evidence/cache-threshold.txt` |
+| Cluster, network, probes, rollout | PENDING | PENDING | `docs/evidence/networkpolicy-tests.txt`, `pin-mismatch.txt`, `rollout-and-endpoints.txt`, `chroma-outage-probes.txt` |
+| CI/CD and real eval gate | PENDING | PENDING | CI green on `dev`; gate red/green on PR #1 (`docs/evidence/gate-demo.txt`); **cd.yml needs the owner's Docker Hub secrets and a reviewed merge** |
+| Clean clone + README + checker | PENDING | PENDING | `docs/evidence/clean-clone.log`, `docs/evidence/check-submission.txt` |
+| Submitted before deadline | PENDING | PENDING | Google Classroom (by the team) |
 
 ### Submission data template
 `Repository: <URL> | CD run: <URL> | Docker Hub API: <URL> | UI: <URL> | Indexer: <URL> | results commit: <SHA> | baseline commit: <SHA> | submitted timestamp PKT: <actual>`.

@@ -30,21 +30,24 @@ served. It builds a new generation and flips the registry pointer
 ## 2. Readiness and liveness swapped, Chroma slow for 90 seconds: what happens?
 
 As built, liveness asks only "is the process alive" (`api/app/routes/health.py:24`,
-`/healthz` returns a constant) and readiness asks about dependencies (`health.py:29-58`).
-Measured on our cluster with Chroma made unavailable for 90 s
-(`docs/evidence/chroma-outage-probes.txt`): @@MEASURE: as-built outcome@@.
+`/healthz` returns a constant) and readiness asks about dependencies (`health.py:29-58`;
+probes at `k8s/base/api.yaml:43-55`). We measured both arrangements by taking Chroma away
+for 90 s (`scripts/probe-experiment.sh`; output, sampled every 10 s, in
+`docs/evidence/chroma-outage-probes.txt`):
 
-**Swapped** (liveness on `/readyz`, readiness on `/healthz`), the same 90 s does this. The
-liveness probe (`k8s/base/api.yaml:47-50`: every 20 s, failureThreshold 3) fails on all
-three pods at once, because they share the one Chroma. After 3 × 20 s = 60 s, the kubelet
-kills and restarts **all three** containers. Meanwhile the swapped readiness probe still
-says "ready", so the Service keeps routing questions to pods that cannot retrieve and are
-about to be killed. The restarted pods need Chroma to pass liveness, Chroma is still slow,
-so they are killed again: CrashLoopBackOff with growing back-off. When Chroma recovers at
-90 s, the pods are sitting in back-off (10 s, 20 s, 40 s, ...), so the outage outlives its
-cause. Measured: @@MEASURE: swapped outcome@@. A dependency that was only slow becomes a
-cluster-wide restart storm, which is why `/healthz` must never touch Chroma, Redis or the
-LLM.
+| | During the 90 s outage | Restarts | When Chroma returns |
+| --- | --- | ---: | --- |
+| **As built** | after 3 failed readiness probes (32–42 s) the pods leave the Service: endpoints 3 → 1 → 0. The Ingress has nowhere to send a question, so users get an immediate error instead of a wrong answer | **0** | all three pods back in the Service about **11 s** later (their next readiness probe); nothing was restarted, nothing re-warmed |
+| **Swapped** (liveness `/readyz`, readiness `/healthz`) | readiness keeps saying "ready", so the Service keeps **all 3 endpoints** and routes questions to pods that cannot retrieve | **3**: at 62–72 s, after 3 failed liveness probes 20 s apart, the kubelet killed **all three containers at the same moment** | the pods came back only because Chroma returned 20 s after the kill wave, before the next 60 s window |
+
+With swapped probes, a 90 s slowdown in one dependency became a simultaneous restart of
+every replica. Every in-flight answer (each takes one to three minutes here) was lost, and
+during the outage the Service lied about where it could send traffic. Had Chroma stayed slow
+for more than about two minutes, the kills would repeat every 60 s, with CrashLoopBackOff
+growing the delay (10 s, 20 s, 40 s, ...), so the API would stay down well after Chroma
+recovered. That is the restart storm: what was merely slow becomes down. With the probes as
+built, readiness takes pods out of rotation and puts them back, and liveness never fires,
+because `/healthz` touches nothing.
 
 ## 3. What does a CPU-based HPA measure on a generation service, and what should scale it?
 
