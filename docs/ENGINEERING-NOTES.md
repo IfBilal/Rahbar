@@ -146,7 +146,15 @@ lines 86-88). The API compares that with its own `EMBED_MODEL` in two places:
 Because the rollout is `maxUnavailable: 0` (`k8s/base/api.yaml:13`), the three old,
 correct pods keep serving while the new pods sit unready, and the rollout stalls instead of
 completing. Demonstrated on the cluster (`docs/evidence/pin-mismatch.txt`):
-@@MEASURE: pin demo summary@@.
+we patched `EMBED_MODEL` to `mxbai-embed-large` in the
+ConfigMap and ran `kubectl rollout restart deployment/api` without re-indexing. The new pod
+stayed **0/1 READY** for the whole 90 s window; its log has one ERROR line,
+`embedding model mismatch: refusing readiness`, with `conflict: index
+'rahbar-g20261104201533-a7b3528e' was built with embed_model='nomic-embed-text' (dimension
+768) but this API has EMBED_MODEL='mxbai-embed-large'`; its `/readyz` returned **503**
+`{"failed": ["embedding_pin"], ...}`. `kubectl get endpoints api` still listed the **three
+old pods**, so users never noticed. Restoring the ConfigMap value and restarting rolled out
+cleanly.
 
 **Without the guardrail** nothing would error. The API would embed questions with the new
 model and compare them against vectors from the old one. Two models' spaces are not

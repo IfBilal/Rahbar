@@ -1,0 +1,78 @@
+# 4.4 embedding pin: EMBED_MODEL changed in the ConfigMap, API restarted, index NOT rebuilt (2026-11-04T22:17:54Z)
+
+$ kubectl get pods -n rahbar -l app=api
+NAME                   READY   STATUS        RESTARTS   AGE
+api-599b89d8d8-d2xx7   1/1     Running       0          10s
+api-599b89d8d8-k4w9s   1/1     Running       0          14s
+api-599b89d8d8-pcvnk   1/1     Running       0          5s
+api-7d79976749-4h8gt   1/1     Terminating   0          66s
+api-7d79976749-hz75l   1/1     Terminating   0          70s
+api-7d79976749-kwdcx   1/1     Terminating   0          61s
+
+$ kubectl patch configmap rahbar-config -n rahbar --type merge -p {"data":{"EMBED_MODEL":"mxbai-embed-large"}}
+configmap/rahbar-config patched
+
+$ kubectl rollout restart deployment/api -n rahbar
+deployment.apps/api restarted
+
+$ kubectl rollout status deployment/api -n rahbar --timeout=90s
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+error: timed out waiting for the condition
+(expected: the rollout does not complete; the new pod never becomes ready)
+
+$ kubectl get pods -n rahbar -l app=api
+NAME                   READY   STATUS    RESTARTS   AGE
+api-599b89d8d8-d2xx7   1/1     Running   0          100s
+api-599b89d8d8-k4w9s   1/1     Running   0          104s
+api-599b89d8d8-pcvnk   1/1     Running   0          95s
+api-8c7f85d97-hwwdv    0/1     Running   0          90s
+
+$ kubectl logs -n rahbar api-8c7f85d97-hwwdv --tail=20
+{"ts": "2026-11-04T22:17:57Z", "level": "INFO", "logger": "uvicorn.error", "msg": "Started server process [1]", "request_id": "-"}
+{"ts": "2026-11-04T22:17:57Z", "level": "INFO", "logger": "uvicorn.error", "msg": "Waiting for application startup.", "request_id": "-"}
+{"ts": "2026-11-04T22:17:57Z", "level": "INFO", "logger": "rahbar.api", "msg": "api started", "request_id": "-", "retriever": "chroma", "llm_provider": "ollama-host", "embed_model": "mxbai-embed-large", "top_k": 5}
+{"ts": "2026-11-04T22:17:57Z", "level": "INFO", "logger": "uvicorn.error", "msg": "Application startup complete.", "request_id": "-"}
+{"ts": "2026-11-04T22:17:57Z", "level": "INFO", "logger": "uvicorn.error", "msg": "Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)", "request_id": "-"}
+{"ts": "2026-11-04T22:17:58Z", "level": "ERROR", "logger": "rahbar.api", "msg": "embedding model mismatch: refusing readiness", "request_id": "-", "conflict": "embedding model mismatch: index 'rahbar-g20261104201533-a7b3528e' was built with embed_model='nomic-embed-text' (dimension 768) but this API has EMBED_MODEL='mxbai-embed-large'; re-run the indexer Job or fix the ConfigMap"}
+{"ts": "2026-11-04T22:17:58Z", "level": "WARNING", "logger": "rahbar.health", "msg": "readiness changed", "request_id": "ba20fc1d11e54be893985f1f0f1f98fb", "ready": false, "failed": ["embedding_pin"], "checks": {"chroma": "ok", "collection": "ok: rahbar-g20261104201533-a7b3528e (532 chunks)", "embedding_pin": "embedding model mismatch: index 'rahbar-g20261104201533-a7b3528e' was built with embed_model='nomic-embed-text' (dimension 768) but this API has EMBED_MODEL='mxbai-embed-large'; re-run the indexer Job or fix the ConfigMap", "redis": "ok"}}
+
+$ kubectl exec -n rahbar api-8c7f85d97-hwwdv -- python -c 'GET /readyz'
+503 {"status":"not ready","failed":["embedding_pin"],"checks":{"chroma":"ok","collection":"ok: rahbar-g20261104201533-a7b3528e (532 chunks)","embedding_pin":"embedding model mismatch: index 'rahbar-g20261104201533-a7b3528e' was built with embed_model='nomic-embed-text' (dimension 768) but this API has EMBED_MODEL='mxbai-embed-large'; re-run the indexer Job or fix the ConfigMap","redis":"ok"}}
+
+$ kubectl get endpoints api -n rahbar
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME   ENDPOINTS                                                     AGE
+api    10.244.120.123:8000,10.244.120.124:8000,10.244.120.125:8000   4h27m
+(the three old pods keep serving: maxUnavailable 0)
+
+## restore the pin
+
+$ kubectl patch configmap rahbar-config -n rahbar --type merge -p {"data":{"EMBED_MODEL":"nomic-embed-text"}}
+configmap/rahbar-config patched
+
+$ kubectl rollout restart deployment/api -n rahbar
+deployment.apps/api restarted
+
+$ kubectl rollout status deployment/api -n rahbar --timeout=600s
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+
+$ kubectl get pods -n rahbar -l app=api
+NAME                   READY   STATUS        RESTARTS   AGE
+api-5898bf4d94-8vqxv   1/1     Running       0          13s
+api-5898bf4d94-bz6l9   1/1     Running       0          9s
+api-5898bf4d94-szll4   1/1     Running       0          4s
+api-599b89d8d8-d2xx7   1/1     Terminating   0          115s
+api-599b89d8d8-k4w9s   1/1     Terminating   0          119s
+api-599b89d8d8-pcvnk   1/1     Terminating   0          110s
