@@ -22,4 +22,6 @@ RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin api
 USER 10001
 EXPOSE 8000
 # exec form: SIGTERM reaches uvicorn directly, so the preStop + grace period drain works.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+# --log-config: uvicorn's own lines are JSON too (4.8), not just the app's.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log", \
+     "--log-config", "app/uvicorn-log.json"]
