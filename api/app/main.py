@@ -26,6 +26,7 @@ from .routes import ask, health, metrics
 from .services.cache import SemanticCache
 
 log = logging.getLogger("rahbar.api")
+APP_VERSION = os.environ.get("APP_VERSION", "dev")   # baked in at build time (Dockerfile ARG)
 
 
 @asynccontextmanager
@@ -81,6 +82,7 @@ async def request_context(request: Request, call_next):  # type: ignore[no-untyp
         response = await call_next(request)
         status = response.status_code
         response.headers["X-Request-ID"] = rid
+        response.headers["X-Rahbar-Version"] = APP_VERSION   # which image answered (4.6)
         return response
     finally:
         route = request.scope.get("route")
