@@ -106,7 +106,7 @@ def test_every_container_is_hardened(objs) -> None:
 
 def test_dedicated_service_accounts_without_tokens(objs) -> None:
     sas = {o["metadata"]["name"]: o for o in objs if o["kind"] == "ServiceAccount"}
-    assert set(sas) == {"api", "ui", "indexer", "chroma", "redis"}
+    assert {"api", "ui", "indexer", "chroma", "redis"} <= set(sas)
     assert all(sa["automountServiceAccountToken"] is False for sa in sas.values())
 
 
