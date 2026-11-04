@@ -57,14 +57,20 @@ spec:
             preStop:
               exec: {command: ["sleep", "10"]}
           resources:
-            requests: {cpu: 100m, memory: 160Mi}
-            limits: {cpu: 500m, memory: 384Mi}
+            requests:
+              cpu: 100m
+              memory: 160Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
           volumeMounts:
             - {name: tmp, mountPath: /tmp}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: {drop: [ALL]}
+            capabilities:
+              drop:
+                - ALL
       volumes:
         - name: tmp
           emptyDir: {}

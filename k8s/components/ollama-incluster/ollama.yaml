@@ -11,7 +11,8 @@ metadata: {name: ollama-models, namespace: rahbar}
 spec:
   accessModes: [ReadWriteOnce]
   resources:
-    requests: {storage: 6Gi}
+    requests:
+      storage: 6Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -51,15 +52,21 @@ spec:
             - {name: OLLAMA_MODELS, value: /models}
             - {name: HOME, value: /tmp}
           resources:
-            requests: {cpu: 100m, memory: 256Mi}
-            limits: {cpu: "1", memory: 1Gi}
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
           volumeMounts:
             - {name: models, mountPath: /models}
             - {name: tmp, mountPath: /tmp}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: {drop: [ALL]}
+            capabilities:
+              drop:
+                - ALL
       containers:
         - name: ollama
           image: ollama/ollama:0.17.6
@@ -85,15 +92,21 @@ spec:
             httpGet: {path: /api/tags, port: 11434}
             periodSeconds: 10
           resources:
-            requests: {cpu: "1", memory: 3Gi}
-            limits: {cpu: "4", memory: 5Gi}
+            requests:
+              cpu: "1"
+              memory: 3Gi
+            limits:
+              cpu: "4"
+              memory: 5Gi
           volumeMounts:
             - {name: models, mountPath: /models}
             - {name: tmp, mountPath: /tmp}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: {drop: [ALL]}
+            capabilities:
+              drop:
+                - ALL
       volumes:
         - name: models
           persistentVolumeClaim: {claimName: ollama-models}

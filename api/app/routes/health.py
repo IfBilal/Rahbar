@@ -35,7 +35,7 @@ def readiness_checks(state: object) -> tuple[dict[str, str], list[str]]:
         try:
             info = retriever.index_info()
             checks["chroma"] = "ok"
-            if info.count > 0:
+            if not info.is_empty:
                 checks["collection"] = f"ok: {info.collection} ({info.count} chunks)"
             else:
                 checks["collection"] = f"empty: {info.collection} has no chunks"

@@ -46,6 +46,10 @@ class IndexInfo:
     dimension: int | None
     generation: str
 
+    @property
+    def is_empty(self) -> bool:
+        return self.count == 0
+
 
 def wants_history(question: str) -> bool:
     return bool(_HISTORY.search(question))
