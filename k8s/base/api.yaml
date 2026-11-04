@@ -58,12 +58,14 @@ spec:
             preStop:
               exec: {command: ["sleep", "10"]}
           resources:
+            # kubectl top (docs/evidence/hpa.txt, 585 samples): 3m / ~70Mi serving, peaks
+            # 151m (startup) and 74Mi. The CPU request is also the HPA's denominator.
             requests:
               cpu: 100m
-              memory: 160Mi
+              memory: 96Mi
             limits:
               cpu: 500m
-              memory: 384Mi
+              memory: 256Mi
           volumeMounts:
             - {name: tmp, mountPath: /tmp}
           securityContext:

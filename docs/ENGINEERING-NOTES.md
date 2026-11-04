@@ -52,7 +52,7 @@ because `/healthz` touches nothing.
 ## 3. What does a CPU-based HPA measure on a generation service, and what should scale it?
 
 The HPA (`k8s/base/hpa.yaml:11-17`, 3–8 replicas, 70% of `requests.cpu`) divides the
-api containers' CPU by their 100m request (`k8s/base/api.yaml:60`). While a question is
+api containers' CPU by their 100m request (`k8s/base/api.yaml:64`). While a question is
 being answered, an api pod spends almost all its time **waiting**: on the Ollama host for
 generation (one to four minutes per answer on our laptop CPU), and briefly on Chroma and
 the embedder. Generation burns the *host's* CPU, not the pod's. The pod's own CPU is JSON
@@ -86,11 +86,13 @@ capacity. That is an argument for ollama-incluster with GPU nodes, or a hosted p
 (`docs/evidence/kubectl-top-indexer-run.txt`): peak **910 Mi**, during OCR of the scanned
 PDFs (pdf2image holds a 300 dpi page bitmap, then Tesseract runs on it) and while
 pdfplumber parses the 85-page annual report. Steady embedding sat at about 460 Mi. Limit:
-**1536 Mi** (`k8s/base/indexer-job.yaml:70`, same in the CronJob), request 512 Mi (line 69).
+**1536 Mi** (`k8s/base/indexer-job.yaml:82`, same in the CronJob). The request is **1 Gi**
+(line 79), set above the measured peak so the scheduler only places the Job where 910 Mi
+actually fits; the first version requested 512 Mi, below its own peak.
 Margin: 1536 − 910 = **626 Mi, about 41% above the measured peak**. We keep that margin
 because peak memory grows with the largest page we OCR and the largest PDF we parse, and
-the website can publish a bigger one. Compare the serving pods: about 72 Mi each, limit
-384 Mi (`k8s/base/api.yaml:60-61`). Indexing is the memory-hungry path, which is one more
+the website can publish a bigger one. Compare the serving pods: peak 74 Mi over 585
+samples, request 96 Mi, limit 256 Mi (`k8s/base/api.yaml:62-68`). Indexing is the memory-hungry path, which is one more
 reason it is not in the API.
 
 Set the limit wrong (below 910 Mi) and the kernel's OOM killer ends the container: exit

@@ -1,0 +1,52 @@
+{
+    "request_id": "evidence-qa-1",
+    "answer": "The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules Handbook, June 2026. [academic-rules-handbook-jun-2026.pdf / 4. Registration > Withdrawal from a Course]",
+    "citations": [
+        {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4. Registration > Withdrawal from a Course",
+            "page": 22
+        }
+    ],
+    "answered_from_context": true,
+    "confidence": "high",
+    "retrieved": [
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-pdf-2026-06-0028-4dcbdc1e",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4. Registration > Withdrawal from a Course",
+            "page": 22,
+            "score": 0.8384
+        },
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-pdf-2026-0011-ce61cc89",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "13. Registration of Students under",
+            "page": 2,
+            "score": 0.7595
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-pdf-2026-06-0027-3a34aced",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4. Registration > Adding or Dropping a Course",
+            "page": 22,
+            "score": 0.7426
+        },
+        {
+            "chunk_id": "student-handbook-jun-2026-pdf-2026-06-0039-de598592",
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "VI \u2013 SEMESTER RULES",
+            "page": 29,
+            "score": 0.7039
+        },
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-pdf-2026-0024-ca4a4a7a",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "34. Maximum Time Allowed to",
+            "page": 5,
+            "score": 0.6919
+        }
+    ],
+    "provider": "ollama",
+    "cached": true
+}

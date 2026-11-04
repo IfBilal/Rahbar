@@ -1,0 +1,80 @@
+# Steady state of the whole stack, 2026-11-04T22:34:02Z
+$ kubectl get all,pvc,ingress,hpa,networkpolicy,cronjob -n rahbar
+NAME                                      READY   STATUS      RESTARTS   AGE
+pod/api-5898bf4d94-42dpt                  1/1     Running     0          3m16s
+pod/api-5898bf4d94-pln7l                  1/1     Running     0          4m6s
+pod/api-5898bf4d94-zdgpr                  1/1     Running     0          4m2s
+pod/chroma-0                              1/1     Running     0          6m40s
+pod/indexer-d5cm4                         0/1     Completed   0          4h40m
+pod/redis-b8d9d4b69-gx4qj                 1/1     Running     0          4h41m
+pod/ui-b84f8ffd9-28qj8                    1/1     Running     0          4h41m
+
+NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/api      ClusterIP   10.96.115.93     <none>        8000/TCP   4h42m
+service/chroma   ClusterIP   10.96.96.97      <none>        8000/TCP   4h42m
+service/redis    ClusterIP   10.97.164.20     <none>        6379/TCP   4h42m
+service/ui       ClusterIP   10.100.138.177   <none>        8080/TCP   4h42m
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api     3/3     3            3           4h42m
+deployment.apps/redis   1/1     1            1           4h42m
+deployment.apps/ui      1/1     1            1           4h42m
+
+NAME                              DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-5898bf4d94    3         3         3       14m
+replicaset.apps/api-599b89d8d8    0         0         0       16m
+replicaset.apps/api-6b5cb7fcdf    0         0         0       14m
+replicaset.apps/api-6cccddcbcf    0         0         0       3m11s
+replicaset.apps/api-8c7f85d97     0         0         0       16m
+replicaset.apps/api-f54676b6      0         0         0       8m47s
+replicaset.apps/redis-b8d9d4b69   1         1         1       4h41m
+replicaset.apps/redis-dd48b5649   0         0         0       4h42m
+replicaset.apps/ui-674575b8d9     0         0         0       4h42m
+replicaset.apps/ui-b84f8ffd9      1         1         1       4h41m
+
+NAME                      READY   AGE
+statefulset.apps/chroma   1/1     4h42m
+
+NAME                                      REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api   Deployment/api   cpu: 3%/70%   3         8         3          4h42m
+
+NAME                    SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cronjob.batch/reindex   0 3 * * 0   <none>     False     0        <none>          4h42m
+
+NAME                                      STATUS     COMPLETIONS   DURATION   AGE
+job.batch/indexer                         Complete   1/1           14m        4h40m
+
+NAME                                  STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-chroma-0   Bound    pvc-b1322d81-66d8-4a0d-8830-c7cebd001e38   2Gi        RWO            standard       <unset>                 4h42m
+persistentvolumeclaim/redis-data      Bound    pvc-cd090be1-555b-4adc-8ef9-a96dadb70cb1   1Gi        RWO            standard       <unset>                 4h42m
+
+NAME                               CLASS   HOSTS          ADDRESS        PORTS   AGE
+ingress.networking.k8s.io/rahbar   nginx   rahbar.local   192.168.49.2   80      4h42m
+
+NAME                                                          POD-SELECTOR   AGE
+networkpolicy.networking.k8s.io/allow-dns-egress              <none>         4h42m
+networkpolicy.networking.k8s.io/api-policy                    app=api        4h42m
+networkpolicy.networking.k8s.io/chroma-from-api-and-indexer   app=chroma     4h42m
+networkpolicy.networking.k8s.io/default-deny-all              <none>         4h42m
+networkpolicy.networking.k8s.io/indexer-policy                app=indexer    4h42m
+networkpolicy.networking.k8s.io/redis-from-api                app=redis      4h42m
+networkpolicy.networking.k8s.io/ui-from-ingress               app=ui         4h42m
+
+$ kubectl top pods -n rahbar --containers
+POD                     NAME     CPU(cores)   MEMORY(bytes)   
+api-5898bf4d94-42dpt    api      3m           68Mi            
+api-5898bf4d94-pln7l    api      3m           70Mi            
+api-5898bf4d94-zdgpr    api      3m           71Mi            
+chroma-0                chroma   2m           32Mi            
+redis-b8d9d4b69-gx4qj   redis    9m           10Mi            
+ui-b84f8ffd9-28qj8      ui       1m           4Mi             
+
+# requests/limits as deployed (from the manifests)
+POD                                   REQ_CPU   REQ_MEM   LIM_CPU   LIM_MEM
+api-5898bf4d94-42dpt                  100m      160Mi     500m      384Mi
+api-5898bf4d94-pln7l                  100m      160Mi     500m      384Mi
+api-5898bf4d94-zdgpr                  100m      160Mi     500m      384Mi
+chroma-0                              50m       128Mi     1         1Gi
+indexer-d5cm4                         500m      512Mi     2         1536Mi
+redis-b8d9d4b69-gx4qj                 20m       32Mi      250m      256Mi
+ui-b84f8ffd9-28qj8                    5m        16Mi      100m      64Mi
