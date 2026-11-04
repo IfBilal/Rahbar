@@ -34,7 +34,7 @@ def test_shortened_section_maps_to_the_real_chunk() -> None:
 @pytest.mark.parametrize("citation", [
     Citation(source="made-up-policy.pdf", section="1. Attendance", page=1),   # fabricated
     Citation(source="rules.pdf", section="9.9 Nonexistent", page=1),          # wrong section
-    Citation(source="rules.pdf", section=P[0].section, page=99),              # wrong page
+    Citation(source="rules.pdf", section="9.9", page=1),                      # clause not retrieved
 ])
 def test_fabricated_citations_are_rejected(citation: Citation) -> None:
     with pytest.raises(GuardError, match="does not match"):
@@ -99,3 +99,19 @@ def test_an_answer_without_markers_gets_its_validated_citations_inline() -> None
                                [Citation(source="rules.pdf", section=P[1].section, page=10)]), P)
     assert out.answer == ("Admission is closed after three semesters. "
                           f"[rules.pdf / {P[1].section}]")
+
+
+def test_a_real_section_with_a_wrong_page_is_served_with_the_real_page() -> None:
+    """Measured: llama3.2:3b cited '6. Rules for Summer Semester' with page 6 (the section
+    number). The chunk is real and retrieved; the served citation carries its real page."""
+    out = check_answer(_answer("x [A]", [Citation(source="rules.pdf", section=P[0].section,
+                                                  page=99)]), P)
+    assert out.citations == [Citation(source="rules.pdf", section=P[0].section, page=22)]
+
+
+def test_a_clause_number_maps_to_the_passage_that_contains_it() -> None:
+    passages = [passage(1, section="1. Introduction > Academic Year", page=7,
+                        text="1.2 Academic Year of the University starts in August.")]
+    out = check_answer(_answer("It starts in August.", [Citation(source="rules.pdf",
+                                                                 section="1.2", page=7)]), passages)
+    assert out.citations[0].section == "1. Introduction > Academic Year"
