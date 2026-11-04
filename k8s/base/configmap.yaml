@@ -23,7 +23,7 @@ data:
   TOP_K: "5"
   # Abstain below this cosine similarity: highest floor that keeps every answerable golden
   # question's relevant passage above it (lowest: 0.650); measured in docs/PIPELINE.md.
-  RELEVANCE_FLOOR: "0.60"
+  RELEVANCE_FLOOR: "0.50"
   # Lowest threshold with zero false hits on our paraphrase/negative pairs (PIPELINE.md).
   CACHE_THRESHOLD: "0.95"
   # 0.2: facts and JSON want near-deterministic decoding; 0 still hallucinates when evidence is absent.
