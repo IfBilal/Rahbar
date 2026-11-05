@@ -21,6 +21,7 @@ if ! kind get clusters | grep -qx "$CLUSTER"; then
 fi
 kubectl apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/$INGRESS_NGINX/deploy/static/provider/kind/deploy.yaml"
 kubectl wait -n ingress-nginx --for=condition=ready pod -l app.kubernetes.io/component=controller --timeout=240s
+kubectl wait -n ingress-nginx --for=condition=complete job --all --timeout=120s || true  # admission certs
 
 gateway=$(docker network inspect kind --format '{{range .IPAM.Config}}{{.Gateway}} {{end}}' \
           | tr ' ' '\n' | grep -E '^[0-9]+\.' | head -1)
@@ -31,7 +32,13 @@ curl -sf "http://$gateway:11434/api/version" >/dev/null || {
 if [ "${PRELOADED:-1}" = "1" ]; then
   for image in api ui indexer; do kind load docker-image "rahbar-$image:$TAG" --name "$CLUSTER"; done
 fi
-kustomize build "$here/k8s/overlays/$OVERLAY" | sed "s/OLLAMA_HOST_IP/$gateway/g" | kubectl apply -f -
+manifests=$(kustomize build "$here/k8s/overlays/$OVERLAY" | sed "s/OLLAMA_HOST_IP/$gateway/g")
+# The ingress admission webhook can refuse connections for a few seconds after the
+# controller reports ready (cd run 41977868131); apply is idempotent, so retry.
+for attempt in 1 2 3 4 5 6; do
+  echo "$manifests" | kubectl apply -f - && break
+  [ "$attempt" = 6 ] && exit 1; echo "apply failed, retrying in 10 s"; sleep 10
+done
 
 kubectl wait -n rahbar --for=condition=complete job/indexer --timeout="${INDEX_TIMEOUT:-900s}" || {
   kubectl get pods -n rahbar; kubectl logs -n rahbar job/indexer --all-containers --tail=50; exit 1; }

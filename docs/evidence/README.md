@@ -28,6 +28,7 @@ carry the command that produced them and a UTC timestamp.
 | `eval-run1-…`, `eval-run2-cache-hits.json`, `eval-run3-…` | the evaluation runs before the shipped one (`eval/results.json`) | `eval/run_eval.py` |
 | `gate-demo.txt`, `eval-gate-red.png`, `eval-gate-green.png` | the CI eval gate failing on PR #1, then passing after the fix | GitHub Actions runs 41891435694 and 41892555788; screenshots captured 5 November 2026 |
 | `ci-runs.txt` | CI run URLs per commit | `gh run list` |
+| `ollama-incluster.txt` | bonus: Ollama Deployment + PVC in the cluster; answers and declines through the Ingress, a 532-chunk re-index through it, and weights surviving a pod restart | `kubectl apply -k k8s/overlays/incluster`, `scripts/smoke.py` |
 | `cd-run.txt` | successful branch deployment with real model, covered answer and abstention | GitHub Actions run 41969926861 |
 | `cd-main.txt` | successful main-branch publication, deployment and Ingress smoke test | GitHub Actions run 41972097173 |
 | `branch-protection.json` | required approvals, status checks and administrator enforcement | GitHub branch protection API, 5 November 2026 |

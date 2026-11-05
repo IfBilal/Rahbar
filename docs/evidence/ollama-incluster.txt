@@ -1,0 +1,171 @@
+# Bonus: ollama-incluster on minikube (docker driver, 6 GiB node, Calico), 2026-11-05T06:16:48Z
+# kubectl apply -k k8s/overlays/incluster (dev overlay + components/ollama-incluster)
+namespace/rahbar unchanged
+serviceaccount/api unchanged
+serviceaccount/chroma unchanged
+serviceaccount/indexer unchanged
+serviceaccount/ollama created
+serviceaccount/redis unchanged
+serviceaccount/ui unchanged
+configmap/rahbar-config configured
+service/api unchanged
+service/chroma unchanged
+service/ollama created
+service/redis unchanged
+service/ui unchanged
+persistentvolumeclaim/ollama-models created
+persistentvolumeclaim/redis-data unchanged
+deployment.apps/api unchanged
+deployment.apps/ollama created
+deployment.apps/redis unchanged
+deployment.apps/ui unchanged
+statefulset.apps/chroma configured
+cronjob.batch/reindex configured
+horizontalpodautoscaler.autoscaling/api unchanged
+job.batch/indexer configured
+ingress.networking.k8s.io/rahbar unchanged
+networkpolicy.networking.k8s.io/allow-dns-egress unchanged
+networkpolicy.networking.k8s.io/api-policy configured
+networkpolicy.networking.k8s.io/chroma-from-api-and-indexer unchanged
+networkpolicy.networking.k8s.io/default-deny-all unchanged
+networkpolicy.networking.k8s.io/indexer-policy configured
+networkpolicy.networking.k8s.io/ollama-policy created
+networkpolicy.networking.k8s.io/redis-from-api unchanged
+networkpolicy.networking.k8s.io/ui-from-ingress unchanged
+
+# The first start failed: the init container ended with 'kill %1' (no job control in sh) -> Init:Error exit 1.
+# Fixed in k8s/components/ollama-incluster/ollama.yaml (kill $pid; exit with the pull's status) and re-applied.
+
+$ kubectl get deploy,pod,pvc,svc -l app=ollama   +  pvc/ollama-models
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/ollama   1/1     1            1           4h58m
+
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)     AGE
+service/ollama   ClusterIP   10.98.164.126   <none>        11434/TCP   4h58m
+
+NAME                                  STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/ollama-models   Bound    pvc-f692d2d0-c1d2-4ba4-b29e-9063421e06b5   6Gi        RWO            standard       <unset>                 4h58m
+NAME                      READY   STATUS    RESTARTS   AGE
+ollama-555c9f5d44-wsm79   1/1     Running   0          25s
+
+$ probes and resources of the ollama container
+startupProbe={"failureThreshold":30,"httpGet":{"path":"/api/version","port":11434,"scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":1}
+livenessProbe={"failureThreshold":3,"httpGet":{"path":"/api/version","port":11434,"scheme":"HTTP"},"periodSeconds":20,"successThreshold":1,"timeoutSeconds":1}
+readinessProbe={"failureThreshold":3,"httpGet":{"path":"/api/tags","port":11434,"scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":1}
+resources={"limits":{"cpu":"4","memory":"5Gi"},"requests":{"cpu":"1","memory":"3Gi"}}
+
+$ models on the PVC
+Defaulted container "ollama" out of: ollama, pull-models (init)
+NAME                       ID              SIZE      MODIFIED       
+llama3.2:3b                a80c4f17acd5    2.0 GB    19 seconds ago    
+nomic-embed-text:latest    0a109f422b47    274 MB    20 seconds ago    
+
+$ ConfigMap after the overlay
+LLM_PROVIDER=ollama-incluster OLLAMA_URL=http://ollama:11434 EMBED_MODEL=nomic-embed-text
+
+$ kubectl rollout restart deployment/api && kubectl rollout status deployment/api
+deployment.apps/api restarted
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+
+# 11:15:53 ask through the Ingress; every embedding and generation now goes to the ollama pod
+$ python3 scripts/smoke.py --api http://$(minikube ip) --host rahbar.local
+GET / -> 200, 9154 bytes
+POST /api/ask (covered) -> 200, answered_from_context=True, 1 citations, 5 retrieved
+POST /api/ask (absent)  -> 200, answered_from_context=False
+smoke test passed
+
+$ one answer in full
+{
+ "answer": "A student is barred from the final exam after missing more than 20% of the total lectures, as prescribed by the course instructor. [prospectus-2026-academic-rules-and-regulations.pdf / 1. Attendance Requirement 4] and [academic-rules-handbook-jun-2026.pdf / 1. Introduction > Attendance Requirements] states the same rule with slight variation, stating 20% for undergraduate programs and 75% for graduate and postgraduate programs.",
+ "citations": [
+  {
+   "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+   "section": "1. Attendance Requirement 4",
+   "page": 1
+  },
+  {
+   "source": "academic-rules-handbook-jun-2026.pdf",
+   "section": "1. Introduction > Attendance Requirements",
+   "page": 10
+  }
+ ],
+ "answered_from_context": true,
+ "confidence": "high",
+ "provider": "ollama",
+ "cached": false
+}
+
+$ api log lines for those requests (provider and llm url)
+{"ts": "2026-11-05T11:37:39Z", "level": "INFO", "logger": "rahbar.answer", "msg": "answered", "request_id": "acc3304a407cc66d1b60df0af6dba8b2", "retriever": "chroma", "provider": "ollama", "top_k": 5, "cache_similarity": 0.598, "retrieval_ms": 23.1, "generation_ms": 132155.5, "attempts": 1, "tokens_in": 1488, "tokens_out": 42, "cached_now": false, "follow_up": false, "chunk_ids": ["grading-page-ht
+{"ts": "2026-11-05T11:39:16Z", "level": "INFO", "logger": "rahbar.answer", "msg": "answered", "request_id": "d3e4ae52357b952e20c3fd3607733144", "retriever": "chroma", "provider": "ollama", "top_k": 5, "cache_similarity": 0.6961, "retrieval_ms": 38.9, "generation_ms": 96799.0, "attempts": 1, "tokens_in": 1391, "tokens_out": 176, "cached_now": true, "follow_up": false, "chunk_ids": ["student-handboo
+
+$ ollama pod access log (callers are the api pod IPs)
+[GIN] 2026/11/05 - 11:37:39 | 200 |         2m12s |  10.244.120.110 | POST     "/api/chat"
+[GIN] 2026/11/05 - 11:37:40 | 200 |  134.328718ms |  10.244.120.110 | POST     "/api/embed"
+[GIN] 2026/11/05 - 11:39:16 | 200 |         1m36s |  10.244.120.110 | POST     "/api/chat"
+api-6bcfbdb6c7-6hrd9   10.244.120.112
+api-6bcfbdb6c7-g8q8g   10.244.120.105
+api-6bcfbdb6c7-ldpq9   10.244.120.110
+
+# 11:39:25 re-index through the in-cluster model: kubectl create job --from=cronjob/reindex manual-reindex-incluster
+job.batch/manual-reindex-incluster created
+job.batch/manual-reindex-incluster condition met
+{"ts": "2026-11-05T11:49:51Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 532, "dimension": 768, "model": "nomic-embed-text", "seconds": 373.9}
+{"ts": "2026-11-05T11:49:54Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 532, "seconds": 585.4}
+
+# 11:50:18 weights live on the PVC: delete the pod; the new pod's init finds both models and does not download them
+pod "ollama-555c9f5d44-wsm79" deleted from rahbar namespace
+pod/ollama-555c9f5d44-ftph6 condition met
+init started=2026-11-05T11:50:19Z finished=2026-11-05T11:50:30Z exit=0
+ready since=2026-11-05T11:50:38Z
+blob download progress lines in this init run: 10
+NAME                      READY   STATUS    RESTARTS   AGE
+ollama-555c9f5d44-ftph6   1/1     Running   0          21s
+
+$ kubectl get pods (whole namespace)
+NAME                             READY   STATUS      RESTARTS   AGE
+api-6bcfbdb6c7-6hrd9             1/1     Running     0          35m
+api-6bcfbdb6c7-g8q8g             1/1     Running     0          35m
+api-6bcfbdb6c7-ldpq9             1/1     Running     0          35m
+chroma-0                         1/1     Running     0          13h
+indexer-slfn9                    0/1     Completed   0          13h
+manual-reindex-1-b9djq           0/1     Completed   0          12h
+manual-reindex-incluster-2h2wp   0/1     Completed   0          11m
+ollama-555c9f5d44-ftph6          1/1     Running     0          21s
+redis-b8d9d4b69-b2r52            1/1     Running     0          13h
+ui-b84f8ffd9-twvz8               1/1     Running     0          13h
+
+# 11:50:50 back to the default ollama-host mode (the README path): remove the component's objects, re-apply dev
+deployment.apps "ollama" deleted from rahbar namespace
+service "ollama" deleted from rahbar namespace
+persistentvolumeclaim "ollama-models" deleted from rahbar namespace
+networkpolicy.networking.k8s.io "ollama-policy" deleted from rahbar namespace
+serviceaccount "ollama" deleted from rahbar namespace
+job.batch "manual-reindex-incluster" deleted from rahbar namespace
+configmap/rahbar-config configured
+statefulset.apps/chroma configured
+cronjob.batch/reindex configured
+job.batch/indexer configured
+networkpolicy.networking.k8s.io/api-policy configured
+networkpolicy.networking.k8s.io/indexer-policy configured
+deployment.apps/api restarted
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+LLM_PROVIDER=ollama-host OLLAMA_URL=http://host.minikube.internal:11434
