@@ -37,15 +37,22 @@ spec:
           livenessProbe:
             httpGet: {path: /healthz, port: 8080}
             periodSeconds: 20
+          # kubectl top (docs/evidence/kubectl-top-steady.txt): 1m / 4Mi; nginx serving static files
           resources:
-            requests: {cpu: 5m, memory: 16Mi}
-            limits: {cpu: 100m, memory: 64Mi}
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
           volumeMounts:
             - {name: tmp, mountPath: /tmp}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: {drop: [ALL]}
+            capabilities:
+              drop:
+                - ALL
       volumes:
         - name: tmp
           emptyDir: {}

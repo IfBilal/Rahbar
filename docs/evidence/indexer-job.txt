@@ -1,0 +1,68 @@
+# Indexer Job + weekly CronJob, and a manual re-index while the API serves (2026-11-04T22:50:09Z)
+$ kubectl get job,cronjob -n rahbar
+NAME                STATUS     COMPLETIONS   DURATION   AGE
+job.batch/indexer   Complete   1/1           7m25s      10m
+
+NAME                    SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cronjob.batch/reindex   0 3 * * 0   <none>     False     0        <none>          10m
+
+$ kubectl logs -n rahbar job/indexer --all-containers  (the clean-clone run)
+  fetch   Undergraduate Academic Rules (Aug 2023)
+          undergraduate-academic-rules-aug-2023.pdf, 14,888,226 bytes
+  fetch   Academic Rules Handbook (Jun 2026)
+          academic-rules-handbook-jun-2026.pdf, 987,731 bytes
+  fetch   Prospectus 2026 - Academic Rules and Regulations
+          prospectus-2026-academic-rules-and-regulations.pdf, 7,066,767 bytes
+  fetch   Student Handbook (Jun 2026)
+          student-handbook-jun-2026.pdf, 1,980,275 bytes
+  fetch   Annual Report 2019-20
+          annual-report-2019-20.pdf, 891,216 bytes
+  fetch   Annual Report 2023-24
+          annual-report-2023-24.pdf, 5,100,456 bytes
+  fetch   Fee Structure page
+          fee-structure-page.html, 91,429 bytes
+  fetch   Grading page
+          grading-page.html, 95,673 bytes
+  fetch   Faculty Entrepreneurship and Technical Start-ups Policy
+          faculty-entrepreneurship-and-technical-start-ups-policy.pdf, 3,872,809 bytes
+
+9 documents in corpus/raw, manifest written to corpus/MANIFEST.md
+corpus matches the committed MANIFEST.md
+{"ts": "2026-11-04T22:40:05Z", "logger": "rahbar.indexer", "msg": "indexer starting", "dummy": false, "embed_model": "nomic-embed-text", "collection": "rahbar", "chroma": "chroma:8000", "pod": "indexer-slfn9"}
+{"ts": "2026-11-04T22:41:21Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "undergraduate-academic-rules-aug-2023.pdf", "doc_version": "2023-08", "superseded": true, "pages": 26, "ocr_pages": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], "empty_pages": [3], "chunks": 45, "seconds": 76.2}
+{"ts": "2026-11-04T22:41:31Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "academic-rules-handbook-jun-2026.pdf", "doc_version": "2026-06", "superseded": false, "pages": 58, "ocr_pages": [1, 2, 56, 57, 58], "empty_pages": [2, 56, 57], "chunks": 66, "seconds": 9.6}
+{"ts": "2026-11-04T22:41:32Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "prospectus-2026-academic-rules-and-regulations.pdf", "doc_version": "2026", "superseded": false, "pages": 5, "ocr_pages": [], "empty_pages": [], "chunks": 25, "seconds": 1.0}
+{"ts": "2026-11-04T22:41:41Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "student-handbook-jun-2026.pdf", "doc_version": "2026-06", "superseded": false, "pages": 64, "ocr_pages": [1, 2, 63, 64], "empty_pages": [2, 8, 63], "chunks": 82, "seconds": 8.6}
+{"ts": "2026-11-04T22:41:44Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "annual-report-2019-20.pdf", "doc_version": "2019-20", "superseded": false, "pages": 33, "ocr_pages": [], "empty_pages": [], "chunks": 63, "seconds": 3.2}
+{"ts": "2026-11-04T22:41:52Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "annual-report-2023-24.pdf", "doc_version": "2023-24", "superseded": false, "pages": 85, "ocr_pages": [], "empty_pages": [], "chunks": 211, "seconds": 8.2}
+{"ts": "2026-11-04T22:41:52Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "fee-structure-page.html", "doc_version": "2026-27", "superseded": false, "pages": 1, "ocr_pages": [], "empty_pages": [], "chunks": 9, "seconds": 0.0}
+{"ts": "2026-11-04T22:41:52Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "grading-page.html", "doc_version": "2026", "superseded": false, "pages": 1, "ocr_pages": [], "empty_pages": [], "chunks": 8, "seconds": 0.0}
+{"ts": "2026-11-04T22:42:12Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf", "doc_version": "2022-05", "superseded": false, "pages": 8, "ocr_pages": [1, 2, 3, 4, 5, 6, 7, 8], "empty_pages": [], "chunks": 23, "seconds": 19.8}
+{"ts": "2026-11-04T22:42:12Z", "logger": "rahbar.indexer", "msg": "chunking done", "chunks": 532, "chunk_size": 300, "chunk_overlap": 40, "amplification": 1.085}
+{"ts": "2026-11-04T22:46:48Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 532, "dimension": 768, "model": "nomic-embed-text", "seconds": 276.5}
+{"ts": "2026-11-04T22:46:50Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 532, "seconds": 405.2}
+
+## api pods and the generation they serve BEFORE the manual re-index
+NAME                   RESTARTS   STARTED
+api-6568c78cd7-lb4b8   0          2026-11-04T22:39:29Z
+api-6568c78cd7-njzqb   0          2026-11-04T22:39:29Z
+api-6568c78cd7-wb599   0          2026-11-04T22:39:29Z
+serving: ok: rahbar-g20261104224649-a7b3528e (532 chunks)
+
+$ kubectl create job --from=cronjob/reindex manual-reindex-1 -n rahbar
+job.batch/manual-reindex-1 created
+job.batch/manual-reindex-1 condition met
+{"ts": "2026-11-04T22:58:23Z", "logger": "rahbar.indexer", "msg": "chunking done", "chunks": 532, "chunk_size": 300, "chunk_overlap": 40, "amplification": 1.085}
+{"ts": "2026-11-04T23:03:05Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 532, "seconds": 410.2}
+
+## AFTER: the same pods (no restart, no redeploy) now serve the new generation
+NAME                   RESTARTS   STARTED
+api-6568c78cd7-lb4b8   0          2026-11-04T22:39:29Z
+api-6568c78cd7-njzqb   0          2026-11-04T22:39:29Z
+api-6568c78cd7-wb599   0          2026-11-04T22:39:29Z
+serving: ok: rahbar-g20261104230304-a7b3528e (532 chunks)
+
+$ kubectl get jobs -n rahbar
+NAME               STATUS     COMPLETIONS   DURATION   AGE
+indexer            Complete   1/1           7m25s      23m
+manual-reindex-1   Complete   1/1           7m28s      7m37s

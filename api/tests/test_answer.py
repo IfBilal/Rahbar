@@ -156,9 +156,19 @@ def test_a_settings_change_starts_a_fresh_cache_scope() -> None:
     assert cache_scope("g1", "stub", S) != base
     for change in ({"relevance_floor": 0.6}, {"top_k": 3}, {"temperature": 0.1},
                    {"max_context_passages": 2}, {"llm_model": "llama3.2:1b"},
-                   {"embed_model": "other"}):
+                   {"embed_model": "other"}, {"superseded_filter": False}):
         assert cache_scope("g1", "ollama", replace(S, **change)) != base, change
     assert cache_scope("g1", "ollama", S) == base
+
+
+def test_a_prompt_change_starts_a_fresh_cache_scope(monkeypatch) -> None:
+    """Found on the cluster: after the evidence ids changed, run 2 of the evaluation was
+    served run 1's answers. The prompt text is now part of the cache key."""
+    from app.services import answer as a
+
+    before = a.cache_scope("g1", "ollama", S)
+    monkeypatch.setattr(a, "PROMPT_VERSION", "deadbeef")
+    assert a.cache_scope("g1", "ollama", S) != before
 
 
 def test_answers_from_a_different_provider_are_not_reused() -> None:

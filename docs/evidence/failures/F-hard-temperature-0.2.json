@@ -1,0 +1,82 @@
+[
+  {
+    "id": "a01",
+    "run": 1,
+    "seconds": 41.1,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The documents do not cover this question. There is no mention of a monthly hostel fee or the process of applying for a hostel room in the provided evidence passages."
+  },
+  {
+    "id": "a01",
+    "run": 2,
+    "seconds": 8.6,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The documents do not cover this question. The evidence passages only discuss fee structure and admission fees, but do not mention monthly hostel fees or the application process for a hostel room."
+  },
+  {
+    "id": "a02",
+    "run": 1,
+    "seconds": 79.9,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The evidence passages do not provide information on hostel curfew timings for female students. The evidence passages only cover rules related to academic warnings, semester rules, and registration for FYP-I and FYP-II. The documents do not cover this question."
+  },
+  {
+    "id": "a02",
+    "run": 2,
+    "seconds": 7.4,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The evidence passages do not provide information on hostel curfew timings for female students."
+  },
+  {
+    "id": "q09",
+    "run": 1,
+    "seconds": 137.9,
+    "answered_from_context": true,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "According to the 2023-24 annual report, the Islamabad campus has a highly qualified, fully committed, and professionally stimulated faculty dedicated to academic excellence. The faculty members excel in teaching competence and are adept at integrating the latest advancements in science and technology into their instruction. They are accomplished researchers, contributors, and developers in their respective fields, conducting research in areas such as Intelligent Networks, Software Testing, Software Engineering, Machine Intelligence, Image Processing, Neural Networks, Embedded Systems, RF Systems, and Control Systems. Our faculty members are a total of [annual-report-2023-24.pdf / ISLAMABAD, PAKISTAN > Islamabad Campus]."
+  },
+  {
+    "id": "q09",
+    "run": 2,
+    "seconds": 35.6,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The Islamabad campus has a highly qualified, fully committed, and professionally stimulated faculty dedicated to academic excellence, with faculty members who excel in teaching competence and are adept at integrating the latest advancements in science and technology into their instruction. They are accomplished researchers, contributors, and developers in their respective fields, conducting research in areas such as Intelligent Networks, Software Testing, Software Engineering, Machine Intelligence, Image Processing, Neural Networks, Embedded Systems, RF Systems, and Control Systems. Our faculty members are accomplished researchers, contributors, and developers in their respective fields, which implies that the exact number of faculty members is not explicitly stated in the passage."
+  },
+  {
+    "id": "e01",
+    "run": 1,
+    "seconds": 60.8,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The documents do not cover this question."
+  },
+  {
+    "id": "e01",
+    "run": 2,
+    "seconds": 5.5,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The documents do not cover this question."
+  }
+]

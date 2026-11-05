@@ -22,8 +22,9 @@ spec:
       # No CHROMA_PORT=tcp://... service links: Chroma reads CHROMA_* as its own config.
       enableServiceLinks: false
       # preStop sleeps 10 s so the endpoint is removed before uvicorn stops accepting
-      # connections; 30 s leaves room for an in-flight generation to finish.
-      terminationGracePeriodSeconds: 30
+      # connections; then uvicorn finishes in-flight answers. A CPU generation takes up to
+      # ~190 s here: with the old 30 s grace a rollout cut answers off with a 502 (measured).
+      terminationGracePeriodSeconds: 240
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001
@@ -57,14 +58,22 @@ spec:
             preStop:
               exec: {command: ["sleep", "10"]}
           resources:
-            requests: {cpu: 100m, memory: 160Mi}
-            limits: {cpu: 500m, memory: 384Mi}
+            # kubectl top (docs/evidence/hpa.txt, 585 samples): 3m / ~70Mi serving, peaks
+            # 151m (startup) and 74Mi. The CPU request is also the HPA's denominator.
+            requests:
+              cpu: 100m
+              memory: 96Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
           volumeMounts:
             - {name: tmp, mountPath: /tmp}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: {drop: [ALL]}
+            capabilities:
+              drop:
+                - ALL
       volumes:
         - name: tmp
           emptyDir: {}

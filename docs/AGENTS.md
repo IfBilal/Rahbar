@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** the plan was executed; deliverables are `README.md`, `docs/ARCHITECTURE.md`, `docs/adr/0001`–`0004` and `docs/TRACEABILITY.md`. This guide is kept as the plan of record.
+
 # RAHBAR — coding-agent operating manual
 
 ## Package boundary and original files
@@ -74,7 +76,7 @@ Each task's final report should contain: `Task / Owner / Dependencies verified /
 - Use the starter's versions and package names unless a tested, recorded migration is necessary: Chroma HTTP client/server `1.0.12`, Python `3.12`, FastAPI, Pydantic, Redis.
 - No new dependencies, schemas, ports, service names, or file owners without checking `INTERFACE-CONTRACTS.md` and notifying the other developer.
 - Prefer small changes with unit tests and a runnable command. Do not claim passing tests without executing them.
-- Implement real behavior, not TODO-shaped examples. All starter `NotImplementedError` and `STARTER-TODO` markers must be resolved before submission.
+- Implement real behavior, not TODO-shaped examples. All starter `NotImplementedError` and `starter TODO` markers must be resolved before submission.
 
 ### Task execution protocol (required for each agentic IDE session)
 1. Quote your task ID and owner from `CRITICAL-PATH.md`. Read its blocking dependencies.
@@ -176,7 +178,7 @@ Use `Verified from starter`, `Required by assignment`, `Proposed design`, and `M
 - Eval fixture golden file has 6 questions, real golden must contain **at least 15**, from actual confirmed corpus.
 
 ### Important trap: starter test and documentation are not completion
-`/readyz` currently always returns 200; `eval/run_eval.py` has `NotImplementedError`; `ChromaRetriever.retrieve`, provider(s), the five stages and live cluster are missing. No project outcome should be marked passed solely because the stub UI gives a response. Check with `grep -R 'STARTER-TODO\|NotImplementedError' api indexer eval` before final release.
+`/readyz` currently always returns 200; `eval/run_eval.py` has `NotImplementedError`; `ChromaRetriever.retrieve`, provider(s), the five stages and live cluster are missing. No project outcome should be marked passed solely because the stub UI gives a response. Check with `grep -R 'starter TODO\|NotImplementedError' api indexer eval` before final release.
 
 ### Recommendations that are *not* supplied requirements
 Versioned immutable Chroma collections + Chroma registry active pointer (safe-reindex design (consolidated in ADR 0003)), lexical exact-term assist (optional hybrid design (consolidated in ADR 0002)), and branch-per-task coordination are recommended designs. They require implementation and peer approval; don't claim them as features in current starter.

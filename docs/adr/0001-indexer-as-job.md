@@ -15,8 +15,9 @@ With three API replicas and one Chroma volume, indexing on startup breaks in fou
    each half-way through a different PDF. What ends up in Chroma is an index that no
    single run produced: duplicated chunks, missing chunks, mixed generations.
 2. **Every restart pays the full cost again.** A rolling update, an OOMKill or a node
-   drain re-OCRs 34 scanned pages and re-embeds 486 chunks. On our laptop that is 13
-   minutes per pod (measured: `"indexer finished", "seconds": 797.9`).
+   drain re-OCRs 32 scanned pages and re-embeds 532 chunks. On our laptop that is 7 to
+   13 minutes per pod (measured: `"indexer finished", "seconds": 405.2` on an idle machine,
+   `797.9` under load).
 3. **Readiness becomes a lie.** Either a pod says ready before its index exists and serves
    empty retrievals, or it takes 13 minutes to say ready and the startup probe
    (30 × 2 s = 60 s) kills it half-way, so a rollout swaps three working pods for three

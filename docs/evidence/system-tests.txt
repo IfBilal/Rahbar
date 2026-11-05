@@ -1,0 +1,10 @@
+# make system-test against the live minikube stack (2026-11-04T22:30:34Z)
+$ RAHBAR_SYSTEM=1 RAHBAR_DISRUPTIVE=1 INGRESS_IP=192.168.49.2 pytest -rA tests/system
+PASSED tests/system/test_live_cluster.py::test_ingress_serves_the_ui_and_the_api
+PASSED tests/system/test_live_cluster.py::test_the_absent_topic_is_declined
+PASSED tests/system/test_live_cluster.py::test_three_api_endpoints_behind_the_service
+PASSED tests/system/test_live_cluster.py::test_network_policy_blocks_ui_to_chroma_and_allows_api_to_chroma
+PASSED tests/system/test_live_cluster.py::test_network_policy_blocks_ui_to_redis
+PASSED tests/system/test_live_cluster.py::test_deleting_an_api_pod_does_not_interrupt_answers
+PASSED tests/system/test_live_cluster.py::test_changing_the_embedding_model_on_the_api_only_blocks_readiness
+7 passed in 106.99s (0:01:46)

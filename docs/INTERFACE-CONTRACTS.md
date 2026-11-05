@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** frozen as built; the four additive contract changes are recorded in `docs/adr/0004-llm-provider-and-data-governance.md`. This guide is kept as the plan of record.
+
 # Frozen HTTP, Python, metadata and environment contracts
 
 **Hard gate G0:** both humans sign off on these contracts before independent coding. `api/app/schemas.py` is the actual schema source; do not silently add `session_id`, change JSON fields or invent provider modes. All examples of scores and answers illustrate schema **only**, not evaluation results.

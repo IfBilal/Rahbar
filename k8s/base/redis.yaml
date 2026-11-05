@@ -9,7 +9,8 @@ metadata:
 spec:
   accessModes: [ReadWriteOnce]
   resources:
-    requests: {storage: 1Gi}
+    requests:
+      storage: 1Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -52,13 +53,20 @@ spec:
           livenessProbe:
             tcpSocket: {port: 6379}
             periodSeconds: 20
+          # kubectl top (docs/evidence/kubectl-top-steady.txt): 9m / 10Mi; limit covers maxmemory 200mb + AOF rewrite
           resources:
-            requests: {cpu: 20m, memory: 32Mi}
-            limits: {cpu: 250m, memory: 256Mi}
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: {drop: [ALL]}
+            capabilities:
+              drop:
+                - ALL
       volumes:
         - name: data
           persistentVolumeClaim: {claimName: redis-data}

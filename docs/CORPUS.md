@@ -1,7 +1,7 @@
 # Corpus
 
 Source: **FAST-NUCES public website (nu.edu.pk)** · Documents: **9** (7 PDFs, 2 HTML pages) ·
-Pages: **279 PDF pages** + 2 web pages · Indexed chunks: **486** (400/60 tokens)
+Pages: **279 PDF pages** + 2 web pages · Indexed chunks: **532** (300/40 tokens)
 
 Every file is public (no SLATE, Flex, NU Mail or anything behind a login). We commit
 `corpus/sources.yaml` (what to fetch, with `doc_version` and `superseded`) and

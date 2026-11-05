@@ -70,7 +70,7 @@ Deployment with `strategy: Recreate`, which avoids the overlap for the one cache
    question asks about an older version, with clause numbers and course codes pulled
    forward by Chroma's full-text `$contains` (exact-term assist).
    **Floor**: if no passage reaches `RELEVANCE_FLOOR`, abstain without calling the model.
-5. **Augment**: system rules, then up to `MAX_CONTEXT_PASSAGES` numbered `<evidence>`
+5. **Augment**: system rules, then up to `MAX_CONTEXT_PASSAGES` enumerated `<evidence>` (ids A, B, C, so they never collide with clause numbers)
    blocks (untrusted data, with imperatives neutralised), then the `<question>`.
 6. **Generate**: Ollama with `format` = the `Answer` JSON schema, temperature 0.2.
 7. **Validate**: Pydantic, then the citation guard; one retry with the reason; then a
@@ -112,6 +112,7 @@ Verified on minikube with Calico (`docs/evidence/networkpolicy-tests.txt`).
 | Indexer dies half-way | old generation keeps serving; the half-written one is never published | registry pointer moves only after a full count check |
 | Website publishes new bytes | indexer Job fails closed; old generation keeps serving | manifest SHA-256 check |
 | Redis down | api pods 0/1 READY (case study requires it); requests in flight answer without cache | readiness vs request-path handling |
+| Rollout while a question is being answered | the old pod leaves the Service (preStop 10 s), then finishes the answer before exiting | `terminationGracePeriodSeconds: 240`; with the first value (30 s) a rollout cut a 190 s generation off and the user got a 502 (measured during evaluation) |
 | Model returns prose or fake citations | one retry, then a canned answer; `rahbar_fallbacks_total` increments | guard + fallback |
 
 ## Security closures (section 4.7)

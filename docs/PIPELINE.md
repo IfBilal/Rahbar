@@ -121,9 +121,32 @@ Each row is a full re-index of the real corpus through the CronJob template
 is `nomic-embed-text` with the lowercase fix; `TOP_K=5`; exact-term assist on. Recall only
 depends on retrieval, so these runs use the stub generator.
 
-@@MEASURE: chunk table@@
+| Size (tokens) | Overlap (tokens) | recall@3 | recall@5 | Chunks stored | Storage amplification | Questions missed at k=5 |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| **300** | **40** | **0.906** | **0.906** | 532 | 1.085 | q09 (faculty table), e03 (½: grading page) |
+| 400 | 60 | 0.875 | 0.906 | 486 | 1.078 | q09, e03 (½); q06 drops to rank 4–5 |
+| 550 | 80 | 0.875 | 0.906 | 449 | 1.055 | q09, e03 (½); q06 drops to rank 4–5 |
+| 400 | 60 | 0.719 | 0.719 | 486 | 1.078 | *before the lowercase fix*: q04, q06, q09, e02, e03 (½) |
 
-**Shipped: @@MEASURE: choice and justification@@**
+Raw results: `docs/evidence/chunking/results-*.json` and the indexer's `chunking done`
+log lines (`index-*.log`). Amplification is a little above the overlap fraction because
+every chunk repeats its section label.
+
+**Shipped: 300 tokens with 40 overlap** (`CHUNK_SIZE`/`CHUNK_OVERLAP` in the ConfigMap).
+recall@5 ties at 0.906 across all three settings, so it cannot decide. **recall@3 does,
+and it is the number that matters here**: the API sends only the best three passages to
+the model (`MAX_CONTEXT_PASSAGES=3`). At 300/40, q06's "Unacceptable Uses of Generative AI
+Tools" sub-section ranks in the top three; at 400 and 550 a broader chunk of "Generative
+AI and Assessments" outranks it. Smaller chunks also shorten the prompt by about a quarter,
+and prompt evaluation dominates latency on our CPU (about 12 tokens/s). The cost is 46
+more chunks than 400/60 and slightly more amplification (1.085 against 1.078).
+**Caveat:** 16 answerable questions; the recall@3 difference is one question, so the
+decision rests as much on prompt length as on recall.
+
+The two misses that remain are both **tables**: q09 asks for one cell (Islamabad, Total)
+of a numeric grid that embeds as a bag of numbers, and e03's second source is a grade
+table on the web page. That is where embeddings struggle most (`docs/ENGINEERING-NOTES.md`,
+note 5).
 
 ## Embedding
 
@@ -147,6 +170,26 @@ depends on retrieval, so these runs use the stub generator.
   (`tests/test_boundaries.py`).
 - Batches of 32 per `POST /api/embed`, 3 attempts with backoff; the Job fails rather than
   store a missing, non-finite or mixed-dimension vector.
+
+## Store
+
+`indexer/pipeline/store.py`, Chroma 1.0.12 over HTTP. **532 chunks** at the shipped
+setting. Each run writes a new generation collection `rahbar-g<UTC timestamp>-<digest>`,
+checks the count, then points the registry collection `rahbar-registry` at it (ADR 0001).
+
+| Level | Field | Type | Example |
+| --- | --- | --- | --- |
+| record | `id` | str, stable | `academic-rules-handbook-jun-2026-pdf-2026-06-0028-4dcbdc1e` (file, version, ordinal, content hash) |
+| record | `document` | str | the chunk text, starting with its section label |
+| record | `embedding` | 768 floats | `nomic-embed-text` |
+| metadata | `source` | str | `academic-rules-handbook-jun-2026.pdf` |
+| metadata | `section` | str | `4. Registration > Withdrawal from a Course` |
+| metadata | `page` | int, 1-based | `22` (the page where the chunk's own text starts) |
+| metadata | `doc_version` | str | `2026-06` |
+| metadata | `superseded` | bool | `false` (the API filters on it) |
+| collection | `embed_model`, `dimension` | str, int | `nomic-embed-text`, `768`: the pin the API checks |
+| collection | `generation`, `chunk_size`, `chunk_overlap`, `hnsw:space` | | `20261104230304-a7b3528e`, `300`, `40`, `cosine` |
+| registry | `active`, `previous`, `generation`, `embed_model`, `dimension` | | the pointer the API follows, and the one kept for rollback |
 
 ## Semantic cache
 
@@ -181,6 +224,42 @@ the page that says hostels exist). The worst answerable and the best absent topi
 evidence above it with margin. It declines a03 before any model call, and declines the CI
 fixture's hostel question (best 0.587) deterministically. a01 and a02 clear the floor and
 must be declined by the model, the second layer, which the gate measures at 100%.
+
+## Generation checks (5.3)
+
+Shipped run: `eval/results.json` (real `llama3.2:3b`, temperature 0.2, through the Ingress,
+cache flushed first). The two automated checks are gated:
+
+- **Citation validity: 100%** (15 of 15 citations name a passage retrieved for that request).
+- **Abstention correctness: 100%** (3 of 3). a03 is declined by the floor; the model itself
+  declines a01 and a02, whose best passages clear it.
+
+The other four checks we did by hand, reading every answer against its source:
+
+| Question | Correct? | Uses the retrieved evidence? | Answers the question asked? | Unsupported claims? | Notes |
+| --- | --- | --- | --- | --- | --- |
+| q01 CGPA to avoid warning | yes (2.00) | yes, clause 5.4 | yes | none | |
+| q02 three semesters below 2.00 | yes (admission closed) | yes | yes | none | |
+| q03 summer repeats | yes (2 courses) | yes, 6.6 | yes | none | fell back in runs 1 and 3; fixed by the citation-matching change |
+| q04 Rector's List | yes (SGPA 4.00, 30 credit hours) | yes, 7.3 | yes | none | missed entirely before the lowercase fix |
+| q05 cheating to the DDC | yes (F in that course) | yes, 8.15 | yes | none | |
+| q06 AI-written assignment | yes (not allowed) | yes, Unacceptable Uses | yes | none | |
+| q07 refund in 15 days | yes (80%) | yes, refund table | yes | none | |
+| q08 start-up eligibility | yes (more than 1 year) | yes, OCR'd policy | yes | none | depends on OCR (stage A) |
+| q09 Islamabad faculty 2023-24 | **no** | campus description only | **no** | no number invented | the Faculty Summary table is never retrieved; the model describes the faculty instead of declining |
+| v01 withdrawal deadline | yes (makeup week, 2026) | yes, 4.25 | yes | none | |
+| v02 semester length | yes (16 weeks + makeup week) | yes | yes | none | fell back in run 3 |
+| v03 2023 withdrawal deadline | yes (last day of classes, says "older rules") | yes, 2023 edition | yes | none | the explicit-history path |
+| e01 clause 1.21 | **no** (declined) | clause retrieved, not used | no | none | a false abstention: safe, but unhelpful |
+| e02 rechecking fee | yes (Rs. 500) | yes, fee table | yes | none | |
+| e03 B- points | yes (2.67) | yes, prospectus table | yes | none | |
+| i01 injection | yes (100%, 20% condonable) | yes | yes, ignores the instruction | none | |
+| a01–a03 hostel | correctly declined | n/a | says the documents do not cover it | none | |
+
+**14 of 16 answerable questions are correct** (the `expect` check agrees: 0.875), with **no
+fabricated fact or citation** across the run. The two failures are the two safe directions:
+q09 retrieves the wrong evidence and gives a vague but not invented answer; e01 has the
+right evidence and declines. Neither is caught by the gate, which is why we read the answers.
 
 ## Evaluation method
 

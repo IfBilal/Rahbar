@@ -24,7 +24,7 @@ def render(overlay: str) -> list[dict]:
     return [d for d in yaml.safe_load_all(out) if d]
 
 
-@pytest.fixture(scope="module", params=["dev", "prod", "ci"])
+@pytest.fixture(scope="module", params=["dev", "prod", "ci", "incluster"])
 def objs(request) -> list[dict]:
     return render(request.param)
 
@@ -52,8 +52,8 @@ def test_every_required_object_exists(objs) -> None:
                        ("ConfigMap", "rahbar-config"), ("NetworkPolicy", "default-deny-all"),
                        ("HorizontalPodAutoscaler", "api")]:
         one(objs, kind, name)
-    assert sorted(o["metadata"]["name"] for o in objs if o["kind"] == "Service") == \
-        ["api", "chroma", "redis", "ui"]
+    assert {"api", "chroma", "redis", "ui"} <= \
+        {o["metadata"]["name"] for o in objs if o["kind"] == "Service"}
 
 
 def test_nothing_lands_in_the_default_namespace(objs) -> None:
@@ -78,7 +78,8 @@ def test_api_has_three_replicas_three_probes_and_zero_unavailable(objs) -> None:
     assert c["livenessProbe"]["httpGet"]["path"] == "/healthz"
     assert c["readinessProbe"]["httpGet"]["path"] == "/readyz"
     assert c["lifecycle"]["preStop"]["exec"]["command"][0] == "sleep"
-    assert pod_spec(api)["terminationGracePeriodSeconds"] > 10
+    # longer than the slowest generation we measured (~190 s), or rollouts drop answers
+    assert pod_spec(api)["terminationGracePeriodSeconds"] >= 200
 
 
 def test_every_container_has_requests_and_limits(objs) -> None:
@@ -106,7 +107,7 @@ def test_every_container_is_hardened(objs) -> None:
 
 def test_dedicated_service_accounts_without_tokens(objs) -> None:
     sas = {o["metadata"]["name"]: o for o in objs if o["kind"] == "ServiceAccount"}
-    assert set(sas) == {"api", "ui", "indexer", "chroma", "redis"}
+    assert {"api", "ui", "indexer", "chroma", "redis"} <= set(sas)
     assert all(sa["automountServiceAccountToken"] is False for sa in sas.values())
 
 
@@ -227,3 +228,15 @@ def test_prod_overlay_pulls_sha_tagged_images_from_docker_hub() -> None:
         if "rahbar-" in image:
             repo, tag = image.rsplit(":", 1)
             assert repo.startswith("docker.io/") and len(tag) >= 7 and tag != "latest"
+
+
+def test_incluster_ollama_has_a_patient_startup_probe_and_a_weights_volume() -> None:
+    objs = render("incluster")
+    ollama = one(objs, "Deployment", "ollama")
+    c = pod_spec(ollama)["containers"][0]
+    assert c["startupProbe"]["failureThreshold"] == 30          # weights take minutes to load
+    assert pod_spec(ollama)["volumes"][0]["persistentVolumeClaim"]["claimName"] == "ollama-models"
+    data = one(objs, "ConfigMap", "rahbar-config")["data"]
+    assert data["OLLAMA_URL"] == "http://ollama:11434" and data["LLM_PROVIDER"] == "ollama-incluster"
+    assert _allows_ingress(objs, "ollama", "api", 11434)
+    assert not _allows_ingress(objs, "ollama", "ui", 11434)

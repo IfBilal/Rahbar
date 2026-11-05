@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** answered in `docs/ENGINEERING-NOTES.md` with file:line references and measurements. This guide is kept as the plan of record.
+
 > **Required output file:** Implement the material in this *supplementary planning guide* and record the final, evidence-backed results in the instructor-provided `docs/ENGINEERING-NOTES.md`. That original file is not included in this archive.
 
 # Seven engineering questions — final answers require your own evidence

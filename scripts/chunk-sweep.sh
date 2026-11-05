@@ -21,5 +21,6 @@ for setting in "$@"; do
   kubectl logs -n $NS "job/$job" -c indexer | grep -E '"chunking done"|"indexer finished"' | tee "$OUT/index-$size-$overlap.log"
   sleep 8                                  # the API re-reads the registry every 5 s
   python eval/run_eval.py --api "http://$IP" --host rahbar.local \
-    --out "$OUT/results-$size-$overlap.json" --baseline /dev/null/none | tail -8
+    --out "$OUT/results-$size-$overlap.json" --baseline /dev/null/none | tail -8 || true
+  # (|| true: with the stub generator the abstention gate fails by design; we want recall)
 done

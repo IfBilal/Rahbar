@@ -29,6 +29,11 @@ from ..routes import metrics as m
 from ..schemas import Answer, AskResponse, Passage, RetrievedRef
 from .cache import SemanticCache
 from .guard import GuardError, check_answer, is_follow_up
+from .prompt import REMINDER, SYSTEM
+
+# A prompt change changes answers, so it must start a fresh cache scope (found when run 2
+# of the evaluation was served run 1's answers after the evidence ids changed).
+PROMPT_VERSION = hashlib.sha256((SYSTEM + REMINDER).encode()).hexdigest()[:8]
 
 log = logging.getLogger("rahbar.answer")
 
@@ -53,17 +58,22 @@ def cache_scope(generation: str, provider: str, settings: Settings) -> str:
     """Everything that shapes an answer is in the key, so an answer is only reused under
     the exact rules that produced it: a new index generation, model, provider, floor,
     top_k, passage count or temperature starts a fresh, empty scope."""
-    knobs = (f"{provider}|{settings.llm_model}|{settings.temperature}|{settings.relevance_floor}|"
-             f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}")
+    knobs = (f"{PROMPT_VERSION}|{provider}|{settings.llm_model}|{settings.temperature}|"
+             f"{settings.relevance_floor}|"
+             f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}|"
+             f"{settings.superseded_filter}")
     digest = hashlib.sha256(knobs.encode()).hexdigest()[:10]
     return f"{generation}:{settings.embed_model}:{digest}"
+
+
+RETRIES = 1   # 3.4: retry once on a rejected reply, then fall back
 
 
 def generate_checked(question: str, passages: list[Passage],
                      provider: LLMProvider) -> tuple[Answer | None, str | None, int]:
     """Steps 6-7: generate, validate, retry once. Returns (answer, failure reason, attempts)."""
     reason: str | None = None
-    for attempt in (1, 2):
+    for attempt in range(1, RETRIES + 2):
         try:
             raw = provider.generate(question, passages, retry_reason=reason)
             return check_answer(raw, passages), None, attempt
@@ -72,7 +82,7 @@ def generate_checked(question: str, passages: list[Passage],
         except Exception as exc:  # timeout, connection refused, HTTP 5xx from the model host
             reason = f"provider error {type(exc).__name__}: {str(exc)[:200]}"
         log.warning("generation rejected", extra={"attempt": attempt, "reason": reason})
-    return None, reason, 2
+    return None, reason, RETRIES + 1
 
 
 def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
@@ -148,9 +158,10 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
     if not response.answered_from_context:
         m.ABSTENTIONS.labels(reason="model_declined").inc()
 
-    # 8. store: cache only a grounded, validated, standalone answer
-    cacheable = (scope is not None and vector is not None and response.answered_from_context
-                 and bool(response.citations))
+    # 8. store: cache only a grounded, validated, standalone answer. Fallbacks and
+    # abstentions below the floor returned earlier and never reach this point.
+    never_cache = follow_up or not response.answered_from_context or not response.citations
+    cacheable = scope is not None and vector is not None and not never_cache
     if cacheable and cache is not None and scope is not None and vector is not None:
         try:
             cache.store(scope, question, vector,

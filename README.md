@@ -41,10 +41,10 @@ Full design: `docs/ARCHITECTURE.md`.
 
 | Measured on our stack | Value | Where |
 | --- | --- | --- |
-| Corpus | 9 public documents, 279 PDF pages + 2 web pages, 486 chunks | `docs/CORPUS.md` |
-| recall@3 / recall@5 (19-question golden set) | @@MEASURE@@ | `eval/results.json` |
-| Citation validity / must-abstain correctness | @@MEASURE@@ | `eval/results.json` |
-| Chunking shipped | 400 tokens, 60 overlap, chosen from three measured settings | `docs/PIPELINE.md` |
+| Corpus | 9 public documents, 279 PDF pages + 2 web pages, 532 chunks | `docs/CORPUS.md` |
+| recall@3 / recall@5 (19-question golden set) | 0.906 / 0.906 (exact terms 0.833, version 1.0) | `eval/results.json` |
+| Citation validity / must-abstain correctness | 100% / 100%; 14 of 16 answers correct on manual review | `eval/results.json`, `docs/PIPELINE.md` |
+| Chunking shipped | 300 tokens, 40 overlap (best recall@3 of three measured settings) | `docs/PIPELINE.md` |
 | Semantic cache threshold | 0.95, the lowest with zero false hits | `docs/evidence/cache-threshold.txt` |
 | Indexer peak memory | 910 Mi (limit 1536 Mi) | `docs/evidence/kubectl-top-indexer-run.txt` |
 
@@ -81,8 +81,13 @@ make ask Q="What is the monthly hostel fee?"             # declines: not in the 
 # or open the chat UI: add "$(minikube ip) rahbar.local" to /etc/hosts, browse http://rahbar.local
 ```
 
-The first indexer run takes about 15 minutes on a laptop CPU: it downloads the corpus,
-OCRs 34 scanned pages and embeds 486 chunks. Until it finishes, the API pods correctly
+**Embeddings go through the same host Ollama.** In ollama-host mode both the indexer Job
+and the API call `http://host.minikube.internal:11434` for `nomic-embed-text` embeddings as
+well as `llama3.2:3b` generation; the model is pinned by `EMBED_MODEL` in the ConfigMap.
+
+The first indexer run takes about 10 minutes on a laptop CPU: it downloads the corpus,
+OCRs 32 scanned pages and embeds 532 chunks (the clean-clone run took 7 minutes,
+`docs/evidence/clean-clone.txt`). Until it finishes, the API pods correctly
 report `0/1 READY`.
 
 ### The apply order
@@ -121,10 +126,10 @@ kubectl apply -f k8s/base/api.yaml -f k8s/base/ui.yaml -f k8s/base/hpa.yaml -f k
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/ask` | `{"question": "..."}` (3–500 chars) → answer, citations, `answered_from_context`, confidence, retrieved passages with scores, provider, `cached`. 422 on a bad question. |
-| `GET` | `/healthz` | Liveness: the process is alive. Touches nothing else. |
-| `GET` | `/readyz` | Readiness: Chroma reachable, active collection non-empty, its embedding model equal to `EMBED_MODEL`, Redis reachable. 503 names the failed check. |
-| `GET` | `/metrics` | Prometheus: requests and latency per route, retrieval and generation latency, cache lookups/hits/ratio, abstentions, fallbacks, tokens in/out per request. |
+| POST | `/api/ask` | `{"question": "..."}` (3–500 chars) → answer, citations, `answered_from_context`, confidence, retrieved passages with scores, provider, `cached`. 422 on a bad question. |
+| GET | `/healthz` | Liveness: the process is alive. Touches nothing else. |
+| GET | `/readyz` | Readiness: Chroma reachable, active collection non-empty, its embedding model equal to `EMBED_MODEL`, Redis reachable. 503 names the failed check. |
+| GET | `/metrics` | Prometheus: requests and latency per route, retrieval and generation latency, cache lookups/hits/ratio, abstentions, fallbacks, tokens in/out per request. |
 
 Every response carries `X-Request-ID` (yours, or generated), and every log line for that
 request carries the same id.

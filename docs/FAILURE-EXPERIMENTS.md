@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** executed; results are in `docs/FAILURE-ANALYSIS.md` and `docs/evidence/failures/`. This guide is kept as the plan of record.
+
 > **Required output file:** Implement the material in this *supplementary planning guide* and record the final, evidence-backed results in the instructor-provided `docs/FAILURE-ANALYSIS.md`. That original file is not included in this archive.
 
 # Required four controlled RAG fault experiments

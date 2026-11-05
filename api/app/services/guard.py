@@ -9,7 +9,9 @@ import re
 
 from ..schemas import Answer, Citation, Passage
 
-_MARKER = re.compile(r"\[(\d{1,2})\]")
+_MARKER = re.compile(r"\[([A-Z])\]")            # evidence letters, see prompt.evidence_id
+_CLAUSE = re.compile(r"\d{1,2}(\.\d{1,2}){1,2}")    # '1.2', '4.25', '6.4.1'
+_NUMBER = re.compile(r"\s*\[\d{1,3}\]")          # a bracketed number is never a citation
 
 
 class GuardError(ValueError):
@@ -22,25 +24,35 @@ def _norm(text: str | None) -> str:
 
 def match_passage(citation: Citation, passages: list[Passage]) -> Passage | None:
     """The retrieved passage a citation refers to, or None if it names none of them.
-    A model that shortens the section path ('Withdrawal from a Course' for '4. Registration >
-    Withdrawal from a Course') still points at a real chunk, so a suffix match counts; the
-    citation is then rewritten to the passage's exact labels."""
+
+    The model often gets a label slightly wrong while pointing at a real chunk: a shortened
+    section path ('Withdrawal from a Course'), a clause number instead of the heading
+    ('1.2'), or a page copied from the section number ('6. Rules for Summer Semester',
+    page 6). Each still identifies a passage retrieved for this request, so it is matched
+    and then rewritten to that passage's exact source, section and page. The page decides
+    between passages of the same section; it never makes a real passage unmatchable.
+    A citation naming no retrieved passage at all is rejected."""
     same_source = [p for p in passages if _norm(p.source) == _norm(citation.source)]
     want = _norm(citation.section)
-    hits = [p for p in same_source if want and (_norm(p.section) == want
-                                                or _norm(p.section).endswith(want))]
-    if citation.page is not None:
-        hits = [p for p in hits if p.page == citation.page] or []
-    return hits[0] if hits else None
+    if not want:
+        return None
+    hits = [p for p in same_source if _norm(p.section) == want or _norm(p.section).endswith(want)]
+    if not hits and _CLAUSE.fullmatch(want):        # a clause number found in the passage
+        hits = [p for p in same_source if re.search(rf"(?<![\d.]){re.escape(want)}(?![\d])", p.text)]
+    on_page = [p for p in hits if citation.page is not None and p.page == citation.page]
+    best = on_page or hits
+    return best[0] if best else None
 
 
 def check_answer(answer: Answer, passages: list[Passage]) -> Answer:
     """Return a cleaned copy of `answer`, or raise GuardError."""
-    numbers = [int(n) for n in _MARKER.findall(answer.answer)]
-    bad = [n for n in numbers if not 1 <= n <= len(passages)]
+    letters = _MARKER.findall(answer.answer)
+    bad = [x for x in letters if ord(x) - ord("A") >= len(passages)]
     if bad:
-        raise GuardError(f"evidence marker(s) {bad} do not exist; there are "
-                         f"{len(passages)} passages")
+        raise GuardError(f"evidence marker(s) {bad} do not exist; the evidence ids are "
+                         f"A to {chr(ord('A') + len(passages) - 1)}")
+    numbers = [ord(x) - ord("A") + 1 for x in letters]
+    answer = answer.model_copy(update={"answer": _NUMBER.sub("", answer.answer)})
     if not answer.answered_from_context:
         if numbers:
             raise GuardError("answered_from_context is false but the answer cites evidence "
@@ -60,8 +72,13 @@ def check_answer(answer: Answer, passages: list[Passage]) -> Answer:
     unique = list({p.chunk_id: p for p in cited}.values())
     if not unique:
         raise GuardError("answered_from_context is true but nothing is cited")
-    text = _MARKER.sub(lambda m: f"[{passages[int(m.group(1)) - 1].source} / "
-                                 f"{passages[int(m.group(1)) - 1].section}]", answer.answer)
+    def readable(m: re.Match[str]) -> str:
+        p = passages[ord(m.group(1)) - ord("A")]
+        return f"[{p.source} / {p.section}]"
+
+    text = _MARKER.sub(readable, answer.answer)
+    if not letters:     # 3.4: the answer text itself must show its sources, not only the list
+        text = text.rstrip() + " " + " ".join(f"[{p.source} / {p.section}]" for p in unique)
     return answer.model_copy(update={
         "answer": text,
         "citations": [Citation(source=p.source, section=p.section, page=p.page) for p in unique],

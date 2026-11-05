@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** implemented as `.github/workflows/ci.yml` and `cd.yml`; gate shown red then green in `docs/evidence/gate-demo.txt`. This guide is kept as the plan of record.
+
 # GitHub Actions CI/CD execution and quality gates
 
 **Branches:** `dev` for integration, protected `main` (no direct pushes; require passing CI and one approving reviewer). `ci.yml` on PRs to `main` and pushes to `dev`; jobs `lint`, `test` (≥60% app coverage, stubs/offline), `manifests` (`kustomize build` | `kubeconform -strict`), `build` (API/UI/indexer, no PR push), `scan` (Trivy fixed HIGH/CRITICAL), `e2e-eval` (kind/k3d + real fixture indexing + evaluation quality gate).

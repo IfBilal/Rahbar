@@ -47,3 +47,9 @@ def test_rag_metrics_are_exposed(client: TestClient) -> None:
                  "rahbar_abstentions_total", "rahbar_fallbacks_total",
                  "rahbar_tokens_total", "rahbar_tokens_per_request", "rahbar_request_seconds"):
         assert name in text, name
+
+
+def test_every_response_names_the_running_version(client: TestClient) -> None:
+    r = client.get("/healthz")
+    assert r.json() == {"status": "alive"}                 # the body stays as the starter pins it
+    assert r.headers["X-Rahbar-Version"]

@@ -1,0 +1,8 @@
+q01 run 1:   70.8s answered=True fallback=False expect=True :: An undergraduate needs to have a minimum CGPA of 2.00 to avoid academic warning. [academic-rules-handbook-jun-2026.pdf / 5. Academic Assessment > Academic Warni
+q01 run 2:   14.9s answered=True fallback=False expect=True :: To avoid academic warning, an undergraduate student needs to maintain a minimum Cumulative Grade Point Average (CGPA) of 2.00 [academic-rules-handbook-jun-2026.
+v01 run 1:   78.5s answered=True fallback=False expect=True :: The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules Handbook, Jun 2026.
+v01 run 2:   15.1s answered=True fallback=False expect=True :: The deadline to withdraw from a course is the last day of the makeup week of every semester.[academic-rules-handbook-jun-2026.pdf / 4. Registration > Withdrawal
+e02 run 1:   75.8s answered=True fallback=False expect=True :: The paper rechecking fee per course is Rs. 500, as stated in section 'Miscellaneous Fees' of the fee-structure-page.html [fee-structure-page.html / Miscellaneou
+e02 run 2:   10.8s answered=True fallback=False expect=True :: The paper rechecking fee per course is Rs. 500, as stated in passage B. [fee-structure-page.html / Miscellaneous Fees]
+
+expect found 6/6, fallbacks 0/6, distinct answers per question {'q01': 2, 'v01': 2, 'e02': 2}

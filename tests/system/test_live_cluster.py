@@ -11,7 +11,6 @@ import concurrent.futures
 import json
 import os
 import subprocess
-import time
 import urllib.request
 
 import pytest
@@ -98,7 +97,10 @@ def test_changing_the_embedding_model_on_the_api_only_blocks_readiness() -> None
                        "-o", "jsonpath={.data.EMBED_MODEL}").stdout
     try:
         kubectl("set", "env", "deployment/api", "-n", NS, "EMBED_MODEL=mxbai-embed-large")
-        time.sleep(60)
+        # the rollout must NOT complete: the new pod stays unready (expected timeout)
+        stuck = kubectl("rollout", "status", "deployment/api", "-n", NS, "--timeout=90s",
+                        check=False)
+        assert stuck.returncode != 0
         pods = json.loads(kubectl("get", "pods", "-n", NS, "-l", "app=api", "-o", "json").stdout)
         new = [p for p in pods["items"]
                if any(e.get("value") == "mxbai-embed-large"

@@ -122,6 +122,8 @@ def summarise(rows: list[dict]) -> dict:
             if expect else None,
             "cached": bool(resp.get("cached", False)),
             "seconds": row.get("seconds"),
+            # for the manual generation review of 5.3 (correct? grounded? on-topic?)
+            "answer": (resp.get("answer") or "")[:400],
         })
 
     def recall(key: str, kind: str | None = None) -> float | None:
@@ -204,7 +206,7 @@ def main() -> int:
     if baseline is None:
         print("\nno baseline yet: the recall gate is skipped until one is committed")
 
-    results["golden"] = str(args.golden)
+    results["golden"] = args.golden.name  # no machine-specific absolute path in committed results
     results["questions"] = len(rows)
     args.out.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(f"\nresults written to {args.out}")
