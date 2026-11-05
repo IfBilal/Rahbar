@@ -81,6 +81,14 @@ make ask Q="What is the monthly hostel fee?"             # declines: not in the 
 # or open the chat UI: add "$(minikube ip) rahbar.local" to /etc/hosts, browse http://rahbar.local
 ```
 
+**Bonus: Ollama inside the cluster.** `kubectl apply -k k8s/overlays/incluster`, then
+`kubectl rollout restart deployment/api -n rahbar`. This adds an Ollama Deployment with
+a PVC for the weights; its init container pulls both models once, and its startupProbe
+allows 30 × 10 s for loading. It switches `LLM_PROVIDER` to `ollama-incluster` and points
+the API and the indexer at `http://ollama:11434` through NetworkPolicy. Verified on
+minikube (`docs/evidence/ollama-incluster.txt`). The case study recommends
+`--memory=8192` for this mode.
+
 **Embeddings go through the same host Ollama.** In ollama-host mode both the indexer Job
 and the API call `http://host.minikube.internal:11434` for `nomic-embed-text` embeddings as
 well as `llama3.2:3b` generation; the model is pinned by `EMBED_MODEL` in the ConfigMap.
