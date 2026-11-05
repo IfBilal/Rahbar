@@ -1,0 +1,10 @@
+CD trial of release fix (workflow_dispatch)
+Run: https://github.com/IfBilal/Rahbar/actions/runs/41969926861
+Commit: aec6d5f9006df75863e69387914a76d0508f3fda
+Result: success; test, build-push and deploy completed
+Smoke output (2026-11-05 04:58:18 UTC):
+GET / -> 200, 9154 bytes
+POST /api/ask (covered) -> 200, answered_from_context=True, 1 citations, 5 retrieved
+POST /api/ask (absent) -> 200, answered_from_context=False
+smoke test passed
+This run used the real corpus and Ollama generation. It predates the subsequent smoke-gate and evidence commits; the final main run must also pass.
