@@ -116,10 +116,15 @@ jobs:
       - name: smoke test through the Ingress
         run: |
           python3 scripts/smoke.py --api http://localhost:8080 --host rahbar.local
+      - name: set up Python for optional evaluation
+        if: ${{ inputs.full_eval }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: full real-corpus evaluation (manual dispatch only)
         if: ${{ inputs.full_eval }}
         run: |
-          python3 -m pip install --user httpx==0.28.1 pyyaml==6.0.2
+          python3 -m pip install httpx==0.28.1 pyyaml==6.0.2
           python3 eval/run_eval.py --api http://localhost:8080 --host rahbar.local --out /tmp/rahbar-real-results.json
       - name: preserve real-corpus evaluation results
         if: ${{ inputs.full_eval && always() }}
