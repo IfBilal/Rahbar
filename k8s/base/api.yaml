@@ -8,6 +8,10 @@ metadata:
 spec:
   replicas: 3
   revisionHistoryLimit: 5
+  # On a fresh cluster the pods are correctly unready until the indexer Job publishes
+  # (4.2), which took 405-798 s here and longer on a CI runner. The 600 s default
+  # marked that wait as a failed rollout (cd run 42057168112).
+  progressDeadlineSeconds: 1800
   strategy:
     type: RollingUpdate
     rollingUpdate: {maxSurge: 1, maxUnavailable: 0}     # never below 3 ready pods (4.6)
