@@ -99,7 +99,7 @@ manifests, run on every CI build), and `tests/system/` (live cluster, `make syst
 
 | Requirement | Where | Evidence |
 | --- | --- | --- |
-| `dev` for work, `main` protected (PR, CI, one approval) | branch settings | all work on `dev`, nothing pushed to `main`; **enabling protection needs repo-admin (owner step)** |
+| `dev` for work, `main` protected (PR, CI, one approval) | branch settings | `main` protection enabled on 5 November 2026: PR, one approval and six CI checks required, including administrators; release merged via PR #2 |
 | ci.yml: lint, test (≥ 60%), manifests, build (no push), scan, e2e-eval | `.github/workflows/ci.yml` | Actions run URLs in `docs/evidence/ci-runs.txt` |
 | cd.yml: test → build-push (SHA) → deploy (rollout, Ingress smoke) | `.github/workflows/cd.yml`, `scripts/smoke.py` | successful cd run URL |
 | `needs:` on publishing/deploying jobs | `cd.yml` `build-push: needs: test`, `deploy: needs: build-push` | `scripts/check_submission.py` (I) |
