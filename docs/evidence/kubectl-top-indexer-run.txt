@@ -1,0 +1,640 @@
+# kubectl top pods -n rahbar, sampled every 10 s while the indexer Job ran (2026-11-04T17:56:36Z)
+--- 17:56:36
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-7bdb67757d-4kbz8    api       57m          69Mi            
+api-7bdb67757d-4mkzg    api       62m          69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           13Mi            
+indexer-d5cm4           indexer   1268m        529Mi           
+redis-b8d9d4b69-gx4qj   redis     16m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:56:47
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       96m          74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1247m        910Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:56:57
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       96m          74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1247m        910Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:57:07
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       96m          74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1247m        910Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:57:18
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       96m          74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1247m        910Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:57:28
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       96m          74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1247m        910Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:57:39
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       96m          74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1247m        910Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:57:49
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1210m        549Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:57:59
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1210m        549Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:58:10
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1210m        549Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:58:20
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1210m        549Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:58:30
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1210m        549Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:58:41
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1090m        519Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:58:51
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1090m        519Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:59:02
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1090m        519Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:59:12
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1090m        519Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:59:22
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1090m        519Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:59:33
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1090m        519Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:59:43
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1189m        467Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 17:59:54
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1189m        467Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:00:04
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1189m        467Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:00:14
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1189m        467Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:00:25
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1189m        467Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:00:35
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1189m        467Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:00:46
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           468Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:00:56
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           468Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:01:06
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           468Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:01:17
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           468Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:01:27
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           468Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:01:37
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           468Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:01:48
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           470Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:01:58
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           470Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:02:08
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           470Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:02:19
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           470Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:02:29
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           470Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:02:39
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           470Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:02:50
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           472Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:03:00
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           472Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:03:11
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           472Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:03:21
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           472Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:03:31
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           472Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:03:42
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           473Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          4Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:03:52
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           473Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          4Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:04:02
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           473Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          4Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:04:13
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           473Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          4Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:04:23
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           473Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          4Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:04:33
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           473Mi           
+redis-b8d9d4b69-gx4qj   redis     14m          4Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:04:44
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           474Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:04:54
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           474Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:05:05
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           474Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:05:15
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           474Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:05:25
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           474Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:05:36
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       3m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           474Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:05:46
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           475Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:05:56
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           475Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:06:07
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           475Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:06:17
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           475Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:06:28
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           475Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:06:38
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           475Mi           
+redis-b8d9d4b69-gx4qj   redis     15m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:06:48
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           478Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:06:59
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           478Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:07:09
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           478Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:07:19
+POD                     NAME      CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api       4m           74Mi            
+api-7bdb67757d-4kbz8    api       4m           69Mi            
+api-7bdb67757d-4mkzg    api       4m           69Mi            
+api-c5c85bbdb-mskn6     api       4m           69Mi            
+chroma-0                chroma    2m           17Mi            
+indexer-d5cm4           indexer   1m           478Mi           
+redis-b8d9d4b69-gx4qj   redis     13m          3Mi             
+ui-b84f8ffd9-28qj8      ui        1m           2Mi             
+--- 18:07:30
+POD                     NAME     CPU(cores)   MEMORY(bytes)   
+api-5486488f45-j97fx    api      4m           74Mi            
+api-7bdb67757d-4kbz8    api      4m           69Mi            
+api-7bdb67757d-4mkzg    api      4m           69Mi            
+api-c5c85bbdb-mskn6     api      4m           69Mi            
+chroma-0                chroma   2m           17Mi            
+redis-b8d9d4b69-gx4qj   redis    13m          3Mi             
+ui-b84f8ffd9-28qj8      ui       1m           2Mi             
+job status: 1

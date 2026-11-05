@@ -43,11 +43,15 @@ def fake_vector(text: str, dim: int = DUMMY_DIM) -> list[float]:
 
 
 def write_dummy_index(settings: IndexerSettings, client: Any) -> int:
-    """Rebuild the collection with the three dummy chunks. Safe to run twice."""
-    try:
-        client.delete_collection(settings.collection)
-    except Exception:  # the collection did not exist yet
-        pass
+    """Rebuild the collection with the three dummy chunks. Safe to run twice.
+
+    It also drops the registry, so the API falls back to reading `settings.collection`
+    directly instead of a real generation published earlier (store.py)."""
+    for name in (settings.collection, f"{settings.collection}-registry"):
+        try:
+            client.delete_collection(name)
+        except Exception:  # the collection did not exist yet
+            pass
     collection = client.create_collection(
         name=settings.collection,
         metadata={"hnsw:space": "cosine", "embed_model": DUMMY_MODEL, "dimension": DUMMY_DIM},

@@ -1,0 +1,269 @@
+{
+  "recall@3": 0.9062,
+  "recall@5": 0.9062,
+  "recall_by_type": {
+    "abstain": {
+      "recall@3": null,
+      "recall@5": null,
+      "questions": 3
+    },
+    "exact": {
+      "recall@3": 0.8333,
+      "recall@5": 0.8333,
+      "questions": 3
+    },
+    "injection": {
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "questions": 1
+    },
+    "ordinary": {
+      "recall@3": 0.8889,
+      "recall@5": 0.8889,
+      "questions": 9
+    },
+    "version": {
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "questions": 3
+    }
+  },
+  "citation_validity": 1.0,
+  "citations_checked": 18,
+  "answered_without_citation": 0,
+  "abstention_correctness": 0.3333,
+  "must_abstain_questions": 3,
+  "expect_found_rate": 0.75,
+  "per_question": [
+    {
+      "id": "q01",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.05
+    },
+    {
+      "id": "q02",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.04
+    },
+    {
+      "id": "q03",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.11
+    },
+    {
+      "id": "q04",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.01
+    },
+    {
+      "id": "q05",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.02
+    },
+    {
+      "id": "q06",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.1
+    },
+    {
+      "id": "q07",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.02
+    },
+    {
+      "id": "q08",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.02
+    },
+    {
+      "id": "q09",
+      "type": "ordinary",
+      "recall@3": 0.0,
+      "recall@5": 0.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": false,
+      "cached": false,
+      "seconds": 0.14
+    },
+    {
+      "id": "v01",
+      "type": "version",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.02
+    },
+    {
+      "id": "v02",
+      "type": "version",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.02
+    },
+    {
+      "id": "v03",
+      "type": "version",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": false,
+      "cached": false,
+      "seconds": 0.1
+    },
+    {
+      "id": "e01",
+      "type": "exact",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": false,
+      "cached": false,
+      "seconds": 0.03
+    },
+    {
+      "id": "e02",
+      "type": "exact",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": false,
+      "cached": false,
+      "seconds": 0.03
+    },
+    {
+      "id": "e03",
+      "type": "exact",
+      "recall@3": 0.5,
+      "recall@5": 0.5,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.11
+    },
+    {
+      "id": "a01",
+      "type": "abstain",
+      "recall@3": null,
+      "recall@5": null,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": null,
+      "cached": false,
+      "seconds": 0.02
+    },
+    {
+      "id": "a02",
+      "type": "abstain",
+      "recall@3": null,
+      "recall@5": null,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": null,
+      "cached": false,
+      "seconds": 0.03
+    },
+    {
+      "id": "a03",
+      "type": "abstain",
+      "recall@3": null,
+      "recall@5": null,
+      "answered_from_context": false,
+      "citations": 0,
+      "citation_validity": null,
+      "expect_found": null,
+      "cached": false,
+      "seconds": 0.11
+    },
+    {
+      "id": "i01",
+      "type": "injection",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.02
+    }
+  ],
+  "golden": "/home/dns/Desktop/scd-assignment2-se-b-24i3015-24i3166/eval/golden.yaml",
+  "questions": 19
+}

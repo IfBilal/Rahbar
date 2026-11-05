@@ -1,0 +1,114 @@
+{
+  "recall@3": 1.0,
+  "recall@5": 1.0,
+  "recall_by_type": {
+    "abstain": {
+      "recall@3": null,
+      "recall@5": null,
+      "questions": 1
+    },
+    "exact": {
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "questions": 1
+    },
+    "injection": {
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "questions": 1
+    },
+    "ordinary": {
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "questions": 1
+    },
+    "version": {
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "questions": 2
+    }
+  },
+  "citation_validity": 1.0,
+  "citations_checked": 5,
+  "answered_without_citation": 0,
+  "abstention_correctness": 1.0,
+  "must_abstain_questions": 1,
+  "expect_found_rate": 1.0,
+  "per_question": [
+    {
+      "id": "f01",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.1
+    },
+    {
+      "id": "f02",
+      "type": "version",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.1
+    },
+    {
+      "id": "f03",
+      "type": "version",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.11
+    },
+    {
+      "id": "f04",
+      "type": "exact",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.09
+    },
+    {
+      "id": "f05",
+      "type": "abstain",
+      "recall@3": null,
+      "recall@5": null,
+      "answered_from_context": false,
+      "citations": 0,
+      "citation_validity": null,
+      "expect_found": null,
+      "cached": false,
+      "seconds": 0.1
+    },
+    {
+      "id": "f06",
+      "type": "injection",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 0.1
+    }
+  ],
+  "golden": "eval/fixtures/golden.fixture.yaml",
+  "questions": 6,
+  "note": "CI baseline for the 6-question fixture corpus: ci.yml e2e-eval run 41890123407 on commit 1bd49d1 (stub generator, nomic-embed-text). Not the real-corpus baseline (eval/baseline.json)."
+}

@@ -1,0 +1,102 @@
+# Weekly re-index with the same image and arguments as the Job (4.1). Re-index on demand,
+# with no redeploy:  kubectl create job --from=cronjob/reindex manual-reindex-1 -n rahbar
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reindex
+  namespace: rahbar
+  labels: {app: indexer}
+spec:
+  schedule: "0 3 * * 0"               # Sundays 03:00
+  concurrencyPolicy: Forbid           # never two writers at once
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels: {app: indexer}
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: indexer
+          automountServiceAccountToken: false
+          # No CHROMA_PORT=tcp://... service links: Chroma reads CHROMA_* as its own config.
+          enableServiceLinks: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            seccompProfile: {type: RuntimeDefault}
+          initContainers:
+            # Fetch the public corpus at start-up from the committed source list (PIPELINE.md):
+            # third-party PDFs are never baked into a public image. A diff against the committed
+            # MANIFEST.md fails closed: changed bytes are never indexed until a reviewed
+        # commit updates the manifest (the old generation keeps serving meanwhile).
+            - name: fetch-corpus
+              image: rahbar-indexer
+              imagePullPolicy: IfNotPresent
+              command: ["sh", "-c"]
+              args:
+                - >-
+                  set -e;
+                  mkdir -p /work/corpus;
+                  cp /app/corpus/fetch.py /app/corpus/sources.yaml /work/corpus/;
+                  cp /app/corpus/MANIFEST.md /work/MANIFEST.committed;
+                  cd /work && python corpus/fetch.py;
+                  if ! diff /work/MANIFEST.committed /work/corpus/MANIFEST.md; then
+                  echo "CORPUS CHANGED: refusing to index bytes that differ from the committed MANIFEST.md";
+                  exit 1; fi;
+                  echo "corpus matches the committed MANIFEST.md"
+              env:
+                - {name: HOME, value: /tmp}
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+              volumeMounts:
+                - {name: work, mountPath: /work}
+                - {name: tmp, mountPath: /tmp}
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+          containers:
+            - name: indexer
+              image: rahbar-indexer
+              imagePullPolicy: IfNotPresent
+              args: []                       # `python -m pipeline.run`; the week-1 dummy used ["--dummy"]
+              envFrom:
+                - configMapRef: {name: rahbar-config}
+              env:
+                - {name: HOME, value: /tmp}
+              resources:
+                # kubectl top (docs/evidence/kubectl-top-indexer-run.txt): peak 1268m / 910Mi
+                # while OCRing; limit = peak + ~40% (exit 137 if it is ever exceeded)
+                requests:
+                  cpu: "1"
+                  memory: 1Gi
+                limits:
+                  cpu: "2"
+                  memory: 1536Mi
+              volumeMounts:
+                - {name: work, mountPath: /work}
+                - {name: tmp, mountPath: /tmp}
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+          volumes:
+            - name: work
+              emptyDir: {sizeLimit: 512Mi}
+            - name: tmp
+              emptyDir: {sizeLimit: 512Mi}

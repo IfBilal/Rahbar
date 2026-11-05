@@ -8,7 +8,7 @@
 Exit code 0 when every gate passes, 1 when any fails. CI relies on that exit code.
 
 Given: talking to the API, reading the golden set, writing results.json, the exit
-code. Yours: the four functions marked STARTER-TODO. They are the evaluation.
+code. Ours: recall_at_k, citation_validity, summarise and gate (docs/PIPELINE.md).
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ import argparse
 import json
 import sys
 import time
+import unicodedata
 from pathlib import Path
 
 import httpx
@@ -45,31 +46,130 @@ def ask(client: httpx.Client, api: str, question: str) -> dict:
     return response.json()
 
 
+def _norm(text: str | None) -> str:
+    """Compare labels the way a reader would: case, curly quotes and spacing ignored."""
+    text = unicodedata.normalize("NFKC", text or "").replace("\u2019", "'").replace("\u2018", "'")
+    return " ".join(text.lower().split())
+
+
+def _matches(gold: dict, ref: dict) -> bool:
+    """A retrieved passage matches a golden (source, section) pair when the source is the
+    same file and the passage's section label contains the golden section. The chunker
+    labels sections with their heading path, so 'Academic Warning/Probation' matches
+    '5. Academic Assessment > Academic Warning/Probation'."""
+    return (_norm(gold.get("source")) == _norm(ref.get("source"))
+            and _norm(gold.get("section")) in _norm(ref.get("section")))
+
+
 def recall_at_k(relevant: list[dict], retrieved: list[dict], k: int) -> float | None:
     """Fraction of the relevant (source, section) pairs found in the top k retrieved.
     Return None when the question has no relevant passages (must-abstain questions)."""
-    # STARTER-TODO(5.2): implement. Decide how you match sections and say so in PIPELINE.md.
-    raise NotImplementedError("recall_at_k: see STARTER-TODO(5.2)")
+    if not relevant:
+        return None
+    top = retrieved[:k]
+    found = sum(1 for gold in relevant if any(_matches(gold, ref) for ref in top))
+    return found / len(relevant)
+
+
+def _cites(citation: dict, ref: dict) -> bool:
+    same = (_norm(citation.get("source")) == _norm(ref.get("source"))
+            and _norm(citation.get("section")) == _norm(ref.get("section")))
+    return same and (citation.get("page") is None or citation.get("page") == ref.get("page"))
 
 
 def citation_validity(response: dict) -> float | None:
     """Fraction of the response's citations that match a passage in response['retrieved'].
     Return None when there are no citations."""
-    # STARTER-TODO(5.3): implement.
-    raise NotImplementedError("citation_validity: see STARTER-TODO(5.3)")
+    citations = response.get("citations") or []
+    if not citations:
+        return None
+    retrieved = response.get("retrieved") or []
+    valid = sum(1 for c in citations if any(_cites(c, ref) for ref in retrieved))
+    return valid / len(citations)
+
+
+def _mean(values: list[float]) -> float | None:
+    return round(sum(values) / len(values), 4) if values else None
 
 
 def summarise(rows: list[dict]) -> dict:
     """Overall recall@3, recall@5, citation validity and abstention correctness, plus
     recall@5 broken down by question type. This dict becomes results.json."""
-    # STARTER-TODO(5.2, 5.3): implement.
-    raise NotImplementedError("summarise: see STARTER-TODO(5.2, 5.3)")
+    per_question = []
+    cited = valid = uncited_answers = 0
+    abstain_total = abstain_ok = 0
+    for row in rows:
+        resp = row["response"]
+        retrieved = resp.get("retrieved") or []
+        answered = bool(resp.get("answered_from_context"))
+        citations = resp.get("citations") or []
+        cv = citation_validity(resp)
+        cited += len(citations)
+        valid += round((cv or 0) * len(citations))
+        if answered and not citations:
+            uncited_answers += 1            # a grounded claim with no citation counts as invalid
+        if row["must_abstain"]:
+            abstain_total += 1
+            abstain_ok += not answered
+        expect = row.get("expect")
+        per_question.append({
+            "id": row["id"], "type": row["type"],
+            "recall@3": recall_at_k(row["relevant"], retrieved, 3),
+            "recall@5": recall_at_k(row["relevant"], retrieved, 5),
+            "answered_from_context": answered,
+            "citations": len(citations), "citation_validity": cv,
+            "expect_found": (expect.lower() in (resp.get("answer") or "").lower())
+            if expect else None,
+            "cached": bool(resp.get("cached", False)),
+            "seconds": row.get("seconds"),
+            # for the manual generation review of 5.3 (correct? grounded? on-topic?)
+            "answer": (resp.get("answer") or "")[:400],
+        })
+
+    def recall(key: str, kind: str | None = None) -> float | None:
+        return _mean([q[key] for q in per_question
+                      if q[key] is not None and (kind is None or q["type"] == kind)])
+
+    kinds = sorted({q["type"] for q in per_question})
+    denominator = cited + uncited_answers
+    expects = [q["expect_found"] for q in per_question if q["expect_found"] is not None]
+    return {
+        "recall@3": recall("recall@3"),
+        "recall@5": recall("recall@5"),
+        "recall_by_type": {k: {"recall@3": recall("recall@3", k), "recall@5": recall("recall@5", k),
+                               "questions": sum(q["type"] == k for q in per_question)}
+                           for k in kinds},
+        "citation_validity": round(valid / denominator, 4) if denominator else None,
+        "citations_checked": cited,
+        "answered_without_citation": uncited_answers,
+        "abstention_correctness": round(abstain_ok / abstain_total, 4) if abstain_total else None,
+        "must_abstain_questions": abstain_total,
+        "expect_found_rate": _mean([float(x) for x in expects]),
+        "per_question": per_question,
+    }
 
 
 def gate(results: dict, baseline: dict | None) -> list[str]:
     """Return one message per failed gate (section 5.4); an empty list means pass."""
-    # STARTER-TODO(5.4): implement, using the three constants at the top of this file.
-    raise NotImplementedError("gate: see STARTER-TODO(5.4)")
+    failures = []
+    current = results.get("recall@5")
+    if current is None:
+        failures.append("recall@5 could not be computed: no answerable golden questions")
+    elif baseline and baseline.get("recall@5") is not None:
+        floor = baseline["recall@5"] - MAX_RECALL5_DROP
+        if current < floor - 1e-9:
+            failures.append(f"recall@5 {current:.3f} fell more than {MAX_RECALL5_DROP:.0%} "
+                            f"below the baseline {baseline['recall@5']:.3f}")
+    abstention = results.get("abstention_correctness")
+    if abstention is not None and abstention < REQUIRED_ABSTENTION:
+        wrong = [q["id"] for q in results.get("per_question", [])
+                 if q["type"] == "abstain" and q["answered_from_context"]]
+        failures.append(f"abstention correctness {abstention:.0%}: must-abstain questions "
+                        f"answered from context: {', '.join(wrong) or '?'}")
+    validity = results.get("citation_validity")
+    if validity is not None and validity < MIN_CITATION_VALIDITY:
+        failures.append(f"citation validity {validity:.1%} is below {MIN_CITATION_VALIDITY:.0%}")
+    return failures
 
 
 def main() -> int:
@@ -86,7 +186,7 @@ def main() -> int:
     questions = load_golden(args.golden)
     rows = []
     headers = {"Host": args.host} if args.host else {}
-    with httpx.Client(timeout=120.0, headers=headers) as client:
+    with httpx.Client(timeout=300.0, headers=headers) as client:   # CPU-only generation is slow
         for q in questions:
             started = time.perf_counter()
             response = ask(client, args.api, q["question"])
@@ -100,18 +200,21 @@ def main() -> int:
             })
             print(f"  {q['id']:<5} {rows[-1]['seconds']:>6.2f}s  {q['question'][:60]}")
 
-    try:
-        results = summarise(rows)
-        baseline = json.loads(args.baseline.read_text()) if args.baseline.exists() else None
-        failures = gate(results, baseline)
-    except NotImplementedError as exc:
-        print(f"\nnot implemented yet: {exc}")
-        return 2
+    results = summarise(rows)
+    baseline = json.loads(args.baseline.read_text()) if args.baseline.exists() else None
+    failures = gate(results, baseline)
+    if baseline is None:
+        print("\nno baseline yet: the recall gate is skipped until one is committed")
 
     results["golden"] = str(args.golden)
     results["questions"] = len(rows)
     args.out.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(f"\nresults written to {args.out}")
+    print(f"  recall@3 {results['recall@3']}  recall@5 {results['recall@5']}  "
+          f"citation validity {results['citation_validity']}  "
+          f"abstention {results['abstention_correctness']}")
+    for kind, values in results["recall_by_type"].items():
+        print(f"  {kind:<10} recall@3 {values['recall@3']}  recall@5 {values['recall@5']}")
     if args.update_baseline:
         args.baseline.write_text(json.dumps(results, indent=2), encoding="utf-8")
         print(f"baseline updated: {args.baseline}")

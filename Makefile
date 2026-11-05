@@ -13,7 +13,7 @@ INGRESS_IP ?= $(shell minikube ip 2>/dev/null)
 HOST ?= rahbar.local
 
 .DEFAULT_GOAL := help
-.PHONY: help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check
+.PHONY: help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check manifests ollama-host system-test
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -23,12 +23,14 @@ install: ## create .venv and install the api, indexer and tool dependencies
 	$(BIN)/pip install -q --upgrade pip
 	$(BIN)/pip install -q -r api/requirements-dev.txt -r indexer/requirements-dev.txt
 
-test: ## run the api and indexer tests (stubs only: no cluster, no model, no network)
-	cd api && $(BIN)/pytest -q
-	cd indexer && $(BIN)/pytest -q
+test: ## all unit, design and manifest tests (stubs only: no cluster, no model, no network)
+	cd api && $(BIN)/pytest -q --cov=app --cov-report=term --cov-fail-under=60
+	cd indexer && $(BIN)/pytest -q --cov=pipeline --cov-report=term --cov-fail-under=60
+	cd eval && $(BIN)/pytest -q tests
+	$(BIN)/pytest -q tests --ignore=tests/system
 
 lint: ## ruff and mypy over everything in Python
-	$(BIN)/ruff check api indexer eval corpus
+	$(BIN)/ruff check api indexer eval corpus tests
 	cd api && $(BIN)/mypy app
 	cd indexer && $(BIN)/mypy pipeline
 
@@ -42,7 +44,7 @@ cluster: ## start minikube with Calico, then enable metrics-server and ingress
 
 images: ## build the three images and load them into minikube (needs yours: Dockerfiles)
 	docker build -t rahbar-api:$(TAG) api
-	docker build -t rahbar-indexer:$(TAG) indexer
+	docker build -t rahbar-indexer:$(TAG) -f indexer/Dockerfile .
 	docker build -t rahbar-ui:$(TAG) ui
 	minikube image load rahbar-api:$(TAG)
 	minikube image load rahbar-indexer:$(TAG)
@@ -76,3 +78,14 @@ eval-fixtures: ## score the CI fixture golden set against a local `make dev`
 
 check: ## run the submission checker
 	$(PY) scripts/check_submission.py
+
+manifests: ## render both overlays and validate them strictly (what CI runs)
+	kustomize build k8s/overlays/dev | kubeconform -strict -summary
+	kustomize build k8s/overlays/prod | kubeconform -strict -summary
+	kustomize build k8s/overlays/incluster | kubeconform -strict -summary
+
+ollama-host: ## serve Ollama on the minikube gateway so pods reach host.minikube.internal:11434
+	OLLAMA_HOST=$$(minikube ssh "grep host.minikube.internal /etc/hosts" | awk '{print $$1}' | tr -d '\r'):11434 ollama serve
+
+system-test: ## live cluster checks against a running stack: ingress, abstention, policy, pin
+	RAHBAR_SYSTEM=1 INGRESS_IP=$(INGRESS_IP) $(BIN)/pytest -q tests/system -rA

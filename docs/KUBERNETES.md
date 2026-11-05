@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** every object implemented under `k8s/base`; asserted by `tests/test_manifests.py` on four overlays. This guide is kept as the plan of record.
+
 # Kubernetes deployment object contracts and cluster behavior
 
 **Required namespace:** `rahbar`, never `default`. Required workload topology: API Deployment **3** replicas, UI Deployment ≥1, Chroma StatefulSet with `volumeClaimTemplates`, Redis Deployment and PVC, one-shot indexer Job, weekly reindex CronJob, four internal Services, same-host `/` and `/api` Ingress, shared ConfigMap, Secret placeholder/runtime Secret, default-deny NetworkPolicy, API HPA min 3 / max 8. Each container needs resource requests and limits; API needs startup/liveness/readiness probes and rollout `maxUnavailable:0`, `maxSurge:1`.

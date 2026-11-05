@@ -1,0 +1,269 @@
+{
+  "recall@3": 0.9062,
+  "recall@5": 0.9062,
+  "recall_by_type": {
+    "abstain": {
+      "recall@3": null,
+      "recall@5": null,
+      "questions": 3
+    },
+    "exact": {
+      "recall@3": 0.8333,
+      "recall@5": 0.8333,
+      "questions": 3
+    },
+    "injection": {
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "questions": 1
+    },
+    "ordinary": {
+      "recall@3": 0.8889,
+      "recall@5": 0.8889,
+      "questions": 9
+    },
+    "version": {
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "questions": 3
+    }
+  },
+  "citation_validity": 1.0,
+  "citations_checked": 18,
+  "answered_without_citation": 0,
+  "abstention_correctness": 1.0,
+  "must_abstain_questions": 3,
+  "expect_found_rate": 0.8125,
+  "per_question": [
+    {
+      "id": "q01",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 2,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 97.58
+    },
+    {
+      "id": "q02",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 82.18
+    },
+    {
+      "id": "q03",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": false,
+      "citations": 0,
+      "citation_validity": null,
+      "expect_found": false,
+      "cached": false,
+      "seconds": 145.79
+    },
+    {
+      "id": "q04",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 86.9
+    },
+    {
+      "id": "q05",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 80.4
+    },
+    {
+      "id": "q06",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 2,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 140.34
+    },
+    {
+      "id": "q07",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 109.24
+    },
+    {
+      "id": "q08",
+      "type": "ordinary",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 2,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 99.24
+    },
+    {
+      "id": "q09",
+      "type": "ordinary",
+      "recall@3": 0.0,
+      "recall@5": 0.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": false,
+      "cached": false,
+      "seconds": 146.42
+    },
+    {
+      "id": "v01",
+      "type": "version",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 82.32
+    },
+    {
+      "id": "v02",
+      "type": "version",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 74.14
+    },
+    {
+      "id": "v03",
+      "type": "version",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 97.71
+    },
+    {
+      "id": "e01",
+      "type": "exact",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": false,
+      "citations": 0,
+      "citation_validity": null,
+      "expect_found": false,
+      "cached": false,
+      "seconds": 67.12
+    },
+    {
+      "id": "e02",
+      "type": "exact",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 72.58
+    },
+    {
+      "id": "e03",
+      "type": "exact",
+      "recall@3": 0.5,
+      "recall@5": 0.5,
+      "answered_from_context": true,
+      "citations": 2,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 62.57
+    },
+    {
+      "id": "a01",
+      "type": "abstain",
+      "recall@3": null,
+      "recall@5": null,
+      "answered_from_context": false,
+      "citations": 0,
+      "citation_validity": null,
+      "expect_found": null,
+      "cached": false,
+      "seconds": 50.5
+    },
+    {
+      "id": "a02",
+      "type": "abstain",
+      "recall@3": null,
+      "recall@5": null,
+      "answered_from_context": false,
+      "citations": 0,
+      "citation_validity": null,
+      "expect_found": null,
+      "cached": false,
+      "seconds": 88.34
+    },
+    {
+      "id": "a03",
+      "type": "abstain",
+      "recall@3": null,
+      "recall@5": null,
+      "answered_from_context": false,
+      "citations": 0,
+      "citation_validity": null,
+      "expect_found": null,
+      "cached": false,
+      "seconds": 0.09
+    },
+    {
+      "id": "i01",
+      "type": "injection",
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "expect_found": true,
+      "cached": false,
+      "seconds": 81.9
+    }
+  ],
+  "golden": "/home/dns/Desktop/scd-assignment2-se-b-24i3015-24i3166/eval/golden.yaml",
+  "questions": 19
+}

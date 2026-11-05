@@ -1,0 +1,38 @@
+# Corpus checks, 2026-11-04T18:39:05Z. pdfinfo/pdffonts from poppler-utils; text chars = non-space characters in the PDF text layer (pdftotext).
+
+file                                                            pages  fonts    textchars
+academic-rules-handbook-jun-2026.pdf                               58    136        53084
+annual-report-2019-20.pdf                                          33      7        42074
+annual-report-2023-24.pdf                                          85     15       168437
+faculty-entrepreneurship-and-technical-start-ups-policy.pdf         8      0            0
+prospectus-2026-academic-rules-and-regulations.pdf                  5      8        17482
+student-handbook-jun-2026.pdf                                      64    192        62180
+undergraduate-academic-rules-aug-2023.pdf                          26      3          191
+fee-structure-page.html                                          html      -         7629
+grading-page.html                                                html      -         8376
+
+$ pdffonts faculty-entrepreneurship-and-technical-start-ups-policy.pdf
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+(no rows under the header: no fonts, so no text layer: an image-only scan)
+
+$ pdffonts undergraduate-academic-rules-aug-2023.pdf
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+ACSMTO+Calibri-Bold                  CID Type 0C       Identity-H       yes yes yes     13  0
+BTDGSO+LEMONMILK-Regular             CID Type 0C       Identity-H       yes yes yes     20  0
+UVDMBE+Calibri                       CID Type 0C       Identity-H       yes yes yes    201  0
+(3 fonts but only 191 text characters across 26 pages: the page bodies are images)
+
+$ python corpus/fetch.py --verify
+  ok        undergraduate-academic-rules-aug-2023.pdf
+  ok        academic-rules-handbook-jun-2026.pdf
+  ok        prospectus-2026-academic-rules-and-regulations.pdf
+  ok        student-handbook-jun-2026.pdf
+  ok        annual-report-2019-20.pdf
+  ok        annual-report-2023-24.pdf
+  ok        fee-structure-page.html
+  ok        grading-page.html
+  ok        faculty-entrepreneurship-and-technical-start-ups-policy.pdf
+
+9 of 9 match the manifest

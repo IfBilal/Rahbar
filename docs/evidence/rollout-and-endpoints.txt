@@ -1,0 +1,77 @@
+# 4.6 rollout and rollback, zero-downtime check, endpoints (2026-11-04T22:19:50Z)
+
+$ kubectl get deployment api -n rahbar -o jsonpath={.spec.template.spec.containers[0].image}{"\n"}
+rahbar-api:dev
+version answering now: 422 dev
+
+$ kubectl set image deployment/api -n rahbar api=rahbar-api:v2
+deployment.apps/api image updated
+requests during the rollout: 8, failed (anything but the expected 422): 0, versions seen: dev v2
+
+$ kubectl rollout status deployment/api -n rahbar
+deployment "api" successfully rolled out
+version answering now: 422 v2
+
+$ kubectl rollout history deployment/api -n rahbar
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+33        <none>
+34        <none>
+35        <none>
+36        <none>
+37        <none>
+38        <none>
+
+
+$ kubectl rollout undo deployment/api -n rahbar
+Warning: resource deployments/api was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/api rolled back
+requests during the rollout: 8, failed (anything but the expected 422): 0, versions seen: v2 dev
+
+$ kubectl rollout status deployment/api -n rahbar
+deployment "api" successfully rolled out
+version answering now: 422 dev
+
+$ kubectl get deployment api -n rahbar -o jsonpath={.spec.template.spec.containers[0].image}{"\n"}
+rahbar-api:dev
+
+## scale to 4: the Service finds the new pod by its label, untouched
+
+$ kubectl scale deployment api -n rahbar --replicas=4
+deployment.apps/api scaled
+
+$ kubectl rollout status deployment/api -n rahbar --timeout=300s
+Waiting for deployment "api" rollout to finish: 3 of 4 updated replicas are available...
+Waiting for deployment "api" rollout to finish: 3 of 4 updated replicas are available...
+deployment "api" successfully rolled out
+
+$ kubectl get endpoints api -n rahbar -o wide
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME   ENDPOINTS                                                              AGE
+api    10.244.120.72:8000,10.244.120.74:8000,10.244.120.76:8000 + 1 more...   4h28m
+
+$ kubectl get pods -n rahbar -l app=api -o wide
+NAME                   READY   STATUS        RESTARTS   AGE   IP              NODE       NOMINATED NODE   READINESS GATES
+api-5898bf4d94-gzm4p   1/1     Running       0          15s   10.244.120.76   minikube   <none>           <none>
+api-5898bf4d94-mx2b7   1/1     Running       0          19s   10.244.120.72   minikube   <none>           <none>
+api-5898bf4d94-wtmvk   1/1     Running       0          6s    10.244.120.74   minikube   <none>           <none>
+api-5898bf4d94-wx72g   1/1     Running       0          10s   10.244.120.81   minikube   <none>           <none>
+api-6b5cb7fcdf-257np   1/1     Terminating   0          33s   10.244.120.73   minikube   <none>           <none>
+api-6b5cb7fcdf-rgzxk   1/1     Terminating   0          29s   10.244.120.68   minikube   <none>           <none>
+
+$ kubectl scale deployment api -n rahbar --replicas=3
+deployment.apps/api scaled
+
+$ kubectl get hpa api -n rahbar
+NAME   REFERENCE        TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+api    Deployment/api   cpu: <unknown>/70%   3         8         3          4h28m
+
+## all endpoint IPs while scaled to 4 (kubectl get endpoints abbreviates after three)
+$ kubectl get endpoints api -n rahbar -o jsonpath='{.subsets[*].addresses[*].ip}'
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+10.244.120.71 10.244.120.72 10.244.120.76 10.244.120.81
+
+## back to 3 (HPA minReplicas 3)
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME   ENDPOINTS                                                  AGE
+api    10.244.120.72:8000,10.244.120.76:8000,10.244.120.81:8000   4h28m

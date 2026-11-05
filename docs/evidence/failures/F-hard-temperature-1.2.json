@@ -1,0 +1,82 @@
+[
+  {
+    "id": "a01",
+    "run": 1,
+    "seconds": 43.1,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The documents do not cover this question. There is no mention of a monthly hostel fee or the process of applying for a hostel room in the provided evidence passages."
+  },
+  {
+    "id": "a01",
+    "run": 2,
+    "seconds": 8.8,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "There is no information about a monthly hostel fee in the provided evidence passages. The evidence does not cover how to apply for a hostel room either. The documents do not cover this question."
+  },
+  {
+    "id": "a02",
+    "run": 1,
+    "seconds": 81.0,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The documents do not cover this question."
+  },
+  {
+    "id": "a02",
+    "run": 2,
+    "seconds": 6.4,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The hostel curfew timings for female students are not mentioned in the evidence passages provided."
+  },
+  {
+    "id": "q09",
+    "run": 1,
+    "seconds": 132.9,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "Although the exact number of faculty members is not specified in the evidence, Passage A mentions that the faculty is highly qualified and dedicated to academic excellence. The faculty members are accomplished researchers, contributors, and developers in their respective fields, which suggests that there are many faculty members at the Islamabad campus."
+  },
+  {
+    "id": "q09",
+    "run": 2,
+    "seconds": 15.2,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "According to the 2023-24 annual report, the Islamabad campus had a certain number of faculty members. Unfortunately, the evidence does not provide this information directly."
+  },
+  {
+    "id": "e01",
+    "run": 1,
+    "seconds": 66.9,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The documents do not cover this question."
+  },
+  {
+    "id": "e01",
+    "run": 2,
+    "seconds": 6.8,
+    "answered_from_context": false,
+    "fallback": false,
+    "expect_found": false,
+    "citations_valid": true,
+    "answer": "The documents do not cover this question."
+  }
+]

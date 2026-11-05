@@ -1,0 +1,108 @@
+
+######## Table: Faculty Summary 2023-24: annual-report-2023-24.pdf, page 13
+---- BEFORE: pdfplumber page.extract_text(), no table handling, no page-box filter
+Chapter-2 Faculty and Staff
+Faculty Summary
+Campuses Prof. Assoc. Asst. Profs. Asst. Profs. Lect. Instr. Lab Total
+Profs. Engrs.
+(PhD) (non-PhD)
+Chiniot-Faisalabad 2 4 17 8 58 12 2 103
+Islamabad 19 14 46 16 83 50 8 236
+Karachi 4 6 23 10 84 26 4 157
+Lahore 16 11 29 21 82 19 10 188
+Peshawar 1 2 13 3 18 8 6 51
+Total 42 37 128 58 325 115 30 735
+Chiniot-Faisalabad Campus
+Professor Associate Assistant Lecturer
+Department Professor Professor
+Male Female Male Female Male Female Male Female
+Artificial Intelligence and Data Science - - - - 2 - 3 1
+---- AFTER: indexer/pipeline/extract.py::page_text
+Chapter-2 Faculty and Staff
+
+Faculty Summary
+
+Campuses | Prof. | Assoc. Profs. | Asst. Profs. | Asst. Profs. | Lect. | Instr. | Lab Engrs. | Total
+(PhD) | (non-PhD)
+Chiniot-Faisalabad | 2 | 4 | 17 | 8 | 58 | 12 | 2 | 103
+Islamabad | 19 | 14 | 46 | 16 | 83 | 50 | 8 | 236
+Karachi | 4 | 6 | 23 | 10 | 84 | 26 | 4 | 157
+Lahore | 16 | 11 | 29 | 21 | 82 | 19 | 10 | 188
+Peshawar | 1 | 2 | 13 | 3 | 18 | 8 | 6 | 51
+Total | 42 | 37 | 128 | 58 | 325 | 115 | 30 | 735
+
+Chiniot-Faisalabad Campus
+
+Professor Associate Assistant Lecturer
+
+######## Spread imposition: neighbour page text at negative x: academic-rules-handbook-jun-2026.pdf, page 13
+---- BEFORE: pdfplumber page.extract_text(), no table handling, no page-box filter
+NATIONAL UNIVERSITY OF COMPUTER AND EMERGING SCIENCES
+Grade Points only the most recent grade points are used, even if they are
+less than the earlier attempts.
+2.3 The points for each letter grade are given as follows:
+2.8 “W” will be awarded for withdrawn courses. It will appear on the
+Grade Points Grade Points transcript. However, it will not affect the CGPA.
+A+ 4.00 C+ 2.33 2.9 “I” is a temporary grade given for incomplete work. If it is not
+changed to an earned grade, it shall automatically convert to
+A 4.00 C 2.00 F grade after a fixed time set by the competent authority.
+A- 3.67 C- 1.67 2.10 F/A grade in the transcript implies that the student fails to
+appear in the final examination.
+B+ 3.33 D+ 1.33
+2.11 For PhD. thesis 1-IV, a student will be assigned either
+B 3.00 D 1.00
+“Satisfactory” (S) or Unsatisfactory (U) grade.
+B- 2.67 F 0.00
+---- AFTER: indexer/pipeline/extract.py::page_text
+NATIONAL UNIVERSITY OF COMPUTER AND EMERGING SCIENCES
+
+only the most recent grade points are used, even if they are
+less than the earlier attempts.
+
+2.8 “W” will be awarded for withdrawn courses. It will appear on the
+transcript. However, it will not affect the CGPA.
+
+2.9 “I” is a temporary grade given for incomplete work. If it is not
+changed to an earned grade, it shall automatically convert to
+F grade after a fixed time set by the competent authority.
+
+2.10 F/A grade in the transcript implies that the student fails to
+appear in the final examination.
+
+2.11 For PhD. thesis 1-IV, a student will be assigned either
+
+######## Three-column page: prospectus-2026-academic-rules-and-regulations.pdf, page 1
+---- BEFORE: pdfplumber page.extract_text(), no table handling, no page-box filter
+FAST-NUCES
+Academic Rules and Regulations
+Letter grades for MS & MBA pr ograms:
+1. Attendance Requirement 4. Semester Course Load
+Gr ade Po ints Grade Points
+Students are required to maintain Each course is assigned credit
+A+ 4.00 B- 2.67
+100% attendance in lectures, labs, hours. For theory courses 1 credit
+tutorials, seminars, and hour means 1 hour of lecturing A 4.00 C+ 2.33
+discussions as prescribed by the per week, while for lab courses 1 A- 3.67 C 2.00
+course instructor. Absence of a credit hour means 3 hours of lab- B+ 3.33 F 1.00
+maximum of 20% of the total work per week. For example, a 3+1 B 3.00
+lectures may be condoned for credit hour course carries 3 hours
+Letter grades for PhD programs:
+genuine reasons, such as illness. of lectures and 3 hours of lab-
+Failure to meet attendance work per week. Normal course A+ 4.00 B 3.00
+---- AFTER: indexer/pipeline/extract.py::page_text
+FAST-NUCES
+
+1. Attendance Requirement 4
+Students are required to maintain
+100% attendance in lectures, labs,
+tutorials, seminars, and
+discussions as prescribed by the
+course instructor. Absence of a
+maximum of 20% of the total
+lectures may be condoned for
+genuine reasons, such as illness.
+Failure to meet attendance
+requirements will render a
+student ineligible to appear in
+the final examination of the
+concerned course. Minimum 5

@@ -1,0 +1,17 @@
+# CPU-based scaling, 3..8 (4.1). Utilisation = usage / requests.cpu, so the api container
+# must have a CPU request or this reads <unknown>. ENGINEERING-NOTES.md question 3 explains
+# why CPU is a weak signal for a generation service.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api
+  namespace: rahbar
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: api}
+  minReplicas: 3
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: {type: Utilization, averageUtilization: 70}

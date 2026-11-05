@@ -1,5 +1,10 @@
 # Product requirements, traceability and acceptance
 
+> **Status, 5 November 2026:** implemented and measured. The R01–R30 statuses below are
+> final; every VERIFIED row names its evidence. The full requirement → code → test →
+> evidence map is `docs/TRACEABILITY.md`.
+
+
 **Authority:** Assignment 02 sections 1–8 and the inspected starter contracts. This file combines the original product brief, requirement traceability, acceptance, and quality attributes. Treat acceptance as a testable obligation rather than a claim of delivery. If the PDF and this plan differ, follow the PDF.
 
 **Agent task:** for any feature, identify the relevant `FR-xx`/`Rxx` and work breakdown `Txx`, add a unit/integration test, and attach output before changing its status to verified. Required quality numbers must be measured, not invented.
@@ -80,36 +85,36 @@ This is a work-tracking map, **not a pass certificate**. R01–R30 map the instr
 
 | ID | Required behavior | Owner | Source / planned artifact | Proof to capture | Status |
 |---|---|---|---|---|---|
-| R01 | Corpus has >=6 public/owned docs, >=40 pages | A | `CORPUS-PLAN.md; corpus/MANIFEST.md` | source checksums and page count | NOT VERIFIED |
-| R02 | Two revisions of one policy; mark superseded | A | `corpus/sources.yaml; indexer/pipeline/models.py` | two version-sensitive golden questions | NOT VERIFIED |
-| R03 | Scanned image-only PDF is detected and OCR attempted | A | `indexer/pipeline/extract.py; PIPELINE-IMPLEMENTATION.md` | pdffonts/extracted text before-after | NOT VERIFIED |
-| R04 | Real tables + long definitions preserved | A | `indexer/pipeline/clean.py; chunk.py` | table sample + chunk inspection | NOT VERIFIED |
-| R05 | Absent topic + exact-term content in corpus | A | `CORPUS-PLAN.md; eval/golden.yaml` | abstain + exact-term test | NOT VERIFIED |
-| R06 | 5-stage indexer and graded metadata + model/dimension | A | `indexer/pipeline/{extract,clean,chunk,embed,store}.py` | Job logs + Chroma collection metadata | NOT VERIFIED |
-| R07 | 3 chunk configurations measured; storage amplification | A | `PIPELINE-IMPLEMENTATION.md` | measured recall@5 table, no placeholder | NOT VERIFIED |
-| R08 | Question length and eight-step query flow | A | `api/app/routes/ask.py; services/answer.py` | 422, cache, retrieval, generation unit tests | NOT VERIFIED |
-| R09 | Current-version filter, historical exception | A | `api/app/retrieval/chroma.py` | golden version pair + no superseded leak | NOT VERIFIED |
-| R10 | Cache similarity tuned with zero false hits | A | `api/app/services/cache.py; PIPELINE-IMPLEMENTATION.md` | two/three thresholds + false hit evidence | NOT VERIFIED |
-| R11 | Never cache follow-up, abstention, invalid; invalidate on reindex | A | `api/app/services/cache.py; indexer/pipeline/store.py` | cache regressions pre/post reindex | NOT VERIFIED |
-| R12 | Schema provider, 1 retry, safe fallback and 0..0.3 temperature | A | `api/app/providers/llm/*; services/answer.py` | malformed JSON + timeout tests | NOT VERIFIED |
-| R13 | No fabricated citations; abstain below floor; injection test | A | `api/app/services/*; api/tests` | cite whitelist and injection test | NOT VERIFIED |
-| R14 | Pluggable LLM provider and separate embed pin | A | `api/app/providers/llm/*; config.py` | stub/real selected by env; metadata mismatch | NOT VERIFIED |
-| R15 | Namespace, 3 API replicas, UI, StatefulSet+PVC, Redis+PVC | B | `k8s/base/*` | kubectl get/describe endpoints and PVC | NOT VERIFIED |
-| R16 | Indexer Job + weekly CronJob; 4 Services + Ingress | B | `k8s/base/*; Makefile` | one-shot logs + ingress smoke | NOT VERIFIED |
-| R17 | ConfigMap/Secret, deny-default NetworkPolicy, HPA 3..8 | B | `k8s/base/*` | DNS, blocked UI->Chroma; HPA target | NOT VERIFIED |
-| R18 | Startup,liveness,readiness; mismatch blocks ready | B | `k8s/base/api.yaml; api/app/routes/health.py` | 0/1 READY mismatch test | NOT VERIFIED |
-| R19 | Resource requests/limits, rollout + rollback + endpoint count | B | `k8s/base/*; docs/evidence/*` | kubectl top; rollout history; endpoints | NOT VERIFIED |
-| R20 | Nonroot, read-only root, token rules, secret hygiene | B | `Dockerfiles; k8s/base/*; .gitignore` | pod securityContext and secret scan | NOT VERIFIED |
-| R21 | JSON request logs + metrics covering retrieval, gen, cache, tokens | B | `api/app/logjson.py; routes/metrics.py` | /metrics scrape and structured stdout | NOT VERIFIED |
-| R22 | >=15 golden: 8 ordinary,2 version,2 exact,2 abstain,1 injection | A | `eval/golden.yaml` | labeled question count + source references | NOT VERIFIED |
-| R23 | Recall@3/@5, by type; citation validity; abstain 100% | A | `eval/run_eval.py` | results.json saved from live stack | NOT VERIFIED |
-| R24 | CI gate: recall@5 <=5pp drop, >=95% citations, 100% abstain | A | `eval/run_eval.py; eval/baseline.json` | intentional regression fails CI | NOT VERIFIED |
-| R25 | Break 4 stages, diagnose and document | A | `FAILURE-EXPERIMENTS.md` | actual commands, logs and recovery | NOT VERIFIED |
-| R26 | CI lint, >=60% tests, kustomize/kubeconform, build, scan, e2e | B | `.github/workflows/ci.yml` | PR statuses including blocked merge | NOT VERIFIED |
-| R27 | CD test -> SHA build/push -> ephemeral deploy/Ingress smoke | B | `.github/workflows/cd.yml` | successful CD URL and Docker Hub tags | NOT VERIFIED |
-| R28 | Protected main, dev branch, PR approval; no direct main push | Both | `.github; docs/evidence/*` | settings screenshots/PR history | NOT VERIFIED |
-| R29 | Seven engineering notes with source line numbers | Both | `ENGINEERING-NOTES-GUIDE.md` | real code line references and measurements | NOT VERIFIED |
-| R30 | AI disclosure, final URLs, checker clean, README apply order | Both | `AI-ASSISTANCE-PLAYBOOK.md; README.md` | checker output + submission links | NOT VERIFIED |
+| R01 | Corpus has >=6 public/owned docs, >=40 pages | A | `CORPUS-PLAN.md; corpus/MANIFEST.md` | source checksums and page count | VERIFIED: 9 docs, 279 pages, 9/9 SHA-256 match (`docs/evidence/corpus-pdffonts-and-pages.txt`) |
+| R02 | Two revisions of one policy; mark superseded | A | `corpus/sources.yaml; indexer/pipeline/models.py` | two version-sensitive golden questions | VERIFIED: 2023 rules `superseded: true`; v01–v03 golden; `test_superseded_chunks_only_come_back_when_asked_for` |
+| R03 | Scanned image-only PDF is detected and OCR attempted | A | `indexer/pipeline/extract.py; PIPELINE-IMPLEMENTATION.md` | pdffonts/extracted text before-after | VERIFIED: pdffonts shows no fonts; Job log `ocr_pages`; `test_real_ocr_reads_a_scan` runs in CI |
+| R04 | Real tables + long definitions preserved | A | `indexer/pipeline/clean.py; chunk.py` | table sample + chunk inspection | VERIFIED: table rows + sentence splits (`docs/evidence/extraction-before-after.txt`, `test_chunk.py`) |
+| R05 | Absent topic + exact-term content in corpus | A | `CORPUS-PLAN.md; eval/golden.yaml` | abstain + exact-term test | VERIFIED: hostel absent (a01–a03); clause/fee exact terms (e01–e03) |
+| R06 | 5-stage indexer and graded metadata + model/dimension | A | `indexer/pipeline/{extract,clean,chunk,embed,store}.py` | Job logs + Chroma collection metadata | VERIFIED: 486 chunks, dimension 768, `embed_model` in collection metadata (indexer log) |
+| R07 | 3 chunk configurations measured; storage amplification | A | `PIPELINE-IMPLEMENTATION.md` | measured recall@5 table, no placeholder | VERIFIED: three settings measured (`docs/PIPELINE.md`, `docs/evidence/chunking/`) |
+| R08 | Question length and eight-step query flow | A | `api/app/routes/ask.py; services/answer.py` | 422, cache, retrieval, generation unit tests | VERIFIED: `api/tests/test_answer.py`, `test_starter.py` (422) |
+| R09 | Current-version filter, historical exception | A | `api/app/retrieval/chroma.py` | golden version pair + no superseded leak | VERIFIED: `test_retrieval.py` history intent; failure experiment E |
+| R10 | Cache similarity tuned with zero false hits | A | `api/app/services/cache.py; PIPELINE-IMPLEMENTATION.md` | two/three thresholds + false hit evidence | VERIFIED: 0.95, the lowest with zero false hits (`docs/evidence/cache-threshold.txt`) |
+| R11 | Never cache follow-up, abstention, invalid; invalidate on reindex | A | `api/app/services/cache.py; indexer/pipeline/store.py` | cache regressions pre/post reindex | VERIFIED: `test_answer.py` exclusion and re-index tests; generation-scoped keys |
+| R12 | Schema provider, 1 retry, safe fallback and 0..0.3 temperature | A | `api/app/providers/llm/*; services/answer.py` | malformed JSON + timeout tests | VERIFIED: `format` schema, one retry, canned fallback; temperature 0.2 (`test_providers.py`, `test_answer.py`) |
+| R13 | No fabricated citations; abstain below floor; injection test | A | `api/app/services/*; api/tests` | cite whitelist and injection test | VERIFIED: citation guard, floor 0.60, `api/tests/test_injection.py` (incl. live model) |
+| R14 | Pluggable LLM provider and separate embed pin | A | `api/app/providers/llm/*; config.py` | stub/real selected by env; metadata mismatch | VERIFIED: `LLM_PROVIDER` selects stub/ollama/hosted; pin = one ConfigMap key + metadata check |
+| R15 | Namespace, 3 API replicas, UI, StatefulSet+PVC, Redis+PVC | B | `k8s/base/*` | kubectl get/describe endpoints and PVC | VERIFIED: `tests/test_manifests.py`; running on minikube (`docs/evidence/rollout-and-endpoints.txt`) |
+| R16 | Indexer Job + weekly CronJob; 4 Services + Ingress | B | `k8s/base/*; Makefile` | one-shot logs + ingress smoke | VERIFIED: Job + CronJob (`--from=cronjob/reindex` used for every re-index); Ingress smoke |
+| R17 | ConfigMap/Secret, deny-default NetworkPolicy, HPA 3..8 | B | `k8s/base/*` | DNS, blocked UI->Chroma; HPA target | VERIFIED: Calico-enforced policy tested from pods (`docs/evidence/networkpolicy-tests.txt`); HPA reads a value |
+| R18 | Startup,liveness,readiness; mismatch blocks ready | B | `k8s/base/api.yaml; api/app/routes/health.py` | 0/1 READY mismatch test | VERIFIED: three probes; pin mismatch keeps pods 0/1 (`docs/evidence/pin-mismatch.txt`) |
+| R19 | Resource requests/limits, rollout + rollback + endpoint count | B | `k8s/base/*; docs/evidence/*` | kubectl top; rollout history; endpoints | VERIFIED: `kubectl top` evidence; set image / rollout undo (`docs/evidence/rollout-and-endpoints.txt`) |
+| R20 | Nonroot, read-only root, token rules, secret hygiene | B | `Dockerfiles; k8s/base/*; .gitignore` | pod securityContext and secret scan | VERIFIED: `test_every_container_is_hardened`; placeholder Secret only; Trivy clean |
+| R21 | JSON request logs + metrics covering retrieval, gen, cache, tokens | B | `api/app/logjson.py; routes/metrics.py` | /metrics scrape and structured stdout | VERIFIED: JSON logs with request_id; `/metrics` series (`docs/evidence/metrics.txt`) |
+| R22 | >=15 golden: 8 ordinary,2 version,2 exact,2 abstain,1 injection | A | `eval/golden.yaml` | labeled question count + source references | VERIFIED: 19 questions (9/3/3/3/1), committed before the chunk sweep |
+| R23 | Recall@3/@5, by type; citation validity; abstain 100% | A | `eval/run_eval.py` | results.json saved from live stack | VERIFIED: `eval/results.json` from the live stack |
+| R24 | CI gate: recall@5 <=5pp drop, >=95% citations, 100% abstain | A | `eval/run_eval.py; eval/baseline.json` | intentional regression fails CI | VERIFIED: CI e2e-eval gate red then green on PR #1 (`docs/evidence/gate-demo.txt`) |
+| R25 | Break 4 stages, diagnose and document | A | `FAILURE-EXPERIMENTS.md` | actual commands, logs and recovery | VERIFIED: stages A, B, C, E, F (`docs/FAILURE-ANALYSIS.md`) |
+| R26 | CI lint, >=60% tests, kustomize/kubeconform, build, scan, e2e | B | `.github/workflows/ci.yml` | PR statuses including blocked merge | VERIFIED: ci.yml all six jobs green on dev |
+| R27 | CD test -> SHA build/push -> ephemeral deploy/Ingress smoke | B | `.github/workflows/cd.yml` | successful CD URL and Docker Hub tags | BLOCKED on the repo owner: needs `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN` secrets and a reviewed merge to main; workflow written and linted |
+| R28 | Protected main, dev branch, PR approval; no direct main push | Both | `.github; docs/evidence/*` | settings screenshots/PR history | PARTLY BLOCKED: all work on `dev`, no direct push to main; branch protection needs repo-admin (IfBilal) |
+| R29 | Seven engineering notes with source line numbers | Both | `ENGINEERING-NOTES-GUIDE.md` | real code line references and measurements | VERIFIED: `docs/ENGINEERING-NOTES.md` |
+| R30 | AI disclosure, final URLs, checker clean, README apply order | Both | `AI-ASSISTANCE-PLAYBOOK.md; README.md` | checker output + submission links | VERIFIED: `docs/AI-USAGE.md`, README apply order, checker output (`docs/evidence/check-submission.txt`) |
 
 ### How to complete a row
 1. Implement and run its linked test or live command. 2. Record the date, commit SHA, environment, actual result and artifact/screenshot path under `docs/evidence/`. 3. Change status to `VERIFIED <SHA>` only after the other developer reviews it. 4. If unable to demonstrate, keep the row red and identify fallback in `DEVELOPMENT-FLOW.md`.

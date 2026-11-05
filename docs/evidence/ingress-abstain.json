@@ -1,0 +1,46 @@
+{
+    "request_id": "evidence-abstain-1",
+    "answer": "The evidence passages do not mention hostel curfew timings for female students.",
+    "citations": [],
+    "answered_from_context": false,
+    "confidence": "low",
+    "retrieved": [
+        {
+            "chunk_id": "grading-page-html-2026-0005-d394c5eb",
+            "source": "grading-page.html",
+            "section": "Warning/Probation",
+            "page": 1,
+            "score": 0.6291
+        },
+        {
+            "chunk_id": "student-handbook-jun-2026-pdf-2026-06-0039-de598592",
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "VI \u2013 SEMESTER RULES",
+            "page": 29,
+            "score": 0.6285
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-pdf-2026-06-0023-d874c5a0",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4. Registration > Registration of Students under Academic Warning",
+            "page": 21,
+            "score": 0.6263
+        },
+        {
+            "chunk_id": "annual-report-2023-24-pdf-2023-24-0071-446ac6dc",
+            "source": "annual-report-2023-24.pdf",
+            "section": "NUMLOGIC 2024",
+            "page": 32,
+            "score": 0.6199
+        },
+        {
+            "chunk_id": "student-handbook-jun-2026-pdf-2026-06-0040-ddcb2e3d",
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "VI \u2013 SEMESTER RULES",
+            "page": 30,
+            "score": 0.6122
+        }
+    ],
+    "provider": "ollama",
+    "cached": false
+}

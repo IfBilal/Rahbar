@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** measured results are in `docs/PIPELINE.md` and `docs/evidence/chunking/`. This guide is kept as the plan of record.
+
 > **Required output file:** Implement the material in this *supplementary planning guide* and record the final, evidence-backed results in the instructor-provided `docs/PIPELINE.md`. That original file is not included in this archive.
 
 # Indexer pipeline: extraction, clean, chunk, embed and store

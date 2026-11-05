@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** all phases executed; each phase's acceptance is evidenced in `docs/TRACEABILITY.md` and `docs/evidence/`. This guide is kept as the plan of record.
+
 # Nine implementation phases: developer A/B parallel playbook
 
 Each of the nine phases below includes the original concrete tasks, parallel work and definition-of-done requirements. To avoid dependency confusion, **phase numbers describe a coarse working sequence, not a requirement that every phase completes before the next begins**. Use the task DAG in `CRITICAL-PATH.md` to decide what can run concurrently. Some tasks overlap phases on purpose.
@@ -563,7 +565,7 @@ Experiments must alter one stage at a time and be restored; values in PIPELINE a
    make lint
    make check
    python scripts/check_submission.py
-   git grep -n STARTER-TODO
+   git grep -n starter TODO
    confirm final submission links, Docker Hub SHA tags, actual results.json and baseline.json
 ```
 

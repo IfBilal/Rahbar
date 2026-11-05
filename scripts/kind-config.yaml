@@ -1,0 +1,8 @@
+# Throwaway cluster for e2e-eval (ci.yml) and deploy (cd.yml). The ingress-ready label is
+# what the ingress-nginx "kind" provider manifest schedules its controller onto.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    labels:
+      ingress-ready: "true"

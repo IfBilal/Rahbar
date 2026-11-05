@@ -1,3 +1,5 @@
+> **Status (5 November 2026):** measured results are in `docs/CORPUS.md` and `docs/evidence/corpus-pdffonts-and-pages.txt`. This guide is kept as the plan of record.
+
 > **Required output file:** Implement the material in this *supplementary planning guide* and record the final, evidence-backed results in the instructor-provided `docs/CORPUS.md`. That original file is not included in this archive.
 
 # Corpus sourcing, manifest, version control and seven properties
@@ -68,13 +70,13 @@ A 2020 annual report is historical, not 'superseded' by a 2024 annual report in 
 ### Absent topic design
 Example intentionally absent topic: **detailed hostel application/booking process**. Exclude the dedicated facilities policy/prospectus item. If another indexed handbook actually contains those details, the question is **not** a valid must-abstain label; change topic/question based on verified full corpus contents.
 
-### Measured summary — fill after download
-- Downloaded document count: `MEASURE`.
-- Sum of PDF page counts: `MEASURE` (excluding HTML page equivalents unless documented consistently).
-- Confirmed scanned filename/page: `MEASURE`.
-- Confirmed revision pair and clause diff: `MEASURE`.
-- Actual MANIFEST SHA verified on date/commit: `MEASURE`.
-- Corpus exclusions and access rights: `MEASURE`.
+### Measured summary (4 November 2026)
+- Downloaded document count: **9** (7 PDF, 2 HTML).
+- Sum of PDF page counts: **279** (26 + 58 + 5 + 64 + 33 + 85 + 8), plus two HTML pages.
+- Confirmed scanned files: **Faculty Entrepreneurship policy** (no fonts, pages 1–8 OCR'd) and the **2023 Academic Rules** (191 text characters over 26 pages, pages 2–25 OCR'd).
+- Confirmed revision pair and clause diff: 2023 rules vs Jun 2026 handbook, e.g. clause 4.25 withdrawal deadline "last day of classes" → "last day of the makeup week" (`docs/CORPUS.md`).
+- MANIFEST SHA verified: **9 of 9** match (`python corpus/fetch.py --verify`, `docs/evidence/corpus-pdffonts-and-pages.txt`).
+- Exclusions and access rights: public nu.edu.pk pages only; the Transport and Hostel Facilities PDF is excluded on purpose (absent topic).
 
 **G1 DoD:** 7 rows verified with file/page/example, >=6 documents/40 pages, true revision pair, no unauthorized documents. `CORPUS-PLAN.md` is not complete until measured values replace `MEASURE`.
 

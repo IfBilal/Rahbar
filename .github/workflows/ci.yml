@@ -1,0 +1,168 @@
+# CI (case study section 6): every pull request to main and every push to dev.
+# lint · test · manifests · build · scan · e2e-eval. A red job blocks the merge to main.
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read          # least privilege: CI reads code, publishes nothing
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  KUSTOMIZE_VERSION: "5.7.1"
+  KUBECONFORM_VERSION: "0.8.0"
+  TRIVY_IMAGE: "aquasec/trivy:0.76.1"
+  KIND_VERSION: "v0.31.0"
+  OLLAMA_VERSION: "v0.17.6"
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: "**/requirements*.txt"
+      - run: pip install -r api/requirements-dev.txt -r indexer/requirements-dev.txt
+      - name: ruff
+        run: ruff check api indexer eval corpus tests
+      - name: mypy
+        run: |
+          (cd api && mypy app)
+          (cd indexer && mypy pipeline)
+      # The UI is one static index.html with no build step, so there is no eslint/tsc job.
+
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: "**/requirements*.txt"
+      - name: OCR toolchain (the indexer's real-tesseract test runs here)
+        run: sudo apt-get update -q && sudo apt-get install -yq --no-install-recommends tesseract-ocr poppler-utils
+      - name: kustomize (the manifest architecture tests render overlays)
+        run: |
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" | tar xz
+          sudo mv kustomize /usr/local/bin/
+      - run: pip install -r api/requirements-dev.txt -r indexer/requirements-dev.txt
+      - name: api (stub provider and stub retriever, no network, coverage >= 60%)
+        run: cd api && pytest -q --cov=app --cov-report=term --cov-fail-under=60
+      - name: indexer
+        run: cd indexer && pytest -q --cov=pipeline --cov-report=term --cov-fail-under=60
+      - name: evaluator arithmetic
+        run: cd eval && pytest -q tests
+      - name: architecture and manifest tests
+        run: pytest -q tests --ignore=tests/system
+
+  manifests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: install kustomize and kubeconform
+        run: |
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" | tar xz
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar xz
+          sudo mv kustomize kubeconform /usr/local/bin/
+      - name: kustomize build | kubeconform -strict
+        run: |
+          set -o pipefail
+          for overlay in prod dev ci incluster; do
+            echo "== $overlay"
+            kustomize build "k8s/overlays/$overlay" | kubeconform -strict -summary
+          done
+
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: build api, ui and indexer (never pushed from CI)
+        run: |
+          docker buildx build --load -t rahbar-api:ci api
+          docker buildx build --load -t rahbar-ui:ci ui
+          docker buildx build --load -t rahbar-indexer:ci -f indexer/Dockerfile .
+          docker image ls rahbar-*
+      - name: save images for the scan and e2e jobs
+        run: docker save rahbar-api:ci rahbar-ui:ci rahbar-indexer:ci | gzip -1 > images.tar.gz
+      - uses: actions/upload-artifact@v7
+        with:
+          name: images
+          path: images.tar.gz
+          retention-days: 3
+
+  scan:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v8
+        with: {name: images}
+      - run: gunzip -c images.tar.gz | docker load
+      - name: Trivy - fail on HIGH or CRITICAL findings that have a fix
+        run: |
+          for image in api ui indexer; do
+            echo "== rahbar-$image:ci"
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" \
+              image --quiet --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "rahbar-$image:ci"
+          done
+
+  e2e-eval:
+    needs: [test, manifests, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install httpx==0.28.1 pyyaml==6.0.2
+      - uses: actions/download-artifact@v8
+        with: {name: images}
+      - run: gunzip -c images.tar.gz | docker load
+      - name: install kind and kustomize
+        run: |
+          curl -sSLo kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64"
+          curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" | tar xz
+          chmod +x kind && sudo mv kind kustomize /usr/local/bin/
+      - name: Ollama on the runner (ollama-host mode), embedding model only
+        run: |
+          mkdir -p "$HOME/ollama"
+          # The release bundles GPU runtimes; keep only the CPU parts on disk.
+          curl -sSL "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst" \
+            | tar --zstd -x -C "$HOME/ollama" --exclude='lib/ollama/cuda_*' --exclude='lib/ollama/rocm*' --exclude='lib/ollama/vulkan*'
+          OLLAMA_HOST=0.0.0.0:11434 nohup "$HOME/ollama/bin/ollama" serve > ollama.log 2>&1 &
+          for _ in $(seq 1 30); do curl -sf localhost:11434/api/version && break; sleep 1; done
+          OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull nomic-embed-text
+      - name: kind cluster + ingress + whole stack, indexer Job over the fixture corpus
+        run: KUBECONFIG_E2E=$HOME/.kube/config scripts/e2e-kind.sh ci
+      - name: evaluate and enforce the 5.4 gate (recall@5 drop, abstention, citations)
+        run: |
+          python eval/run_eval.py --api http://localhost:8080 --host rahbar.local \
+            --golden eval/fixtures/golden.fixture.yaml \
+            --baseline eval/fixtures/baseline.fixture.json \
+            --out fixture-results.json
+      - name: diagnostics
+        if: always()
+        run: |
+          kubectl get pods,jobs,endpoints -n rahbar || true
+          kubectl logs -n rahbar deployment/api --tail=40 || true
+          tail -20 ollama.log || true
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: fixture-results
+          path: fixture-results.json
+          if-no-files-found: ignore

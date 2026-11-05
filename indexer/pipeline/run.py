@@ -64,7 +64,7 @@ def discover(corpus_dir: str) -> list[tuple[Path, str, bool]]:
 
 
 def run_pipeline(settings: IndexerSettings) -> int:
-    from .chunk import chunk
+    from .chunk import amplification, chunk
     from .clean import clean
     from .embed import embed
     from .extract import extract
@@ -74,12 +74,24 @@ def run_pipeline(settings: IndexerSettings) -> int:
     if not documents:
         raise SystemExit(f"no documents found in {settings.corpus_dir}")
     all_chunks: list[Chunk] = []
+    cleaned = []
     for path, doc_version, superseded in documents:
-        doc = clean(extract(str(path), doc_version, superseded))
+        started = time.perf_counter()
+        raw = extract(str(path), doc_version, superseded, ocr=settings.ocr_enabled)
+        doc = clean(raw)
         pieces = chunk(doc, settings.chunk_size, settings.chunk_overlap)
-        log("chunked", source=path.name, chunks=len(pieces))
+        empty = [p.page for p in doc.pages if not p.text.strip()]
+        log("chunked", source=path.name, doc_version=doc_version, superseded=superseded,
+            pages=len(doc.pages), ocr_pages=[p.page for p in raw.pages if p.ocr],
+            empty_pages=empty, chunks=len(pieces), seconds=round(time.perf_counter() - started, 1))
+        cleaned.append(doc)
         all_chunks.extend(pieces)
+    log("chunking done", chunks=len(all_chunks), chunk_size=settings.chunk_size,
+        chunk_overlap=settings.chunk_overlap, amplification=amplification(all_chunks, cleaned))
+    started = time.perf_counter()
     vectors = embed([c.text for c in all_chunks], settings)
+    log("embedded", vectors=len(vectors), dimension=len(vectors[0]) if vectors else 0,
+        model=settings.embed_model, seconds=round(time.perf_counter() - started, 1))
     return store(all_chunks, vectors, settings)
 
 

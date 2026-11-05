@@ -1,8 +1,10 @@
+> **Status (5 November 2026):** implemented: 19-question golden set, `eval/run_eval.py`, CI gate; results in `eval/results.json`. This guide is kept as the plan of record.
+
 # Test matrix, golden set, retrieval scores and enforced CI gate
 
 Golden set first, tuning second: **≥15 questions**, minimum 8 ordinary + 2 version-sensitive + 2 exact-term + 2 must-abstain + 1 prompt-injection. Record known relevant passages as `(source, section)` or stable chunk IDs **before** seeing retrieval results. `eval/run_eval.py` runs against the *live* stack, writes `eval/results.json`, and must enforce three thresholds: recall@5 must not fall more than **0.05 absolute** below committed baseline; **100%** correct must-abstain; **≥95%** citation validity. Also report recall@3/5 and by-type performance.
 
-**CI distinction:** `eval/fixtures/` is a small fictional corpus and has its own six-question golden set. Real corpus quality metrics and fixture CI tests are different measurements; never replace the real evaluation with stub-only fixture success. Implement existing four `STARTER-TODO` functions in `eval/run_eval.py`.
+**CI distinction:** `eval/fixtures/` is a small fictional corpus and has its own six-question golden set. Real corpus quality metrics and fixture CI tests are different measurements; never replace the real evaluation with stub-only fixture success. Implement existing four `starter TODO` functions in `eval/run_eval.py`.
 
 ## Exact metric semantics and assertions
 

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "q01",
+    "run": 1,
+    "seconds": 61.6,
+    "answered_from_context": true,
+    "fallback": false,
+    "expect_found": true,
+    "citations_valid": true,
+    "answer": "To avoid academic warning, an undergraduate needs to maintain a minimum cumulative grade point average (CGPA) of 2.00. [academic-rules-handbook-jun-2026.pdf / 5. Academic Assessment > Academic Warning/Probation]"
+  },
+  {
+    "id": "q01",
+    "run": 2,
+    "seconds": 13.3,
+    "answered_from_context": true,
+    "fallback": false,
+    "expect_found": true,
+    "citations_valid": true,
+    "answer": "An undergraduate student needs to have a minimum CGPA of 2.00 to avoid academic warning. [academic-rules-handbook-jun-2026.pdf / 5. Academic Assessment > Academic Warning/Probation]"
+  },
+  {
+    "id": "v01",
+    "run": 1,
+    "seconds": 80.8,
+    "answered_from_context": true,
+    "fallback": false,
+    "expect_found": true,
+    "citations_valid": true,
+    "answer": "The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules Handbook, June 2026 edition, page 22. [academic-rules-handbook-jun-2026.pdf / 4. Registration > Withdrawal from a Course]"
+  },
+  {
+    "id": "v01",
+    "run": 2,
+    "seconds": 15.7,
+    "answered_from_context": true,
+    "fallback": false,
+    "expect_found": true,
+    "citations_valid": true,
+    "answer": "The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in Section 4.25 of the Academic Rules Handbook, June 2026. [academic-rules-handbook-jun-2026.pdf / 4. Registration > Withdrawal from a Course]"
+  },
+  {
+    "id": "e02",
+    "run": 1,
+    "seconds": 68.5,
+    "answered_from_context": true,
+    "fallback": false,
+    "expect_found": true,
+    "citations_valid": true,
+    "answer": "The paper rechecking fee per course is Rs. 500, as stated in the Miscellaneous Fees section of the fee structure page. [fee-structure-page.html / Miscellaneous Fees]"
+  },
+  {
+    "id": "e02",
+    "run": 2,
+    "seconds": 11.1,
+    "answered_from_context": true,
+    "fallback": false,
+    "expect_found": true,
+    "citations_valid": true,
+    "answer": "The paper rechecking fee per course is Rs. 500, as stated in passage B [fee-structure-page.html / Miscellaneous Fees]."
+  }
+]

@@ -1,0 +1,49 @@
+# Failure experiment E: superseded filter removed (SUPERSEDED_FILTER=false), 2026-11-04T20:18:52Z
+# Retrieved top 5 for version-sensitive questions. Recall is unchanged (the 2026 passage is still
+# there), but the repealed 2023 clause now sits beside it, and it reaches the model's top-3 context.
+
+########## BROKEN: kubectl set env deployment/api SUPERSEDED_FILTER=false
+
+Q: What is the deadline to withdraw from a course?
+  1. 0.838  academic-rules-handbook-jun-2026.pdf         4. Registration > Withdrawal from a Course
+  2. 0.818  undergraduate-academic-rules-aug-2023.pdf    4. Registration > Withdrawal from a Course   <-- 2023, SUPERSEDED
+  3. 0.759  prospectus-2026-academic-rules-and-regulatio 13. Registration of Students under
+  4. 0.743  undergraduate-academic-rules-aug-2023.pdf    Registration > Adding or Dropping a Course   <-- 2023, SUPERSEDED
+  5. 0.743  academic-rules-handbook-jun-2026.pdf         Registration > Adding or Dropping a Course
+
+Q: How many weeks of teaching does a regular semester have?
+  1. 0.792  academic-rules-handbook-jun-2026.pdf         1. Introduction > Academic Year
+  2. 0.786  undergraduate-academic-rules-aug-2023.pdf    1. Introduction > Academic Year   <-- 2023, SUPERSEDED
+  3. 0.780  prospectus-2026-academic-rules-and-regulatio 3. Academic Year
+  4. 0.746  undergraduate-academic-rules-aug-2023.pdf    pring) semester, students without academic   <-- 2023, SUPERSEDED
+  5. 0.735  undergraduate-academic-rules-aug-2023.pdf    6. Rules for Summer Semester   <-- 2023, SUPERSEDED
+
+Q: Does a student have to repeat a failed course?
+  1. 0.860  grading-page.html                            Repeating a Course
+  2. 0.832  academic-rules-handbook-jun-2026.pdf         . Academic Assessment > Repeating a Course
+  3. 0.806  undergraduate-academic-rules-aug-2023.pdf    . Academic Assessment > Repeating a Course   <-- 2023, SUPERSEDED
+  4. 0.802  prospectus-2026-academic-rules-and-regulatio  > FAST-NUCES Academic Rules & Regulations
+  5. 0.726  prospectus-2026-academic-rules-and-regulatio  > FAST-NUCES Academic Rules & Regulations
+
+########## RESTORED: kubectl set env deployment/api SUPERSEDED_FILTER-
+
+Q: What is the deadline to withdraw from a course?
+  1. 0.838  academic-rules-handbook-jun-2026.pdf         4. Registration > Withdrawal from a Course
+  2. 0.759  prospectus-2026-academic-rules-and-regulatio 13. Registration of Students under
+  3. 0.743  academic-rules-handbook-jun-2026.pdf         Registration > Adding or Dropping a Course
+  4. 0.704  student-handbook-jun-2026.pdf                VI – SEMESTER RULES
+  5. 0.692  prospectus-2026-academic-rules-and-regulatio 34. Maximum Time Allowed to
+
+Q: How many weeks of teaching does a regular semester have?
+  1. 0.792  academic-rules-handbook-jun-2026.pdf         1. Introduction > Academic Year
+  2. 0.780  prospectus-2026-academic-rules-and-regulatio 3. Academic Year
+  3. 0.734  prospectus-2026-academic-rules-and-regulatio 19. Rules for Summer Semester
+  4. 0.730  prospectus-2026-academic-rules-and-regulatio 4. Semester Course Load
+  5. 0.730  academic-rules-handbook-jun-2026.pdf         6. Rules for Summer Semester
+
+Q: Does a student have to repeat a failed course?
+  1. 0.860  grading-page.html                            Repeating a Course
+  2. 0.832  academic-rules-handbook-jun-2026.pdf         . Academic Assessment > Repeating a Course
+  3. 0.802  prospectus-2026-academic-rules-and-regulatio  > FAST-NUCES Academic Rules & Regulations
+  4. 0.726  prospectus-2026-academic-rules-and-regulatio  > FAST-NUCES Academic Rules & Regulations
+  5. 0.725  academic-rules-handbook-jun-2026.pdf         tration of Students under Academic Warning

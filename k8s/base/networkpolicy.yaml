@@ -1,0 +1,125 @@
+# Flat network closed (4.7): deny everything, then allow only what the architecture needs.
+#   Ingress controller -> ui:8080, api:8000      ui -> api:8000
+#   api -> chroma:8000, redis:6379, Ollama:11434 indexer -> chroma:8000, Ollama:11434, web:443/80
+#   every pod -> kube-dns:53                     ui -> chroma: DENIED (nothing allows it)
+# Requires a CNI that enforces policy: minikube --cni=calico (the default CNI ignores it).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: default-deny-all, namespace: rahbar}
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: allow-dns-egress, namespace: rahbar}
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: kube-system}
+          podSelector:
+            matchLabels: {k8s-app: kube-dns}
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: ui-from-ingress, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: ui}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: ingress-nginx}
+      ports: [{protocol: TCP, port: 8080}]
+  egress:                                   # "api from the ui" (4.7); nothing else
+    - to:
+        - podSelector:
+            matchLabels: {app: api}
+      ports: [{protocol: TCP, port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: api-policy, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: api}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: ingress-nginx}
+        - podSelector:
+            matchLabels: {app: ui}
+      ports: [{protocol: TCP, port: 8000}]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app: chroma}
+      ports: [{protocol: TCP, port: 8000}]
+    - to:
+        - podSelector:
+            matchLabels: {app: redis}
+      ports: [{protocol: TCP, port: 6379}]
+    - to:                                   # Ollama on the host (ollama-host mode)
+        - ipBlock: {cidr: 192.168.49.1/32}  # host.minikube.internal; overlays may patch it
+      ports: [{protocol: TCP, port: 11434}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: indexer-policy, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: indexer}
+  policyTypes: [Ingress, Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app: chroma}
+      ports: [{protocol: TCP, port: 8000}]
+    - to:
+        - ipBlock: {cidr: 192.168.49.1/32}
+      ports: [{protocol: TCP, port: 11434}]
+    - to:                                   # nu.edu.pk, for the corpus fetch only
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            # no cluster, private, link-local (cloud metadata), CGNAT or loopback ranges
+            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16,
+                     100.64.0.0/10, 127.0.0.0/8]
+      ports:
+        - {protocol: TCP, port: 443}
+        - {protocol: TCP, port: 80}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: chroma-from-api-and-indexer, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: chroma}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app: api}
+        - podSelector:
+            matchLabels: {app: indexer}
+      ports: [{protocol: TCP, port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: redis-from-api, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: redis}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app: api}
+      ports: [{protocol: TCP, port: 6379}]
