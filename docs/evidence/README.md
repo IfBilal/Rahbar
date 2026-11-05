@@ -26,7 +26,7 @@ carry the command that produced them and a UTC timestamp.
 | `exact-assist-off-results.json` | exact-term recall 0.5 without the `$contains` assist | `EXACT_TERM_ASSIST=false` |
 | `failures/` | five stages broken and restored (A, B, C, E, F) | `scripts/failure-experiments.sh` |
 | `eval-run1-…`, `eval-run2-cache-hits.json`, `eval-run3-…` | the evaluation runs before the shipped one (`eval/results.json`) | `eval/run_eval.py` |
-| `gate-demo.txt` | the CI eval gate failing on PR #1, then passing after the fix | GitHub Actions runs 41891435694 and 41892555788 |
+| `gate-demo.txt`, `eval-gate-red.png`, `eval-gate-green.png` | the CI eval gate failing on PR #1, then passing after the fix | GitHub Actions runs 41891435694 and 41892555788; screenshots captured 5 November 2026 |
 | `ci-runs.txt` | CI run URLs per commit | `gh run list` |
 | `cd-run.txt` | successful branch deployment with real model, covered answer and abstention | GitHub Actions run 41969926861 |
 | `cd-main.txt` | successful main-branch publication, deployment and Ingress smoke test | GitHub Actions run 41972097173 |
@@ -37,3 +37,6 @@ carry the command that produced them and a UTC timestamp.
 The branch-protection settings are recorded in `branch-protection.json`; a settings
 screenshot remains optional additional visual evidence. The successful main-branch CD run
 and Docker Hub links are recorded in `cd-main.txt`.
+
+The red and green screenshots show the actual CI run pages, not the historical pull-request
+merge button. A screenshot of the disabled merge button was not captured at the time.
