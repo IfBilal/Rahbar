@@ -63,6 +63,22 @@ def test_only_passages_above_the_floor_reach_the_model() -> None:
     assert seen["ids"] == ["c1", "c2", "c3"]                    # best three reach the model
 
 
+def test_context_preserves_retriever_order_after_applying_floor() -> None:
+    seen = {}
+
+    class Spy(ScriptedProvider):
+        def generate(self, question, passages, retry_reason=None):
+            seen["ids"] = [p.chunk_id for p in passages]
+            return grounded(passages[0])
+
+    # The retriever can promote a literal clause match above denser semantic hits.
+    ranked = [passage(1, 0.60), passage(2, 0.95), passage(3, 0.90),
+              passage(4, 0.85), passage(5, 0.40)]
+    answer_question("What does clause 1.21 say?", FakeRetriever(ranked), Spy(),
+                    Settings(relevance_floor=0.5, max_context_passages=3))
+    assert seen["ids"] == ["c1", "c2", "c3"]
+
+
 def test_fabricated_citation_is_retried_once_then_succeeds() -> None:
     provider = ScriptedProvider(_bad_citation(), grounded(P[0]))
     r = answer_question("q?", FakeRetriever(P), provider, S)

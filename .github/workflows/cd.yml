@@ -9,12 +9,17 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      full_eval:
+        description: Run the full real-corpus evaluation after deployment
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: cd-main
+  group: ${{ inputs.full_eval && format('cd-eval-{0}', github.ref) || 'cd-main' }}
   cancel-in-progress: false      # never cancel a deploy half-way
 
 env:
@@ -73,7 +78,7 @@ jobs:
   deploy:
     needs: build-push                 # deploys exactly the images this run published
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
       - name: install kind and kustomize
@@ -89,6 +94,7 @@ jobs:
           OLLAMA_HOST=0.0.0.0:11434 nohup "$HOME/ollama/bin/ollama" serve > ollama.log 2>&1 &
           for _ in $(seq 1 30); do curl -sf localhost:11434/api/version && break; sleep 1; done
           OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull nomic-embed-text
+          OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull llama3.2:3b
       - name: pin the prod overlay to this commit's images (never :latest)
         env:
           REPO: docker.io/${{ secrets.DOCKERHUB_USERNAME }}
@@ -96,6 +102,9 @@ jobs:
           cd k8s/overlays/prod
           kustomize edit set image "rahbar-api=$REPO/rahbar-api:$GITHUB_SHA" \
             "rahbar-ui=$REPO/rahbar-ui:$GITHUB_SHA" "rahbar-indexer=$REPO/rahbar-indexer:$GITHUB_SHA"
+          # CI uses the stub, but CD must exercise real generation and abstention.
+          sed -i 's@path: /data/LLM_PROVIDER, value: "stub"@path: /data/LLM_PROVIDER, value: "ollama-host"@' ../../components/ephemeral-cluster/kustomization.yaml
+          grep -q 'path: /data/LLM_PROVIDER, value: "ollama-host"' ../../components/ephemeral-cluster/kustomization.yaml
           kustomize edit add component ../../components/ephemeral-cluster
           kustomize build . | grep -E "image: .*rahbar-" | sort -u
       - name: deploy to an ephemeral kind cluster (real corpus, fetched by the indexer Job)
@@ -107,6 +116,23 @@ jobs:
       - name: smoke test through the Ingress
         run: |
           python3 scripts/smoke.py --api http://localhost:8080 --host rahbar.local
+      - name: set up Python for optional evaluation
+        if: ${{ inputs.full_eval }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: full real-corpus evaluation (manual dispatch only)
+        if: ${{ inputs.full_eval }}
+        run: |
+          python3 -m pip install httpx==0.28.1 pyyaml==6.0.2
+          python3 eval/run_eval.py --api http://localhost:8080 --host rahbar.local --out /tmp/rahbar-real-results.json
+      - name: preserve real-corpus evaluation results
+        if: ${{ inputs.full_eval && always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-corpus-evaluation
+          path: /tmp/rahbar-real-results.json
+          if-no-files-found: warn
       - name: diagnostics
         if: failure()
         run: |
