@@ -39,5 +39,7 @@ The branch-protection settings are recorded in `branch-protection.json`; a setti
 screenshot remains optional additional visual evidence. The successful main-branch CD run
 and Docker Hub links are recorded in `cd-main.txt`.
 
-The red and green screenshots show the actual CI run pages, not the historical pull-request
-merge button. A screenshot of the disabled merge button was not captured at the time.
+The PR #1 red and green screenshots show the actual CI run pages; its historical merge
+button was not captured. `merge-blocked.png` captures PR #8 with the required e2e-eval
+check failing and merging blocked. It also shows that the branch was behind and required
+a review, which were additional blockers at the time.
