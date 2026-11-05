@@ -89,6 +89,7 @@ jobs:
           OLLAMA_HOST=0.0.0.0:11434 nohup "$HOME/ollama/bin/ollama" serve > ollama.log 2>&1 &
           for _ in $(seq 1 30); do curl -sf localhost:11434/api/version && break; sleep 1; done
           OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull nomic-embed-text
+          OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull llama3.2:3b
       - name: pin the prod overlay to this commit's images (never :latest)
         env:
           REPO: docker.io/${{ secrets.DOCKERHUB_USERNAME }}
@@ -96,6 +97,9 @@ jobs:
           cd k8s/overlays/prod
           kustomize edit set image "rahbar-api=$REPO/rahbar-api:$GITHUB_SHA" \
             "rahbar-ui=$REPO/rahbar-ui:$GITHUB_SHA" "rahbar-indexer=$REPO/rahbar-indexer:$GITHUB_SHA"
+          # CI uses the stub, but CD must exercise real generation and abstention.
+          sed -i 's@path: /data/LLM_PROVIDER, value: "stub"@path: /data/LLM_PROVIDER, value: "ollama-host"@' ../../components/ephemeral-cluster/kustomization.yaml
+          grep -q 'path: /data/LLM_PROVIDER, value: "ollama-host"' ../../components/ephemeral-cluster/kustomization.yaml
           kustomize edit add component ../../components/ephemeral-cluster
           kustomize build . | grep -E "image: .*rahbar-" | sort -u
       - name: deploy to an ephemeral kind cluster (real corpus, fetched by the indexer Job)
