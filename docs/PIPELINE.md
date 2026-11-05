@@ -225,10 +225,29 @@ evidence above it with margin. It declines a03 before any model call, and declin
 fixture's hostel question (best 0.587) deterministically. a01 and a02 clear the floor and
 must be declined by the model, the second layer, which the gate measures at 100%.
 
+## Latest real-model evaluation (5 November 2026)
+
+After preserving the retriever's ranking in the model context, the full golden set was
+run through a fresh real-corpus deployment with `llama3.2:3b` and `nomic-embed-text`
+([Actions run 41971390158](https://github.com/IfBilal/Rahbar/actions/runs/41971390158),
+commit `e6b2aba`). The results are in `eval/results.json`; the previously measured
+`eval/baseline.json` is unchanged. Recall@3 and recall@5 were both **0.9062**, citation
+validity **100%**, and abstention correctness **100%**. The automated expected-term
+check found its terms for **15 of 16** answerable questions (0.9375). Clause question
+e01, which declined in the earlier run below, was answered in this run. The smoke test
+had just asked q01, so that question was served from cache; the other questions were
+not cached. Expected-term matching is not a substitute for reviewing answers.
+
+The remaining q09 failure is substantive: the faculty table was not retrieved and the
+model gave a general campus description instead of the requested number. This is not
+a correct answer, even though its citation refers to a retrieved passage. The older
+manual review below describes the preceding evaluation and is retained as historical
+evidence, not as the latest results.
+
 ## Generation checks (5.3)
 
-Shipped run: `eval/results.json` (real `llama3.2:3b`, temperature 0.2, through the Ingress,
-cache flushed first). The two automated checks are gated:
+Earlier run: the pre-ranking-fix evaluation (real `llama3.2:3b`, temperature 0.2, through the Ingress,
+cache flushed first). The latest run is reported above. The two automated checks are gated:
 
 - **Citation validity: 100%** (15 of 15 citations name a passage retrieved for that request).
 - **Abstention correctness: 100%** (3 of 3). a03 is declined by the floor; the model itself
