@@ -29,9 +29,11 @@ carry the command that produced them and a UTC timestamp.
 | `gate-demo.txt` | the CI eval gate failing on PR #1, then passing after the fix | GitHub Actions runs 41891435694 and 41892555788 |
 | `ci-runs.txt` | CI run URLs per commit | `gh run list` |
 | `cd-run.txt` | successful branch deployment with real model, covered answer and abstention | GitHub Actions run 41969926861 |
+| `cd-main.txt` | successful main-branch publication, deployment and Ingress smoke test | GitHub Actions run 41972097173 |
 | `branch-protection.json` | required approvals, status checks and administrator enforcement | GitHub branch protection API, 5 November 2026 |
 | `check-submission.txt` | the starter's checker output on the final tree | `python scripts/check_submission.py` |
 | `clean-clone.txt` | README path from a fresh clone to an answered question | the README commands, in a new directory |
 
-A branch-protection screenshot and a successful `cd.yml` run with Docker Hub links remain
-to be captured after verification (see `README.md`, CI/CD).
+The branch-protection settings are recorded in `branch-protection.json`; a settings
+screenshot remains optional additional visual evidence. The successful main-branch CD run
+and Docker Hub links are recorded in `cd-main.txt`.
