@@ -241,9 +241,11 @@ not cached. Expected-term matching is not a substitute for reviewing answers.
 The remaining q09 failure is substantive: the faculty table was not retrieved and the
 model gave a general campus description instead of the requested number. This is not
 a correct answer, even though its citation refers to a retrieved passage. The source
-itself also disagrees: the Faculty Summary on page 13 gives Islamabad a total of 236,
-while the detailed Islamabad campus table ending on page 14 gives 237. The golden
-expectation is the summary's 236; a complete answer should flag the discrepancy.
+has a scope distinction: the Faculty Summary on page 13 gives Islamabad a total of
+236, while the detailed Islamabad campus table ending on page 14 gives 237 and includes
+one person in an "Others" category. The golden expectation is the faculty summary's
+236; the detailed total includes that additional category and is not necessarily a
+contradiction.
 
 A separate offline diagnostic on 5 November re-downloaded the nine sources and verified
 all nine checksums against `corpus/MANIFEST.md`. A simple lexical ranking still missed
