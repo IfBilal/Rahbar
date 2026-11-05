@@ -9,6 +9,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      full_eval:
+        description: Run the full real-corpus evaluation after deployment
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -73,7 +78,7 @@ jobs:
   deploy:
     needs: build-push                 # deploys exactly the images this run published
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
       - name: install kind and kustomize
@@ -111,6 +116,18 @@ jobs:
       - name: smoke test through the Ingress
         run: |
           python3 scripts/smoke.py --api http://localhost:8080 --host rahbar.local
+      - name: full real-corpus evaluation (manual dispatch only)
+        if: ${{ inputs.full_eval }}
+        run: |
+          python3 -m pip install --user httpx==0.28.1 pyyaml==6.0.2
+          python3 eval/run_eval.py --api http://localhost:8080 --host rahbar.local --out /tmp/rahbar-real-results.json
+      - name: preserve real-corpus evaluation results
+        if: ${{ inputs.full_eval && always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-corpus-evaluation
+          path: /tmp/rahbar-real-results.json
+          if-no-files-found: warn
       - name: diagnostics
         if: failure()
         run: |
