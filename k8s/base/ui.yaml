@@ -37,6 +37,7 @@ spec:
           livenessProbe:
             httpGet: {path: /healthz, port: 8080}
             periodSeconds: 20
+          # kubectl top (docs/evidence/kubectl-top-steady.txt): 1m / 4Mi; nginx serving static files
           resources:
             requests:
               cpu: 5m
