@@ -52,6 +52,7 @@ manifests, run on every CI build), and `tests/system/` (live cluster, `make syst
 | 3.4 Retrieved text is data; poisoned-chunk test | `prompt.py` (delimiters, `neutralise`) | `api/tests/test_injection.py` (3 tests incl. live model) | `docs/FAILURE-ANALYSIS.md` |
 | 3.4 Temperature 0–0.3 with a reason | ConfigMap `TEMPERATURE: "0.2"` + comment | `tests/test_manifests.py::test_configmap_carries_every_tunable_and_the_pin` | |
 | 3.5 Provider behind an interface, one-file swap | `providers/llm/{base,ollama,hosted,stub}.py` | `test_providers.py::test_provider_selection_is_one_config_key` | `docs/adr/0004-...md` |
+| 3.5 Bonus: ollama-incluster (Deployment, PVC for weights, startupProbe failureThreshold 30) | `k8s/components/ollama-incluster/ollama.yaml`, `k8s/overlays/incluster` | `tests/test_manifests.py` (incluster overlay) | `docs/evidence/ollama-incluster.txt` |
 
 ## 4 · Kubernetes
 

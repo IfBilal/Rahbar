@@ -59,8 +59,13 @@ defaults, so the UI, `eval/run_eval.py` and the starter tests are unaffected:
 experiment A).
 
 ## Options considered
-- **ollama-incluster**: needs 8 GB for minikube and a startupProbe with failureThreshold 30
-  while weights load. Our 6 GB laptop budget goes to the three API replicas instead.
+- **ollama-incluster** (bonus, built and run, not the default): an Ollama Deployment with
+  a PVC for the weights and a startupProbe with failureThreshold 30, as
+  `k8s/components/ollama-incluster` behind `k8s/overlays/incluster`. It ran on our 6 GiB
+  minikube: answered and declined through the Ingress, re-indexed all 532 chunks, and
+  kept the weights across a pod restart (`docs/evidence/ollama-incluster.txt`). It is not
+  the default because it puts about 3 GiB of weights and minutes of CPU per answer inside
+  the cluster next to three API replicas; the case study asks for 8 GB for this mode.
 - **A hosted model as default**: faster, but our corpus questions would leave the machine,
   and CI would depend on a third party.
 - **No `format`, parse prose**: works most of the time, which is the problem.
