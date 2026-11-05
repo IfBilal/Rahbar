@@ -10,6 +10,7 @@ replicas without a restart. Without a registry (the week-1 dummy index) it reads
 from __future__ import annotations
 
 import logging
+import math
 import re
 import threading
 import time
@@ -21,6 +22,8 @@ import httpx
 from ..config import Settings
 from ..schemas import Passage
 from .embedder import OllamaEmbedder
+from .tables import matches as table_matches
+from .tables import quantitative
 
 log = logging.getLogger("rahbar.retrieval")
 
@@ -84,6 +87,8 @@ class ChromaRetriever:
         self.embedder = embedder or OllamaEmbedder(settings.ollama_url, settings.embed_model)
         self._lock = threading.Lock()
         self._cached: tuple[float, Any, IndexInfo] | None = None
+        self._table_lock = threading.Lock()
+        self._tables: tuple[str, list[tuple[str, str, dict[str, Any]]]] | None = None
 
     # ------------------------------------------------------------------ connection
     @property
@@ -153,7 +158,56 @@ class ChromaRetriever:
                 exact = self._query(col, vector, k, where, {"$contains": term})
                 passages = exact + [p for p in passages
                                     if p.chunk_id not in {e.chunk_id for e in exact}]
+        if self.settings.exact_term_assist and quantitative(question) and not exact_terms(question):
+            try:
+                table = self._matching_table(col, info, vector, question, current_only)
+                if table is not None and table.score >= self.settings.relevance_floor:
+                    passages = [table] + [p for p in passages if p.chunk_id != table.chunk_id]
+            except Exception as exc:  # dense retrieval remains available on an assist failure
+                log.warning("table retrieval unavailable", extra={"error": type(exc).__name__})
         return passages[:k]
+
+    def _matching_table(self, col: Any, info: IndexInfo, vector: list[float],
+                        question: str, current_only: bool) -> Passage | None:
+        # Read only table-bearing chunks once per generation, not on every question.
+        with self._table_lock:
+            if self._tables is None or self._tables[0] != info.collection:
+                raw = col.get(where_document={"$contains": "|"},
+                              include=["documents", "metadatas"])
+                entries = [(str(cid), str(text or ""), meta or {})
+                           for cid, text, meta in zip(raw["ids"], raw["documents"], raw["metadatas"])]
+                self._tables = (info.collection, entries)
+            entries = self._tables[1]
+        candidates = [(cid, text, meta) for cid, text, meta in entries
+                      if (not current_only or not meta.get("superseded", False))
+                      and table_matches(question, text, str(meta.get("section", "")),
+                                        str(meta.get("doc_version", "")), str(meta.get("source", "")))]
+        if not candidates:
+            return None
+        vectors = col.get(ids=[cid for cid, _, _ in candidates], include=["embeddings"])
+        embeddings = vectors.get("embeddings")
+        if embeddings is None:
+            return None
+        by_id = {str(cid): emb for cid, emb in zip(vectors["ids"], embeddings)}
+        magnitude = math.sqrt(sum(x * x for x in vector))
+        best: Passage | None = None
+        for cid, text, meta in candidates:
+            emb = by_id.get(cid)
+            if emb is None or len(emb) != len(vector) or not magnitude:
+                continue
+            norm = math.sqrt(sum(float(x) ** 2 for x in emb))
+            if not norm:
+                continue
+            score = sum(x * float(y) for x, y in zip(vector, emb)) / (magnitude * norm)
+            if not math.isfinite(score) or (best is not None and score <= best.score):
+                continue
+            page = meta.get("page")
+            best = Passage(chunk_id=cid, text=text, source=str(meta.get("source", "?")),
+                           section=str(meta.get("section", "?")),
+                           page=int(page) if page is not None else None, score=round(score, 4),
+                           doc_version=str(meta.get("doc_version", "")) or None,
+                           superseded=bool(meta.get("superseded", False)))
+        return best
 
     @staticmethod
     def _query(col: Any, vector: list[float], k: int, where: dict | None,

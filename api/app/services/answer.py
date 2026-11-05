@@ -61,7 +61,7 @@ def cache_scope(generation: str, provider: str, settings: Settings) -> str:
     knobs = (f"{PROMPT_VERSION}|{provider}|{settings.llm_model}|{settings.temperature}|"
              f"{settings.relevance_floor}|"
              f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}|"
-             f"{settings.superseded_filter}|retrieval-order-v1")
+             f"{settings.superseded_filter}|retrieval-order-v1|table-assist-v1")
     digest = hashlib.sha256(knobs.encode()).hexdigest()[:10]
     return f"{generation}:{settings.embed_model}:{digest}"
 

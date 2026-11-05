@@ -1,0 +1,55 @@
+"""Identify numeric table rows that directly match a quantitative question.
+
+This is a narrow lexical assist to dense retrieval, not a source of answers. A match
+requires a meaningful word in the section heading and a complete row label in the
+question. The retriever still computes the real cosine score and applies its usual floor.
+"""
+
+from __future__ import annotations
+
+import re
+
+_WORD = re.compile(r"[a-z0-9]+")
+_NUMBER = re.compile(r"\d")
+_QUANTITY = re.compile(r"\b(?:how many|how much|number of|total number|count of)\b", re.I)
+_YEAR = re.compile(r"\b((?:19|20)\d{2})(?:\s*[-/]\s*(\d{2,4}))?\b")
+_GENERIC = frozenset({"about", "according", "academic", "campus", "count", "data", "details",
+                      "information", "members", "other", "others", "report", "rules",
+                      "student", "students", "summary", "table", "total", "university"})
+
+
+def quantitative(question: str) -> bool:
+    return bool(_QUANTITY.search(question))
+
+
+def _words(text: str) -> set[str]:
+    return {x for x in _WORD.findall(text.lower()) if len(x) >= 4 and x not in _GENERIC}
+
+
+def _years(text: str) -> set[str]:
+    years: set[str] = set()
+    for start, end in _YEAR.findall(text):
+        years.add(start)
+        if end:
+            years.add(start[:2] + end if len(end) == 2 else end)
+    return years
+
+
+def matches(question: str, text: str, section: str, version: str, source: str) -> bool:
+    """True only for a matching heading, numeric row label and explicit edition, if any."""
+    if not quantitative(question):
+        return False
+    question_words = _words(question)
+    if not (_words(section.rsplit(">", 1)[-1]) & question_words):
+        return False
+    requested_years = _years(question)
+    if requested_years and not requested_years <= _years(version + " " + source):
+        return False
+    for line in text.splitlines():
+        cells = line.split("|")
+        if len(cells) < 3 or sum(bool(_NUMBER.search(c)) for c in cells[1:]) < 2:
+            continue
+        label = _words(cells[0])
+        if label and label <= question_words:
+            return True
+    return False
