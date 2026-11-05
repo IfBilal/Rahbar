@@ -80,6 +80,8 @@ def test_api_has_three_replicas_three_probes_and_zero_unavailable(objs) -> None:
     assert c["lifecycle"]["preStop"]["exec"]["command"][0] == "sleep"
     # longer than the slowest generation we measured (~190 s), or rollouts drop answers
     assert pod_spec(api)["terminationGracePeriodSeconds"] >= 200
+    # pods wait (unready) for the first index; a full index takes up to ~800 s measured
+    assert api["spec"]["progressDeadlineSeconds"] >= 1500
 
 
 def test_every_container_has_requests_and_limits(objs) -> None:
