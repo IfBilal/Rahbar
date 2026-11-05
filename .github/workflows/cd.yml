@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cd-main
+  group: ${{ inputs.full_eval && format('cd-eval-{0}', github.ref) || 'cd-main' }}
   cancel-in-progress: false      # never cancel a deploy half-way
 
 env:
