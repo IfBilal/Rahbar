@@ -31,13 +31,16 @@ carry the command that produced them and a UTC timestamp.
 | `ollama-incluster.txt` | bonus: Ollama Deployment + PVC in the cluster; answers and declines through the Ingress, a 532-chunk re-index through it, and weights surviving a pod restart | `kubectl apply -k k8s/overlays/incluster`, `scripts/smoke.py` |
 | `cd-run.txt` | successful branch deployment with real model, covered answer and abstention | GitHub Actions run 41969926861 |
 | `cd-main.txt` | successful main-branch publication, deployment and Ingress smoke test | GitHub Actions run 41972097173 |
-| `branch-protection.json` | required approvals, status checks and administrator enforcement | GitHub branch protection API, 5 November 2026 |
+| `branch-protection.json`, `branch-protection.png` | required approvals, status checks and administrator enforcement | GitHub branch protection API and settings page, 5 November 2026 |
 | `check-submission.txt` | the starter's checker output on the final tree | `python scripts/check_submission.py` |
 | `clean-clone.txt` | README path from a fresh clone to an answered question | the README commands, in a new directory |
 
-The branch-protection settings are recorded in `branch-protection.json`; a settings
-screenshot remains optional additional visual evidence. The successful main-branch CD run
-and Docker Hub links are recorded in `cd-main.txt`.
+The branch-protection settings are recorded in `branch-protection.json` and
+`branch-protection.png`. The successful main-branch CD run and Docker Hub links are
+recorded in `cd-main.txt`.
 
-The red and green screenshots show the actual CI run pages, not the historical pull-request
-merge button. A screenshot of the disabled merge button was not captured at the time.
+The PR #1 red and green screenshots show the actual CI run pages; its historical merge
+button was not captured. `merge-blocked.png` captures PR #8 with the required e2e-eval
+check failing and merging blocked. It also shows that the branch was behind and required
+a review, which were additional blockers at the time. `merge-green.png` captures PR #8
+after the floor was restored and all six checks passed; review was still required.
