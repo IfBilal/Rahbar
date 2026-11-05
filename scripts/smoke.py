@@ -42,6 +42,8 @@ def main() -> int:
           f"{len(r['citations'])} citations, {len(r['retrieved'])} retrieved")
     if status != 200 or not r["retrieved"]:
         failures.append("the covered question retrieved nothing")
+    if not r["answered_from_context"]:
+        failures.append("the covered question was not answered from context")
     if r["answered_from_context"] and not r["citations"]:
         failures.append("a grounded answer without citations")
     bad = [c for c in r["citations"] if (c["source"], c["section"], c["page"]) not in retrieved]
