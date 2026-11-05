@@ -88,7 +88,7 @@ class ChromaRetriever:
         self._lock = threading.Lock()
         self._cached: tuple[float, Any, IndexInfo] | None = None
         self._table_lock = threading.Lock()
-        self._tables: tuple[str, list[tuple[str, str, dict[str, Any]]]] | None = None
+        self._tables: tuple[str, bool, list[tuple[str, str, dict[str, Any]]]] | None = None
 
     # ------------------------------------------------------------------ connection
     @property
@@ -171,13 +171,14 @@ class ChromaRetriever:
                         question: str, current_only: bool) -> Passage | None:
         # Read only table-bearing chunks once per generation, not on every question.
         with self._table_lock:
-            if self._tables is None or self._tables[0] != info.collection:
-                raw = col.get(where_document={"$contains": "|"},
+            if self._tables is None or self._tables[:2] != (info.collection, current_only):
+                raw = col.get(where={"superseded": False} if current_only else None,
+                              where_document={"$contains": "|"},
                               include=["documents", "metadatas"])
                 entries = [(str(cid), str(text or ""), meta or {})
                            for cid, text, meta in zip(raw["ids"], raw["documents"], raw["metadatas"])]
-                self._tables = (info.collection, entries)
-            entries = self._tables[1]
+                self._tables = (info.collection, current_only, entries)
+            entries = self._tables[2]
         candidates = [(cid, text, meta) for cid, text, meta in entries
                       if (not current_only or not meta.get("superseded", False))
                       and table_matches(question, text, str(meta.get("section", "")),

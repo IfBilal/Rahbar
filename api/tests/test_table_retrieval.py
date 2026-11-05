@@ -35,11 +35,12 @@ class TableCollection(FakeCollection):
         self.table_embedding = table_embedding
         self.table_reads = 0
 
-    def get(self, ids=None, where_document=None, include=None):
+    def get(self, ids=None, where=None, where_document=None, include=None):
         if ids is not None:
             return {'ids': ids, 'embeddings': [self.table_embedding for _ in ids]}
         self.table_reads += 1
-        rows = [r for r in self.rows if '|' in r['text']]
+        rows = [r for r in self.rows if '|' in r['text']
+                and (where is None or r['meta']['superseded'] is False)]
         return {'ids': [r['id'] for r in rows], 'documents': [r['text'] for r in rows],
                 'metadatas': [r['meta'] for r in rows]}
 
@@ -111,3 +112,9 @@ def test_table_assist_respects_exact_assist_switch_and_clause_priority():
     retriever.settings = replace(retriever.settings, exact_term_assist=True)
     retriever.retrieve(QUESTION + ' Under clause 1.21?', 2)
     assert col.table_reads == 0
+
+
+def test_explicit_history_can_match_a_superseded_table():
+    retriever, _ = make_retriever([0.1, 0.1, 0.1], superseded=True)
+    result = retriever.retrieve('Under the older report, ' + QUESTION, 2)
+    assert result[0].chunk_id == 'c3' and result[0].superseded
