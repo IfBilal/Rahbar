@@ -28,8 +28,9 @@ carry the command that produced them and a UTC timestamp.
 | `eval-run1-…`, `eval-run2-cache-hits.json`, `eval-run3-…` | the evaluation runs before the shipped one (`eval/results.json`) | `eval/run_eval.py` |
 | `gate-demo.txt` | the CI eval gate failing on PR #1, then passing after the fix | GitHub Actions runs 41891435694 and 41892555788 |
 | `ci-runs.txt` | CI run URLs per commit | `gh run list` |
+| `branch-protection.json` | required approvals, status checks and administrator enforcement | GitHub branch protection API, 5 November 2026 |
 | `check-submission.txt` | the starter's checker output on the final tree | `python scripts/check_submission.py` |
 | `clean-clone.txt` | README path from a fresh clone to an answered question | the README commands, in a new directory |
 
-Not here, because only the repository owner can produce them: the branch-protection
-screenshot and a successful `cd.yml` run with Docker Hub links (see `README.md`, CI/CD).
+A branch-protection screenshot and a successful `cd.yml` run with Docker Hub links remain
+to be captured after verification (see `README.md`, CI/CD).
