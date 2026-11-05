@@ -118,3 +118,36 @@ def test_explicit_history_can_match_a_superseded_table():
     retriever, _ = make_retriever([0.1, 0.1, 0.1], superseded=True)
     result = retriever.retrieve('Under the older report, ' + QUESTION, 2)
     assert result[0].chunk_id == 'c3' and result[0].superseded
+
+
+def test_generated_numeric_answer_must_cite_the_matching_table():
+    from app.schemas import Passage
+    from app.services.answer import generate_checked
+    from .fakes import ScriptedProvider, grounded
+
+    table = Passage(chunk_id='table', text=TABLE, source='annual-report-2023-24.pdf',
+                    section='Faculty Summary', page=13, doc_version='2023-24', score=0.68)
+    other = Passage(chunk_id='other', text='Islamabad campus description', source='other.pdf',
+                    section='Campus', page=1, doc_version='2023-24', score=0.8)
+    wrong = grounded(other).model_copy(update={'answer': '236 [B]'})
+    right = grounded(table).model_copy(update={'answer': '236 [A]'})
+    provider = ScriptedProvider(wrong, right)
+    answer, reason, attempts = generate_checked(QUESTION, [table, other], provider)
+    assert reason is None and attempts == 2
+    assert answer is not None and answer.citations[0].section == 'Faculty Summary'
+    assert 'numeric table' in provider.calls[1]
+
+
+def test_repeated_wrong_table_citation_falls_back():
+    from app.schemas import Passage
+    from app.services.answer import generate_checked
+    from .fakes import ScriptedProvider, grounded
+
+    table = Passage(chunk_id='table', text=TABLE, source='annual-report-2023-24.pdf',
+                    section='Faculty Summary', page=13, doc_version='2023-24', score=0.68)
+    other = Passage(chunk_id='other', text='Islamabad campus description', source='other.pdf',
+                    section='Campus', page=1, doc_version='2023-24', score=0.8)
+    wrong = grounded(other).model_copy(update={'answer': '236 [B]'})
+    answer, reason, attempts = generate_checked(QUESTION, [table, other],
+                                                ScriptedProvider(wrong, wrong))
+    assert answer is None and attempts == 2 and reason and 'numeric table' in reason

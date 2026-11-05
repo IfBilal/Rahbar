@@ -25,6 +25,7 @@ from ..config import Settings
 from ..logjson import request_id_var
 from ..providers.llm.base import LLMProvider, usage_var
 from ..retrieval.base import Retriever
+from ..retrieval.tables import matches as table_matches
 from ..routes import metrics as m
 from ..schemas import Answer, AskResponse, Passage, RetrievedRef
 from .cache import SemanticCache
@@ -61,7 +62,7 @@ def cache_scope(generation: str, provider: str, settings: Settings) -> str:
     knobs = (f"{PROMPT_VERSION}|{provider}|{settings.llm_model}|{settings.temperature}|"
              f"{settings.relevance_floor}|"
              f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}|"
-             f"{settings.superseded_filter}|retrieval-order-v1|table-assist-v1")
+             f"{settings.superseded_filter}|retrieval-order-v1|table-assist-v2")
     digest = hashlib.sha256(knobs.encode()).hexdigest()[:10]
     return f"{generation}:{settings.embed_model}:{digest}"
 
@@ -76,7 +77,19 @@ def generate_checked(question: str, passages: list[Passage],
     for attempt in range(1, RETRIES + 2):
         try:
             raw = provider.generate(question, passages, retry_reason=reason)
-            return check_answer(raw, passages), None, attempt
+            answer = check_answer(raw, passages)
+            # When a matching numeric row is in the evidence, an answer to this
+            # quantitative question must cite that table, not an unrelated passage.
+            matched = [(i, p) for i, p in enumerate(passages)
+                       if table_matches(question, p.text, p.section, p.doc_version or "", p.source)]
+            if answer.answered_from_context and matched and not any(
+                c.source == p.source and c.section == p.section and c.page == p.page
+                for c in answer.citations for _, p in matched
+            ):
+                labels = ", ".join(chr(ord("A") + i) for i, _ in matched)
+                raise GuardError(f"The matching numeric table is evidence {labels}; "
+                                 "cite the table passage that supports the answer.")
+            return answer, None, attempt
         except (ValidationError, GuardError, ValueError) as exc:
             reason = f"{type(exc).__name__}: {str(exc)[:300]}"
         except Exception as exc:  # timeout, connection refused, HTTP 5xx from the model host
