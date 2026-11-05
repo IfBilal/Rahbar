@@ -61,7 +61,7 @@ def cache_scope(generation: str, provider: str, settings: Settings) -> str:
     knobs = (f"{PROMPT_VERSION}|{provider}|{settings.llm_model}|{settings.temperature}|"
              f"{settings.relevance_floor}|"
              f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}|"
-             f"{settings.superseded_filter}")
+             f"{settings.superseded_filter}|retrieval-order-v1")
     digest = hashlib.sha256(knobs.encode()).hexdigest()[:10]
     return f"{generation}:{settings.embed_model}:{digest}"
 
@@ -128,7 +128,9 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
 
     # relevance floor: nothing relevant enough means an honest abstention, no model call
     relevant = [p for p in passages if p.score >= settings.relevance_floor]
-    relevant = sorted(relevant, key=lambda p: p.score, reverse=True)[:settings.max_context_passages]
+    # Keep the retriever ranking: exact-term matches may intentionally precede
+    # higher-scoring semantic matches. The floor still applies to every passage.
+    relevant = relevant[:settings.max_context_passages]
     if not relevant:
         m.ABSTENTIONS.labels(reason="below_relevance_floor").inc()
         response = _declined(ABSTAIN_TEXT, passages, provider.name)
