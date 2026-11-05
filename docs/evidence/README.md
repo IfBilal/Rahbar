@@ -42,4 +42,5 @@ and Docker Hub links are recorded in `cd-main.txt`.
 The PR #1 red and green screenshots show the actual CI run pages; its historical merge
 button was not captured. `merge-blocked.png` captures PR #8 with the required e2e-eval
 check failing and merging blocked. It also shows that the branch was behind and required
-a review, which were additional blockers at the time.
+a review, which were additional blockers at the time. `merge-green.png` captures PR #8
+after the floor was restored and all six checks passed; review was still required.
