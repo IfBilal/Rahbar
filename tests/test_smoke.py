@@ -1,10 +1,15 @@
 """The deployment smoke gate must reject both false refusals and false answers."""
 
+import importlib.util
 import sys
+from pathlib import Path
 
 import pytest
 
-from scripts import smoke
+spec = importlib.util.spec_from_file_location("rahbar_smoke", Path(__file__).resolve().parents[1] / "scripts/smoke.py")
+assert spec and spec.loader
+smoke = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(smoke)
 
 
 @pytest.mark.parametrize(
