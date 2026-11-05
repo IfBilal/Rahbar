@@ -1,6 +1,7 @@
 # Images from Docker Hub, tagged by commit SHA, never :latest (section 6). cd.yml rewrites
-# the three tags to ${{ github.sha }} with `kustomize edit set image` before it deploys;
-# the value committed here is the last SHA that was released by hand.
+# the repository and the three tags to docker.io/<DOCKERHUB_USERNAME>/...:${{ github.sha }}
+# with `kustomize edit set image` before it deploys. The committed values are placeholders
+# that only make the overlay render and pass kubeconform; no image was pushed under them.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

@@ -53,6 +53,7 @@ spec:
           livenessProbe:
             tcpSocket: {port: 6379}
             periodSeconds: 20
+          # kubectl top (docs/evidence/kubectl-top-steady.txt): 9m / 10Mi; limit covers maxmemory 200mb + AOF rewrite
           resources:
             requests:
               cpu: 20m
