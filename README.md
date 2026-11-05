@@ -43,7 +43,7 @@ Full design: `docs/ARCHITECTURE.md`.
 | --- | --- | --- |
 | Corpus | 9 public documents, 279 PDF pages + 2 web pages, 532 chunks | `docs/CORPUS.md` |
 | recall@3 / recall@5 (19-question golden set) | 0.906 / 0.906 (exact terms 0.833, version 1.0) | `eval/results.json` |
-| Citation validity / must-abstain correctness | 100% / 100%; 14 of 16 answers correct on manual review | `eval/results.json`, `docs/PIPELINE.md` |
+| Citation validity / must-abstain correctness | 100% / 100%; 15 of 16 answerable questions matched their expected terms (q09 remains incorrect) | `eval/results.json`, `docs/PIPELINE.md` |
 | Chunking shipped | 300 tokens, 40 overlap (best recall@3 of three measured settings) | `docs/PIPELINE.md` |
 | Semantic cache threshold | 0.95, the lowest with zero false hits | `docs/evidence/cache-threshold.txt` |
 | Indexer peak memory | 910 Mi (limit 1536 Mi) | `docs/evidence/kubectl-top-indexer-run.txt` |
@@ -171,8 +171,11 @@ declined, ≥ 95% citation validity).
 
 `cd.yml` runs on every push to `main`: test → build and push the three images to Docker
 Hub tagged with the commit SHA (`needs: test`) → deploy them to an ephemeral kind cluster
-with the real corpus, wait for `rollout status`, and smoke-test through the Ingress
-(`needs: build-push`). It deploys by SHA, never `:latest`. It needs the repository secrets
+with the real corpus and the real model (`llama3.2:3b` on the runner, ollama-host mode),
+wait for `rollout status`, and smoke-test through the Ingress: a cited answer and a declined
+absent topic (`needs: build-push`). The first run (41967840446) deployed and served but
+failed the smoke test: it still generated with the CI stub, which cannot decline a topic
+whose passages clear the relevance floor. The deploy now uses the real model. It deploys by SHA, never `:latest`. It needs the repository secrets
 `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (an access token, not a password).
 
 `main` is protected: pull request, passing CI and one approval. Work happens on `dev`.

@@ -1,0 +1,10 @@
+Successful main-branch CD run
+Run: https://github.com/IfBilal/Rahbar/actions/runs/41972097173
+Commit: 64b3b5085b90c62bb150358fe69346dbcab0a362
+Result: success; test, build-push and deploy completed
+Smoke output (2026-11-05 05:24:39 UTC):
+GET / -> 200, 9154 bytes
+POST /api/ask (covered) -> 200, answered_from_context=True, 1 citations, 5 retrieved
+POST /api/ask (absent) -> 200, answered_from_context=False
+smoke test passed
+Docker Hub images: https://hub.docker.com/u/ifbilal (rahbar-api, rahbar-ui, rahbar-indexer; tagged with the commit SHA).
