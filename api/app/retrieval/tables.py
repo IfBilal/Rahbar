@@ -27,12 +27,8 @@ def _words(text: str) -> set[str]:
 
 
 def _years(text: str) -> set[str]:
-    years: set[str] = set()
-    for start, end in _YEAR.findall(text):
-        years.add(start)
-        if end:
-            years.add(start[:2] + end if len(end) == 2 else end)
-    return years
+    return {year for start, end in _YEAR.findall(text)
+            for year in (start, start[:2] + end if len(end) == 2 else end) if year}
 
 
 def matches(question: str, text: str, section: str, version: str, source: str) -> bool:
