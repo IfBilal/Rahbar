@@ -73,7 +73,7 @@ jobs:
   deploy:
     needs: build-push                 # deploys exactly the images this run published
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - name: install kind and kustomize
@@ -89,6 +89,10 @@ jobs:
           OLLAMA_HOST=0.0.0.0:11434 nohup "$HOME/ollama/bin/ollama" serve > ollama.log 2>&1 &
           for _ in $(seq 1 30); do curl -sf localhost:11434/api/version && break; sleep 1; done
           OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull nomic-embed-text
+          # The deployed product generates with the real model: with the stub, abstention
+          # rests on the relevance floor alone, and absent topics such as hostel curfews clear
+          # it (PIPELINE.md, Relevance floor); the model is the second layer that declines.
+          OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull llama3.2:3b
       - name: pin the prod overlay to this commit's images (never :latest)
         env:
           REPO: docker.io/${{ secrets.DOCKERHUB_USERNAME }}
@@ -97,6 +101,9 @@ jobs:
           kustomize edit set image "rahbar-api=$REPO/rahbar-api:$GITHUB_SHA" \
             "rahbar-ui=$REPO/rahbar-ui:$GITHUB_SHA" "rahbar-indexer=$REPO/rahbar-indexer:$GITHUB_SHA"
           kustomize edit add component ../../components/ephemeral-cluster
+          kustomize edit add patch --kind ConfigMap --name rahbar-config \
+            --patch '[{"op":"replace","path":"/data/LLM_PROVIDER","value":"ollama-host"}]'
+          kustomize build . | grep -E "LLM_PROVIDER|OLLAMA_URL"
           kustomize build . | grep -E "image: .*rahbar-" | sort -u
       - name: deploy to an ephemeral kind cluster (real corpus, fetched by the indexer Job)
         run: KUBECONFIG_E2E=$HOME/.kube/config PRELOADED=0 INDEX_TIMEOUT=1500s scripts/e2e-kind.sh prod
