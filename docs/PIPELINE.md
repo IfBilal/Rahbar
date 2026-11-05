@@ -225,6 +225,25 @@ evidence above it with margin. It declines a03 before any model call, and declin
 fixture's hostel question (best 0.587) deterministically. a01 and a02 clear the floor and
 must be declined by the model, the second layer, which the gate measures at 100%.
 
+## Numeric table retrieval assist
+
+For quantitative questions, the retriever can identify a numeric table row when the
+question contains both the row label and a meaningful word from the section heading.
+An explicit year must match the document edition, and superseded documents remain
+filtered unless the question asks for history. The candidate is promoted only when its
+actual cosine similarity clears `RELEVANCE_FLOOR`; the logged score remains cosine
+similarity. Table-bearing chunks are cached per index generation, and a failed assist
+falls back to dense retrieval. The existing `EXACT_TERM_ASSIST` switch disables this
+assist too; clause and course-code matches retain priority. The answer cache scope changes
+with this implementation, so old answers are not reused.
+
+A local diagnostic using the extracted 2023-24 Faculty Summary, the pinned
+`nomic-embed-text` model and Chroma 1.0.12 retrieved the matching table at cosine
+**0.6843**, above the configured 0.60 floor, even with two higher-scoring decoys.
+This diagnostic used a different Ollama runtime version and is not a replacement for
+the full-cluster golden-set evaluation. The previous real-model results below remain
+the baseline until the new deployment has been measured.
+
 ## Latest real-model evaluation (5 November 2026)
 
 After preserving the retriever's ranking in the model context, the full golden set was
