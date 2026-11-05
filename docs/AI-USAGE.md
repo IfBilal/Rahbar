@@ -8,7 +8,8 @@ measured and reviewed by us; we can explain every line of it.
 | --- | --- | --- |
 | **Claude Code (Anthropic, Claude Opus model), as a coding agent in the terminal**, directed by Taimoor | Most of the implementation: the five indexer stages, the Chroma retriever, Ollama and hosted providers, prompt, citation guard, semantic cache, readiness and metrics; `eval/run_eval.py`'s four functions; all Dockerfiles, Kubernetes manifests, the two workflows and the helper scripts; the test suites (about 250 tests); first drafts of the ADRs and of these reports. | The agent's first versions were wrong in ways that only running the system showed. Each change below is in the git history with the measurement that forced it. |
 | An AI chat assistant, used by Bilal for planning (the planning pack committed in `f0f080c`) | The 25 planning guides in `docs/` (`AGENTS.md`, `PRD.md`, `PHASES.md`, `CRITICAL-PATH.md`, `INTERFACE-CONTRACTS.md`, ...): the requirement traceability R01–R30, the work breakdown, the two-developer split, candidate chunk settings (300/40, 400/60, 550/80), the generation-pointer idea for safe re-indexing. | We used the plans as checklists, not as truth: every candidate value was measured before use, and the PDF overruled the plans where they differed. The draft ADRs were moved to their required paths and rewritten as accepted decisions. The plan's "versioned collections + registry pointer" proposal was implemented and tested. |
-| GitHub Copilot / ChatGPT | Not used. | |
+| **OpenAI Codex**, directed by Bilal | Reviewed the release, configured branch protection, diagnosed the CD smoke-test failure, and implemented the CD and retrieval-ranking fixes with a regression test. | The team must review the changes and validate the new deployment and real-model evaluation; existing measurements predate these fixes. |
+| GitHub Copilot | Not reported as used. | |
 
 ## What we changed after running it (AI output → measured fix)
 
