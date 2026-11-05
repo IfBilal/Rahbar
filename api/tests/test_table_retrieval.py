@@ -151,3 +151,20 @@ def test_repeated_wrong_table_citation_falls_back():
     answer, reason, attempts = generate_checked(QUESTION, [table, other],
                                                 ScriptedProvider(wrong, wrong))
     assert answer is None and attempts == 2 and reason and 'numeric table' in reason
+
+
+def test_table_in_citation_list_cannot_hide_an_unrelated_inline_citation():
+    from app.schemas import Passage
+    from app.services.answer import generate_checked
+    from .fakes import ScriptedProvider, grounded
+
+    table = Passage(chunk_id='table', text=TABLE, source='annual-report-2023-24.pdf',
+                    section='Faculty Summary', page=13, doc_version='2023-24', score=0.68)
+    other = Passage(chunk_id='other', text='Islamabad campus description', source='other.pdf',
+                    section='Campus', page=1, doc_version='2023-24', score=0.8)
+    wrong = grounded(table).model_copy(update={'answer': '236 [B]'})
+    right = grounded(table).model_copy(update={'answer': '236 [A]'})
+    answer, reason, attempts = generate_checked(QUESTION, [table, other],
+                                               ScriptedProvider(wrong, right))
+    assert reason is None and attempts == 2
+    assert answer is not None and '[annual-report-2023-24.pdf / Faculty Summary]' in answer.answer

@@ -62,7 +62,7 @@ def cache_scope(generation: str, provider: str, settings: Settings) -> str:
     knobs = (f"{PROMPT_VERSION}|{provider}|{settings.llm_model}|{settings.temperature}|"
              f"{settings.relevance_floor}|"
              f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}|"
-             f"{settings.superseded_filter}|retrieval-order-v1|table-assist-v2")
+             f"{settings.superseded_filter}|retrieval-order-v1|table-assist-v3")
     digest = hashlib.sha256(knobs.encode()).hexdigest()[:10]
     return f"{generation}:{settings.embed_model}:{digest}"
 
@@ -84,6 +84,7 @@ def generate_checked(question: str, passages: list[Passage],
                        if table_matches(question, p.text, p.section, p.doc_version or "", p.source)]
             if answer.answered_from_context and matched and not any(
                 c.source == p.source and c.section == p.section and c.page == p.page
+                and f"[{p.source} / {p.section}]" in answer.answer
                 for c in answer.citations for _, p in matched
             ):
                 labels = ", ".join(chr(ord("A") + i) for i, _ in matched)
