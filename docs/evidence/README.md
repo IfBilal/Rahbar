@@ -9,7 +9,7 @@ carry the command that produced them and a UTC timestamp.
 | `corpus-pdffonts-and-pages.txt` | 9 documents, 279 pages, the two scans, 9/9 SHA-256 matches | `pdfinfo`, `pdffonts`, `corpus/fetch.py --verify` |
 | `extraction-before-after.txt` | mangled table and off-page text, before and after our extractor | `extract.py::page_text` vs plain pdfplumber |
 | `kubectl-top-indexer-run.txt` | indexer peak memory 910 Mi (limit 1536 Mi) | `kubectl top pods` every 10 s during a full index |
-| `hpa.txt` | HPA reads a value (3%/70%) and API CPU stays ~3m while generations are in flight | `kubectl top` + `kubectl get hpa` every 15 s during the evaluation |
+| `hpa.txt` | HPA reads a value (3%/70%) and API CPU stays ~3m while generations are in flight. The first 4 of 110 samples show `<unknown>/70%`: they were taken during a rollout, before metrics-server had a sample from the new pods (`ENGINEERING-NOTES.md`, note 3) | `kubectl top` + `kubectl get hpa` every 15 s during the evaluation |
 | `networkpolicy-tests.txt` | ui → chroma and ui → redis denied, api → chroma/redis allowed, ui → api allowed, DNS works | `kubectl exec` connections from inside the pods |
 | `pin-mismatch.txt` | changed `EMBED_MODEL`: new pod 0/1 READY, 503 naming the pin, conflict logged, old pods serving | `scripts/ops-evidence.sh pin` |
 | `rollout-and-endpoints.txt` | set image → rollout status → undo with 0 failed requests; 4 endpoints after scaling | `scripts/ops-evidence.sh rollout` |
@@ -34,6 +34,8 @@ carry the command that produced them and a UTC timestamp.
 | `branch-protection.json`, `branch-protection.png` | required approvals, status checks and administrator enforcement | GitHub branch protection API and settings page, 5 November 2026 |
 | `check-submission.txt` | the starter's checker output on the final tree | `python scripts/check_submission.py` |
 | `clean-clone.txt` | README path from a fresh clone to an answered question | the README commands, in a new directory |
+| `clean-clone-final.txt` | the same README path on the final `main` (137a97a): 313 tests, 532 chunks, a cited answer and a decline through the Ingress, all 7 live system tests (pin test included), turns stored in Redis, HPA at 6%/70% | the README commands, in a new directory |
+| `empty-index-readiness.txt` | with no index at all, the API pods stay 0/1 READY (503 naming the missing collection, no endpoints) until the indexer Job publishes; then 3 endpoints and answers | `kubectl apply -k k8s/overlays/dev` after wiping the namespace and the provisioner's data directory |
 
 The branch-protection settings are recorded in `branch-protection.json` and
 `branch-protection.png`. The successful main-branch CD run and Docker Hub links are
