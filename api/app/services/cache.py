@@ -28,6 +28,7 @@ log = logging.getLogger("rahbar.cache")
 
 PREFIX = "rahbar:cache:"
 SCOPE_KEY = PREFIX + "current-scope"
+TURNS_KEY = "rahbar:turns"          # outside PREFIX: a re-index must not erase the turn history
 
 
 def cosine(a: list[float], b: list[float]) -> float:
@@ -85,6 +86,13 @@ class SemanticCache:
         if best is not None and best_score >= self.threshold:
             return best["response"], best_score
         return None, best_score
+
+    def record_turn(self, turn: dict) -> None:
+        """Step 8 of 3.2: keep every turn (question, answer, evidence ids), newest first,
+        bounded by max_entries and expiring after ttl like the cache entries."""
+        self.redis.lpush(TURNS_KEY, json.dumps(turn))
+        self.redis.ltrim(TURNS_KEY, 0, self.max_entries - 1)
+        self.redis.expire(TURNS_KEY, self.ttl)
 
     def store(self, scope: str, question: str, vector: list[float], response: dict) -> None:
         key = self.entries_key(scope)

@@ -153,3 +153,4 @@ questions:
     relevant:
       - {source: academic-rules-handbook-jun-2026.pdf, section: "Attendance Requirements"}
     expect: "100%"
+    must_not: ["attendance is optional", "attendance is now optional"]

@@ -48,3 +48,34 @@ def test_store_is_bounded_and_expires() -> None:
     key = cache.entries_key("s")
     assert [json.loads(x)["question"] for x in redis.kv[key]] == ["q4", "q3", "q2"]
     assert redis.ttl[key] == 60
+
+
+def test_turns_are_stored_bounded_and_survive_a_reindex() -> None:
+    from app.services.cache import TURNS_KEY
+
+    redis = FakeRedis()
+    cache = SemanticCache(redis, threshold=0.9, max_entries=2, ttl_seconds=60)
+    for i in range(3):
+        cache.record_turn({"request_id": f"r{i}", "question": f"q{i}"})
+    kept = [json.loads(x)["request_id"] for x in redis.lrange(TURNS_KEY, 0, 9)]
+    assert kept == ["r2", "r1"] and redis.ttl[TURNS_KEY] == 60
+    cache.observe("new-generation")                     # a re-index expires answers, not turns
+    assert len(redis.lrange(TURNS_KEY, 0, 9)) == 2
+
+
+def test_the_ask_route_stores_the_turn_and_survives_redis_failure() -> None:
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+    from app.services.cache import TURNS_KEY
+
+    redis = FakeRedis()
+    with TestClient(app) as client:
+        app.state.cache = SemanticCache(redis, threshold=0.99)
+        r = client.post("/api/ask", json={"question": "What is the attendance rule?"}).json()
+        turn = json.loads(redis.lrange(TURNS_KEY, 0, 0)[0])
+        assert turn["request_id"] == r["request_id"] and turn["question"].startswith("What")
+        assert turn["answer"] == r["answer"]
+        redis.down = True
+        redis.lpush = lambda *a: (_ for _ in ()).throw(ConnectionError("down"))  # type: ignore[method-assign]
+        assert client.post("/api/ask", json={"question": "What is the attendance rule?"}).status_code == 200

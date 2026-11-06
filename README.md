@@ -173,9 +173,10 @@ docs/       CORPUS, PIPELINE, FAILURE-ANALYSIS, ENGINEERING-NOTES, AI-USAGE, ARC
 pytest with ≥ 60% coverage on stubs (we are at 96%); `kustomize build | kubeconform
 -strict`; image builds (never pushed); Trivy failing on fixable HIGH/CRITICAL; and
 **e2e-eval**, which builds a kind cluster, deploys everything, runs the indexer Job on the
-fixture corpus with the real embedding model, and enforces the evaluation gate (recall@5
+fixture corpus with the real embedding and generation models, and enforces the evaluation gate (recall@5
 within 5 points of `eval/fixtures/baseline.fixture.json`, every must-abstain question
-declined, ≥ 95% citation validity).
+declined, ≥ 95% citation validity, and no answer repeating the planted instruction in
+the fixture's poisoned chunk).
 
 `cd.yml` runs on every push to `main`: test → build and push the three images to Docker
 Hub tagged with the commit SHA (`needs: test`) → deploy them to an ephemeral kind cluster
@@ -187,6 +188,8 @@ whose passages clear the relevance floor. The deploy now uses the real model. It
 `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (an access token, not a password).
 
 `main` is protected: pull request, passing CI and one approval. Work happens on `dev`.
+One commit reached `main` before protection existed: `f0f080c`, the planning pack, pushed on
+the first day. Every change since then has gone through a reviewed pull request.
 
 ## Documents
 

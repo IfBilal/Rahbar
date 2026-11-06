@@ -2,7 +2,7 @@
 
 ## Status
 Accepted · 4 November 2026 · `ollama-host` fully supported; `hosted` implemented and
-unit-tested; `stub` for tests and CI
+unit-tested; `stub` for unit tests
 
 ## Context
 The generator must be swappable without touching the pipeline. It must produce
@@ -20,7 +20,9 @@ ConfigMap. A new provider is one file:
   JSON schema. Temperature 0.2. Context 4096 tokens.
 - `hosted`: any OpenAI-compatible endpoint (Groq, OpenRouter, ...), JSON mode via
   `response_format`, key from the `rahbar-secret` Secret created on the command line.
-- `stub`: deterministic, no network. Every unit test and the CI gate use it.
+- `stub`: deterministic, no network. Every unit test uses it. The CI e2e gate and the CD
+  deploy use the real model on the runner, so the gate also tests the model declining and
+  ignoring planted instructions.
 
 **Enforce, then validate.** The schema constrains decoding, then `Answer.model_validate_json`
 checks the result, then `services/guard.py` checks what a schema cannot: every citation
@@ -49,7 +51,10 @@ cannot drift either.
   query.
 - Logs carry chunk ids, scores and flags, never the question text, the passage text or
   the model's `reasoning`. The API key never appears in the settings `repr`.
-- No personal data is collected; the API has no user accounts or sessions.
+- No personal data is collected; the API has no user accounts or sessions. Each turn
+  (question, answer, citations, retrieved chunk ids) is kept in the in-cluster Redis list
+  `rahbar:turns`, at most `CACHE_MAX_ENTRIES` entries for `CACHE_TTL_SECONDS`, the same
+  bound and retention as the cache entries, which already hold question text. Logs stay text-free.
 
 **Contract changes** (STARTER.md asks for an ADR for these). All are additive, with
 defaults, so the UI, `eval/run_eval.py` and the starter tests are unaffected:

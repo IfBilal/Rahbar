@@ -41,7 +41,7 @@ manifests, run on every CI build), and `tests/system/` (live cluster, `make syst
 | 3.2 Augment: instructions, numbered evidence, question | `api/app/services/prompt.py` | `test_prompt.py::test_order_is_instructions_evidence_question` | |
 | 3.2 Generate schema-constrained, low temperature | `providers/llm/ollama.py` (`format`), ConfigMap `TEMPERATURE` | `test_providers.py::test_ollama_sends_schema_temperature_and_messages` | |
 | 3.2 Validate, retry once, fall back | `answer.py::generate_checked` | `test_answer.py::test_two_failures_give_a_safe_canned_answer_not_a_500` | |
-| 3.2 Store turn, cache if safe | `answer.py::_log_turn`, cache `store` | `test_answer.py::test_one_log_line_per_turn_with_ids_scores_and_no_text` | |
+| 3.2 Store turn, cache if safe | `routes/ask.py` → `cache.py::record_turn` (Redis list `rahbar:turns`, bounded, TTL), `answer.py::_log_turn`, cache `store` | `test_cache.py::test_the_ask_route_stores_the_turn_and_survives_redis_failure`, `::test_turns_are_stored_bounded_and_survive_a_reindex`, `test_answer.py::test_one_log_line_per_turn_with_ids_scores_and_no_text` | |
 | 3.3 Redis/second collection + ADR | `api/app/services/cache.py`; `k8s/base/redis.yaml` | `test_cache.py` | `docs/adr/0003-semantic-cache-store.md` |
 | 3.3 Threshold from ConfigMap, chosen with data | `CACHE_THRESHOLD` | | `docs/evidence/cache-threshold.txt` (0.95; 0.92 ruled out by Rector's vs Dean's List) |
 | 3.3 Never cache follow-ups/abstentions/failures | `answer.py` `cacheable` | `test_answer.py::test_unsafe_answers_are_not_cached`, `::test_fallbacks_are_not_cached` | |
@@ -49,7 +49,7 @@ manifests, run on every CI build), and `tests/system/` (live cluster, `make syst
 | 3.4 One Pydantic model as contract and validator | `schemas.py::Answer` sent as `format`, validated with `model_validate_json` | `test_providers.py::test_ollama_prose_instead_of_json_is_a_validation_error` | |
 | 3.4 Abstain below the relevance floor | `answer.py` floor | `test_answer.py::test_below_the_relevance_floor_abstains_without_calling_the_model` | floor 0.60 measured in `docs/PIPELINE.md` |
 | 3.4 Cite only what was retrieved | `api/app/services/guard.py::check_answer` | `test_guard.py::test_fabricated_citations_are_rejected` | citation validity in `eval/results.json` |
-| 3.4 Retrieved text is data; poisoned-chunk test | `prompt.py` (delimiters, `neutralise`) | `api/tests/test_injection.py` (3 tests incl. live model) | `docs/FAILURE-ANALYSIS.md` |
+| 3.4 Retrieved text is data; poisoned-chunk test | `prompt.py` (delimiters, `neutralise`) | `api/tests/test_injection.py` (3 tests incl. live model); CI e2e-eval indexes the poisoned fixture chunk and the gate fails if an answer repeats it (`must_not`, `eval/run_eval.py::gate`, `test_gate_fails_when_an_answer_obeys_a_planted_instruction`) | `docs/FAILURE-ANALYSIS.md` |
 | 3.4 Temperature 0–0.3 with a reason | ConfigMap `TEMPERATURE: "0.2"` + comment | `tests/test_manifests.py::test_configmap_carries_every_tunable_and_the_pin` | |
 | 3.5 Provider behind an interface, one-file swap | `providers/llm/{base,ollama,hosted,stub}.py` | `test_providers.py::test_provider_selection_is_one_config_key` | `docs/adr/0004-...md` |
 | 3.5 Bonus: ollama-incluster (Deployment, PVC for weights, startupProbe failureThreshold 30) | `k8s/components/ollama-incluster/ollama.yaml`, `k8s/overlays/incluster` | `tests/test_manifests.py` (incluster overlay) | `docs/evidence/ollama-incluster.txt` |
