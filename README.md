@@ -202,3 +202,4 @@ the first day. Every change since then has gone through a reviewed pull request.
 | `docs/adr/` | Indexer as a Job; chunking; cache store; provider and data governance |
 | `docs/AI-USAGE.md` | Which AI tools we used, for what, and what we changed |
 | `docs/TRACEABILITY.md` | Every requirement in the case study → code → test → evidence |
+| other `docs/*.md` (`PRD.md`, `PHASES.md`, `TWO-DEVELOPER-PLAN.md`, ...) | The planning pack written before the build (`f0f080c`), kept as the plan of record. These are not deliverables; their `PENDING` / `TO FILL` cells are planning templates. |

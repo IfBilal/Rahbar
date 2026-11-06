@@ -14,7 +14,7 @@ and the result would be an index that no single run produced: duplicate ids over
 mid-batch, counts that never settle, one pod's `delete_collection` pulling the floor from
 under another. It gets worse from there. Every restart re-pays the full 7–13 minutes (our Job
 log: `"indexer finished", "seconds": 797.9`), and that is far beyond the startup probe's 60 s
-(`k8s/base/api.yaml:44-47`, 30 × 2 s). So a rollout would kill pods half-way through
+(`k8s/base/api.yaml:48-51`, 30 × 2 s). So a rollout would kill pods half-way through
 indexing, forever. Re-indexing would also need a redeploy.
 
 **The object that prevents it:** the indexer is a **Job** (`k8s/base/indexer-job.yaml:4`,
@@ -31,7 +31,7 @@ served. It builds a new generation and flips the registry pointer
 
 As built, liveness asks only "is the process alive" (`api/app/routes/health.py:24`,
 `/healthz` returns a constant) and readiness asks about dependencies (`health.py:29-58`;
-probes at `k8s/base/api.yaml:44-56`). We measured both arrangements by taking Chroma away
+probes at `k8s/base/api.yaml:48-60`). We measured both arrangements by taking Chroma away
 for 90 s (`scripts/probe-experiment.sh`; output, sampled every 10 s, in
 `docs/evidence/chroma-outage-probes.txt`):
 
@@ -52,7 +52,7 @@ because `/healthz` touches nothing.
 ## 3. What does a CPU-based HPA measure on a generation service, and what should scale it?
 
 The HPA (`k8s/base/hpa.yaml:11-17`, 3–8 replicas, 70% of `requests.cpu`) divides the
-api containers' CPU by their 100m request (`k8s/base/api.yaml:64`). While a question is
+api containers' CPU by their 100m request (`k8s/base/api.yaml:68`). While a question is
 being answered, an api pod spends almost all its time **waiting**: on the Ollama host for
 generation (one to four minutes per answer on our laptop CPU), and briefly on Chroma and
 the embedder. Generation burns the *host's* CPU, not the pod's. The pod's own CPU is JSON
@@ -70,7 +70,7 @@ The signal that should scale a generation service is **concurrency and latency o
 in flight**: requests currently waiting on generation per pod (or queue depth), and p95
 of `rahbar_generation_seconds` / `rahbar_request_seconds`. To use it we would need:
 1. An in-flight gauge (`rahbar_inflight_generations`, incremented around
-   `answer.py:140`, `generate_checked`); the latency histograms already exist
+   `answer.py:173`, `generate_checked`); the latency histograms already exist
    (`api/app/routes/metrics.py`).
 2. Prometheus scraping `/metrics`, plus the Prometheus Adapter (or KEDA) to expose that
    gauge through the custom metrics API.
@@ -92,7 +92,7 @@ actually fits; the first version requested 512 Mi, below its own peak.
 Margin: 1536 − 910 = **626 Mi, about 41% above the measured peak**. We keep that margin
 because peak memory grows with the largest page we OCR and the largest PDF we parse, and
 the website can publish a bigger one. Compare the serving pods: peak 74 Mi over 585
-samples, request 96 Mi, limit 256 Mi (`k8s/base/api.yaml:62-68`). Indexing is the memory-hungry path, which is one more
+samples, request 96 Mi, limit 256 Mi (`k8s/base/api.yaml:64-72`). Indexing is the memory-hungry path, which is one more
 reason it is not in the API.
 
 Set the limit wrong (below 910 Mi) and the kernel's OOM killer ends the container: exit
@@ -134,7 +134,7 @@ evaluation). Exact terms stay worst, at 0.833.
 containing "1.21" gets the chunk that literally contains "1.21". We implemented the
 cheapest form: `api/app/retrieval/chroma.py` extracts clause numbers and course codes
 (`_EXACT`, line 34) and asks Chroma for chunks that `$contains` them, ranked first
-(`retrieve` in `api/app/retrieval/chroma.py:151-156`). That alone moved exact-term recall@5 from 0.500 to 0.833. A
+(`retrieve` in `api/app/retrieval/chroma.py:156-160`). That alone moved exact-term recall@5 from 0.500 to 0.833. A
 full BM25 leg would also catch fee names and table labels ("Paper Rechecking Fee"), which
 our regex does not look for. Metadata helps too: indexing table rows with their header
 cells, so "Islamabad | ... | 236" is embedded as "Islamabad total faculty 236".
@@ -148,11 +148,11 @@ lines 86-88). The API compares that with its own `EMBED_MODEL` in two places:
   lines 58-69), which logs `embedding model mismatch: refusing readiness` with both
   model names;
 - on every readiness probe (`api/app/routes/health.py:43`, via `pin_problem` in
-  `api/app/retrieval/chroma.py:62`), which returns **503** with the conflict, so the pod
+  `api/app/retrieval/chroma.py:65`), which returns **503** with the conflict, so the pod
   stays **0/1 READY** and never joins the Service. The same check runs per query
-  (`chroma.py:145-147`), including the vector dimension.
+  (`chroma.py:150-152`), including the vector dimension.
 
-Because the rollout is `maxUnavailable: 0` (`k8s/base/api.yaml:13`), the three old,
+Because the rollout is `maxUnavailable: 0` (`k8s/base/api.yaml:17`), the three old,
 correct pods keep serving while the new pods sit unready, and the rollout stalls instead of
 completing. Demonstrated on the cluster (`docs/evidence/pin-mismatch.txt`):
 we patched `EMBED_MODEL` to `mxbai-embed-large` in the

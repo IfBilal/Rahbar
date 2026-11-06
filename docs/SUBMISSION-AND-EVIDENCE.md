@@ -1,4 +1,4 @@
-> **Status (5 November 2026):** evidence collected under `docs/evidence/`; the release sign-off below is filled in. This guide is kept as the plan of record.
+> **Status (6 November 2026):** evidence collected under `docs/evidence/`; the proof column of the release sign-off below is current. The two developer columns are for each of us to initial before submitting. This guide is kept as the plan of record.
 
 # Submission package, evidence register and demo procedure
 
@@ -49,10 +49,10 @@ No secret in **any Git history** (rotate if one entered), no base64 live Secret 
 ### Release sign-off (fill, not pre-approved)
 | Item | Developer A | Developer B | Proof |
 |---|---|---|---|
-| Real corpus and golden quality | PENDING | PENDING | `docs/CORPUS.md`; `eval/results.json` (recall@5 0.906, citations 100%, abstention 100%) |
+| Real corpus and golden quality | PENDING | PENDING | `docs/CORPUS.md`; `eval/results.json` (recall@5 0.969, citations 100%, abstention 100%, 16/16 answers correct on review) |
 | Indexer, provider, safety and cache | PENDING | PENDING | `docs/PIPELINE.md`; `api/tests/test_injection.py`; `docs/evidence/cache-threshold.txt` |
 | Cluster, network, probes, rollout | PENDING | PENDING | `docs/evidence/networkpolicy-tests.txt`, `pin-mismatch.txt`, `rollout-and-endpoints.txt`, `chroma-outage-probes.txt` |
-| CI/CD and real eval gate | PENDING | PENDING | CI green on `dev`; gate red/green on PR #1 (`docs/evidence/gate-demo.txt`); **cd.yml needs the owner's Docker Hub secrets and a reviewed merge** |
+| CI/CD and real eval gate | PENDING | PENDING | `main` protected (`docs/evidence/branch-protection.png`); gate blocked then green on PR #8 (`merge-blocked.png`, `merge-green.png`); green cd on `main` (`docs/evidence/cd-main.txt`); images at https://hub.docker.com/u/ifbilal |
 | Clean clone + README + checker | PENDING | PENDING | `docs/evidence/clean-clone.txt`, `docs/evidence/check-submission.txt` |
 | Submitted before deadline | PENDING | PENDING | Google Classroom (by the team) |
 
