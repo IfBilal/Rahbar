@@ -36,6 +36,7 @@ carry the command that produced them and a UTC timestamp.
 | `clean-clone.txt` | README path from a fresh clone to an answered question | the README commands, in a new directory |
 | `clean-clone-final.txt` | the same README path on the final `main` (137a97a): 313 tests, 532 chunks, a cited answer and a decline through the Ingress, all 7 live system tests (pin test included), turns stored in Redis, HPA at 6%/70% | the README commands, in a new directory |
 | `empty-index-readiness.txt` | with no index at all, the API pods stay 0/1 READY (503 naming the missing collection, no endpoints) until the indexer Job publishes; then 3 endpoints and answers | `kubectl apply -k k8s/overlays/dev` after wiping the namespace and the provisioner's data directory |
+| `eval-reproduction-minikube.json` | the full 19-question real-model evaluation re-run independently on our minikube against the final `main`, cache flushed first. It reproduces the committed numbers exactly (recall@3/@5 0.969, citation validity 100%, abstention 3/3, expected terms 16/16), and no answer obeyed the planted instruction | `eval/run_eval.py --api http://$(minikube ip) --host rahbar.local`, 7 November 2026 |
 
 The branch-protection settings are recorded in `branch-protection.json` and
 `branch-protection.png`. The successful main-branch CD run and Docker Hub links are
