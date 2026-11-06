@@ -122,7 +122,7 @@ jobs:
   e2e-eval:
     needs: [test, manifests, build]
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -137,7 +137,7 @@ jobs:
           curl -sSLo kind "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64"
           curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" | tar xz
           chmod +x kind && sudo mv kind kustomize /usr/local/bin/
-      - name: Ollama on the runner (ollama-host mode), embedding model only
+      - name: Ollama on the runner (ollama-host mode), embedding and generation models
         run: |
           mkdir -p "$HOME/ollama"
           # The release bundles GPU runtimes; keep only the CPU parts on disk.
@@ -146,6 +146,8 @@ jobs:
           OLLAMA_HOST=0.0.0.0:11434 nohup "$HOME/ollama/bin/ollama" serve > ollama.log 2>&1 &
           for _ in $(seq 1 30); do curl -sf localhost:11434/api/version && break; sleep 1; done
           OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull nomic-embed-text
+          # the gate runs against real generation: abstention and injection are the model's job too
+          OLLAMA_HOST=127.0.0.1:11434 "$HOME/ollama/bin/ollama" pull llama3.2:3b
       - name: kind cluster + ingress + whole stack, indexer Job over the fixture corpus
         run: KUBECONFIG_E2E=$HOME/.kube/config scripts/e2e-kind.sh ci
       - name: evaluate and enforce the 5.4 gate (recall@5 drop, abstention, citations)

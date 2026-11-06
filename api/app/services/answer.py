@@ -8,7 +8,7 @@
   5. augment       instructions, numbered evidence, question         services/prompt.py
   6. generate      schema-constrained, low temperature               providers/llm/*
   7. validate      Pydantic + citation guard, retry once, then fall back   services/guard.py
-  8. store         one JSON log line for the turn; cache it only when safe
+  8. store         the turn in Redis (routes/ask.py) and one JSON log line; cache it only when safe
 A user never sees a 500 because a model misbehaved: every failure ends in a canned answer.
 """
 

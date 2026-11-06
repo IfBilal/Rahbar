@@ -102,8 +102,7 @@ jobs:
           cd k8s/overlays/prod
           kustomize edit set image "rahbar-api=$REPO/rahbar-api:$GITHUB_SHA" \
             "rahbar-ui=$REPO/rahbar-ui:$GITHUB_SHA" "rahbar-indexer=$REPO/rahbar-indexer:$GITHUB_SHA"
-          # CI uses the stub, but CD must exercise real generation and abstention.
-          sed -i 's@path: /data/LLM_PROVIDER, value: "stub"@path: /data/LLM_PROVIDER, value: "ollama-host"@' ../../components/ephemeral-cluster/kustomization.yaml
+          # the component deploys the real model (ollama-host); fail fast if that ever changes
           grep -q 'path: /data/LLM_PROVIDER, value: "ollama-host"' ../../components/ephemeral-cluster/kustomization.yaml
           kustomize edit add component ../../components/ephemeral-cluster
           kustomize build . | grep -E "image: .*rahbar-" | sort -u
