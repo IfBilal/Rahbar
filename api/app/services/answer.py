@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 import time
 from typing import Any
 
@@ -25,7 +26,7 @@ from ..config import Settings
 from ..logjson import request_id_var
 from ..providers.llm.base import LLMProvider, usage_var
 from ..retrieval.base import Retriever
-from ..retrieval.tables import matches as table_matches
+from ..retrieval.tables import matching_rows
 from ..routes import metrics as m
 from ..schemas import Answer, AskResponse, Passage, RetrievedRef
 from .cache import SemanticCache
@@ -62,7 +63,7 @@ def cache_scope(generation: str, provider: str, settings: Settings) -> str:
     knobs = (f"{PROMPT_VERSION}|{provider}|{settings.llm_model}|{settings.temperature}|"
              f"{settings.relevance_floor}|"
              f"{settings.top_k}|{settings.max_context_passages}|{settings.exact_term_assist}|"
-             f"{settings.superseded_filter}|retrieval-order-v1|table-assist-v3")
+             f"{settings.superseded_filter}|retrieval-order-v1|table-assist-v4")
     digest = hashlib.sha256(knobs.encode()).hexdigest()[:10]
     return f"{generation}:{settings.embed_model}:{digest}"
 
@@ -80,16 +81,32 @@ def generate_checked(question: str, passages: list[Passage],
             answer = check_answer(raw, passages)
             # When a matching numeric row is in the evidence, an answer to this
             # quantitative question must cite that table, not an unrelated passage.
-            matched = [(i, p) for i, p in enumerate(passages)
-                       if table_matches(question, p.text, p.section, p.doc_version or "", p.source)]
+            matched = [(i, p, rows) for i, p in enumerate(passages)
+                       if (rows := matching_rows(question, p.text, p.section,
+                                                 p.doc_version or "", p.source))]
             if answer.answered_from_context and matched and not any(
                 c.source == p.source and c.section == p.section and c.page == p.page
                 and f"[{p.source} / {p.section}]" in answer.answer
-                for c in answer.citations for _, p in matched
+                for c in answer.citations for _, p, _ in matched
             ):
-                labels = ", ".join(chr(ord("A") + i) for i, _ in matched)
+                labels = ", ".join(chr(ord("A") + i) for i, _, _ in matched)
                 raise GuardError(f"The matching numeric table is evidence {labels}; "
                                  "cite the table passage that supports the answer.")
+            if answer.answered_from_context and matched:
+                # Exclude citation labels and numbers already stated in the question,
+                # such as its report year; all new numbers must occur in a matching row.
+                number = re.compile(r"(?<![\w.])\d[\d,]*(?:\.\d+)?(?!\w)")
+
+                def numbers(text: str) -> set[str]:
+                    return {x.replace(",", "") for x in number.findall(text)}
+                plain = re.sub(r"\[[^\]]*\]", " ", answer.answer)
+                claimed = numbers(plain) - numbers(question)
+                row_values = set().union(*(numbers(row.split("|", 1)[1])
+                                           for _, _, rows in matched for row in rows))
+                if not claimed or not claimed <= row_values:
+                    raise GuardError("Use the numeric cells from the row naming the entity "
+                                     "in the question, not a different row or grand total; "
+                                     "cite that table.")
             return answer, None, attempt
         except (ValidationError, GuardError, ValueError) as exc:
             reason = f"{type(exc).__name__}: {str(exc)[:300]}"

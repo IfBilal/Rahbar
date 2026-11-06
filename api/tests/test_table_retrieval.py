@@ -168,3 +168,58 @@ def test_table_in_citation_list_cannot_hide_an_unrelated_inline_citation():
                                                ScriptedProvider(wrong, right))
     assert reason is None and attempts == 2
     assert answer is not None and '[annual-report-2023-24.pdf / Faculty Summary]' in answer.answer
+
+
+def test_wrong_numeric_row_is_retried_even_if_the_table_is_cited():
+    from app.schemas import Passage
+    from app.services.answer import generate_checked
+    from .fakes import ScriptedProvider, grounded
+
+    table = Passage(chunk_id='table', text=TABLE + '\nTotal | 42 | 325 | 30 | 735',
+                    source='annual-report-2023-24.pdf', section='Faculty Summary',
+                    page=13, doc_version='2023-24', score=0.68)
+    wrong = grounded(table).model_copy(update={'answer': 'In 2023-24, the count was 30 [A].'})
+    right = grounded(table).model_copy(update={'answer': 'In 2023-24, the count was 236 [A].'})
+    provider = ScriptedProvider(wrong, right)
+    answer, reason, attempts = generate_checked(QUESTION, [table], provider)
+    assert reason is None and attempts == 2
+    assert answer is not None and '236' in answer.answer
+    assert 'row naming the entity' in provider.calls[1]
+
+
+def test_repeated_wrong_numeric_row_falls_back():
+    from app.schemas import Passage
+    from app.services.answer import generate_checked
+    from .fakes import ScriptedProvider, grounded
+
+    table = Passage(chunk_id='table', text=TABLE + '\nTotal | 42 | 325 | 30 | 735',
+                    source='annual-report-2023-24.pdf', section='Faculty Summary',
+                    page=13, doc_version='2023-24', score=0.68)
+    wrong = grounded(table).model_copy(update={'answer': 'The count was 30 [A].'})
+    answer, reason, attempts = generate_checked(QUESTION, [table], ScriptedProvider(wrong, wrong))
+    assert answer is None and attempts == 2 and reason and 'row naming the entity' in reason
+
+
+def test_prompt_highlights_the_matching_row_as_untrusted_evidence():
+    from app.schemas import Passage
+    from app.services.prompt import build_messages
+
+    table = Passage(chunk_id='table', text=TABLE + '\nTotal | 42 | 325 | 30 | 735',
+                    source='annual-report-2023-24.pdf', section='Faculty Summary',
+                    page=13, doc_version='2023-24', score=0.68)
+    text = build_messages(QUESTION, [table])[1]['content']
+    assert '<matched_row evidence="A">Islamabad | 19 | 83 | 236</matched_row>' in text
+    assert '<matched_row evidence="A">Total' not in text
+    assert 'untrusted excerpts' in text
+
+
+def test_correct_row_value_followed_by_sentence_period_is_accepted():
+    from app.schemas import Passage
+    from app.services.answer import generate_checked
+    from .fakes import ScriptedProvider, grounded
+
+    table = Passage(chunk_id='table', text=TABLE, source='annual-report-2023-24.pdf',
+                    section='Faculty Summary', page=13, doc_version='2023-24', score=0.68)
+    correct = grounded(table).model_copy(update={'answer': 'The total was 236. [A]'})
+    answer, reason, attempts = generate_checked(QUESTION, [table], ScriptedProvider(correct))
+    assert answer is not None and reason is None and attempts == 1

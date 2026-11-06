@@ -31,21 +31,28 @@ def _years(text: str) -> set[str]:
             for year in (start, start[:2] + end if len(end) == 2 else end) if year}
 
 
-def matches(question: str, text: str, section: str, version: str, source: str) -> bool:
-    """True only for a matching heading, numeric row label and explicit edition, if any."""
+def matching_rows(question: str, text: str, section: str, version: str,
+                  source: str) -> list[str]:
+    """Return numeric rows whose label, topic and edition match the question."""
     if not quantitative(question):
-        return False
+        return []
     question_words = _words(question)
     if not (_words(section.rsplit(">", 1)[-1]) & question_words):
-        return False
+        return []
     requested_years = _years(question)
     if requested_years and not requested_years <= _years(version + " " + source):
-        return False
+        return []
+    rows: list[str] = []
     for line in text.splitlines():
         cells = line.split("|")
         if len(cells) < 3 or sum(bool(_NUMBER.search(c)) for c in cells[1:]) < 2:
             continue
         label = _words(cells[0])
         if label and label <= question_words:
-            return True
-    return False
+            rows.append(line)
+    return rows
+
+
+def matches(question: str, text: str, section: str, version: str, source: str) -> bool:
+    """True only for a matching heading, numeric row label and explicit edition, if any."""
+    return bool(matching_rows(question, text, section, version, source))
