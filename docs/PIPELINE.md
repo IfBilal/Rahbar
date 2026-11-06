@@ -237,12 +237,19 @@ falls back to dense retrieval. The existing `EXACT_TERM_ASSIST` switch disables 
 assist too; clause and course-code matches retain priority. The answer cache scope changes
 with this implementation, so old answers are not reused.
 
+For a matching numeric table, the prompt highlights the matching row as untrusted
+evidence. The answer guard requires an inline citation to that table and checks new
+numeric claims against the matching row; an invalid response is retried once, then
+falls back safely. This check does not establish that the model selected the correct
+column, so the real-model evaluation and human review remain important.
+
 A local diagnostic using the extracted 2023-24 Faculty Summary, the pinned
 `nomic-embed-text` model and Chroma 1.0.12 retrieved the matching table at cosine
 **0.6843**, above the configured 0.60 floor, even with two higher-scoring decoys.
 This diagnostic used a different Ollama runtime version and is not a replacement for
-the full-cluster golden-set evaluation. The previous real-model results below remain
-the baseline until the new deployment has been measured.
+the full-cluster golden-set evaluation. A subsequent full-model run retrieved and cited
+the correct table but selected the wrong row (30 rather than 236); the row-value guard
+above was added in response and still needs confirmation in another full-model run.
 
 ## Latest real-model evaluation (5 November 2026)
 
