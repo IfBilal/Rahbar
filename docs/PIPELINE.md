@@ -146,7 +146,8 @@ decision rests as much on prompt length as on recall.
 The two misses that remain are both **tables**: q09 asks for one cell (Islamabad, Total)
 of a numeric grid that embeds as a bag of numbers, and e03's second source is a grade
 table on the web page. That is where embeddings struggle most (`docs/ENGINEERING-NOTES.md`,
-note 5).
+note 5). The chunking measurements above were taken before the numeric table assist; with
+it, q09 is retrieved and answered (recall@5 0.969, see the latest evaluation below).
 
 ## Embedding
 
@@ -225,7 +226,56 @@ evidence above it with margin. It declines a03 before any model call, and declin
 fixture's hostel question (best 0.587) deterministically. a01 and a02 clear the floor and
 must be declined by the model, the second layer, which the gate measures at 100%.
 
-## Latest real-model evaluation (5 November 2026)
+## Numeric table retrieval assist
+
+For quantitative questions, the retriever can identify a numeric table row when the
+question contains both the row label and a meaningful word from the section heading.
+An explicit year must match the document edition, and superseded documents remain
+filtered unless the question asks for history. The candidate is promoted only when its
+actual cosine similarity clears `RELEVANCE_FLOOR`; the logged score remains cosine
+similarity. Table-bearing chunks are cached per index generation, and a failed assist
+falls back to dense retrieval. The existing `EXACT_TERM_ASSIST` switch disables this
+assist too; clause and course-code matches retain priority. The answer cache scope changes
+with this implementation, so old answers are not reused.
+
+For a matching numeric table, the prompt highlights the matching row as untrusted
+evidence. The answer guard requires an inline citation to that table and checks new
+numeric claims against the matching row; an invalid response is retried once, then
+falls back safely. This check does not establish that the model selected the correct
+column, so the real-model evaluation and human review remain important.
+
+A local diagnostic using the extracted 2023-24 Faculty Summary, the pinned
+`nomic-embed-text` model and Chroma 1.0.12 retrieved the matching table at cosine
+**0.6843**, above the configured 0.60 floor, even with two higher-scoring decoys.
+This diagnostic used a different Ollama runtime version and is not a replacement for
+the full-cluster golden-set evaluation. A subsequent full-model run retrieved and cited
+the correct table but selected the wrong row (30 rather than 236); the row-value guard
+above was added in response. The next full-model run (below) confirmed it: q09 answered 236.
+
+## Latest real-model evaluation (6 November 2026): shipped numbers
+
+The full golden set was run on the table-assist code (commit `f03fae9`) through a fresh
+real-corpus deployment with `llama3.2:3b` and `nomic-embed-text`
+([Actions run 42156264750](https://github.com/IfBilal/Rahbar/actions/runs/42156264750),
+`full_eval` dispatch). These are the shipped numbers: `eval/results.json`, and
+`eval/baseline.json` now holds the same values (every metric is equal to or better than
+the previous baseline).
+
+| Metric | 5 Nov (before table assist) | 6 Nov (shipped) |
+| --- | ---: | ---: |
+| recall@3 / recall@5 | 0.906 / 0.906 | **0.969 / 0.969** |
+| recall@5 ordinary / version / exact / injection | 0.889 / 1.0 / 0.833 / 1.0 | **1.0** / 1.0 / 0.833 / 1.0 |
+| citation validity | 100% (17) | **100%** (17) |
+| must-abstain correctness | 100% (3/3) | **100%** (3/3) |
+| expected terms found | 15/16 | **16/16** |
+
+We reviewed every answer by hand. All 16 answerable questions are correct and cite a
+retrieved passage. q09 now answers "236 faculty members" from the 2023-24 Faculty Summary,
+and no answer fell back to the canned response. The only recall loss left is e03's
+second source (the grading web page's grade table): the answer is still correct from the
+prospectus. As before, the smoke test had just asked q01, so q01 was served from cache.
+
+## Previous real-model evaluation (5 November 2026)
 
 After preserving the retriever's ranking in the model context, the full golden set was
 run through a fresh real-corpus deployment with `llama3.2:3b` and `nomic-embed-text`

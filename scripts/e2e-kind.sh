@@ -48,7 +48,23 @@ kubectl rollout status -n rahbar deployment/ui --timeout=120s
 kubectl get pods,endpoints -n rahbar
 
 kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller "${INGRESS_PORT:-8080}:80" >/tmp/rahbar-port-forward.log 2>&1 &
-for _ in $(seq 1 30); do
-  curl -sf -H 'Host: rahbar.local' "http://localhost:${INGRESS_PORT:-8080}/" >/dev/null && break; sleep 2
+# The UI may be routed before ingress-nginx has observed the ready API endpoints.
+# GET /api/ask returns 405 only when the API route is actually reachable; unlike a
+# POST it does not generate or cache an answer before the evaluation.
+ui_ready=0
+api_ready=0
+for _ in $(seq 1 60); do
+  ui_ready=0
+  api_ready=0
+  curl -sf -H 'Host: rahbar.local' "http://localhost:${INGRESS_PORT:-8080}/" >/dev/null && ui_ready=1
+  status=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: rahbar.local' \
+    "http://localhost:${INGRESS_PORT:-8080}/api/ask" || true)
+  [ "$status" = 405 ] && api_ready=1
+  [ "$ui_ready" = 1 ] && [ "$api_ready" = 1 ] && break
+  sleep 2
 done
+if [ "$ui_ready" != 1 ] || [ "$api_ready" != 1 ]; then
+  echo "Ingress not ready: UI=$ui_ready API=$api_ready (last API status: $status)" >&2
+  exit 1
+fi
 echo "stack ready on http://localhost:${INGRESS_PORT:-8080} (Host: rahbar.local)"

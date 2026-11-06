@@ -4,7 +4,9 @@ We broke five stages on purpose, one at a time, on the live stack (minikube, rea
 real embeddings), measured each, and restored it. Every break is a configuration change
 run by `scripts/failure-experiments.sh`, so it can be repeated. Outputs are in
 `docs/evidence/failures/`. The healthy reference is the shipped index (300/40, OCR on,
-superseded filter on, top_k 5): **recall@3 0.906, recall@5 0.906**.
+superseded filter on, top_k 5): **recall@3 0.906, recall@5 0.906**. These experiments ran
+before the numeric table assist was added (shipped recall@5 is now 0.969; `docs/PIPELINE.md`),
+so every row is compared with that 0.906 reference.
 
 For A–E the API used the stub generator. All of them are retrieval-side breaks, and recall
 is measured on what is retrieved, so the stub removes model noise and an hour of CPU time

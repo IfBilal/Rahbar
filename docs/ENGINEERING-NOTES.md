@@ -103,7 +103,8 @@ same way every time. The registry pointer only moves after a complete write
 
 ## 5. recall@5 by question type: where is it worst, and why?
 
-Shipped index (300/40), 19 golden questions, through the Ingress
+Shipped index (300/40), 19 golden questions, through the Ingress, measured before the
+numeric table assist (with it, ordinary rises to 1.000 and overall to 0.969; exact terms are unchanged)
 (`docs/evidence/failures/restored-results.json`; the exact-assist-off run is
 `docs/evidence/exact-assist-off-results.json`):
 
@@ -122,8 +123,11 @@ as close to "1.12" or "2.11" as to itself, and the query is dominated by "academ
 require", which matches dozens of clauses equally well. Fees and table cells blur the same
 way. e02 (paper rechecking fee, Rs. 500) ranks the handbook's *clause about* rechecking fees
 above the fee table that states the amount. e03 (B- = 2.67) finds the handbook's grade table
-but not the grading page's. Our remaining ordinary miss is also a table: q09 asks for one
+but not the grading page's. Our remaining ordinary miss was also a table: q09 asks for one
 cell (Islamabad, total faculty: 236) of a numeric grid that embeds as a bag of numbers.
+A narrow row-and-heading lexical assist (`api/app/retrieval/tables.py`) now retrieves it,
+which takes ordinary recall@5 to 1.0 and overall to 0.969 (`docs/PIPELINE.md`, latest
+evaluation). Exact terms stay worst, at 0.833.
 
 **The technique that addresses it** is lexical matching alongside dense retrieval:
 **hybrid retrieval** (BM25 or keyword search fused with the vector ranking), so a query
