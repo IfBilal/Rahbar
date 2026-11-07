@@ -1,0 +1,31 @@
+# 3.3 invalidate on re-index, re-run on the final main (137a97a), 6 November 2026 UTC: the same question twice (second from the cache), a manual re-index from the CronJob while the same three API pods keep serving (0 restarts), then the same question is regenerated and the old generation's cache key is gone. Script: ask -> ask -> kubectl create job --from=cronjob/reindex -> ask; redis-cli --scan between.
+
+############ ask twice: the second answer comes from the semantic cache  (2026-11-06T20:49:55Z)
+cached= False | answered_from_context= True | A student can repeat a maximum of 2 courses in a summer semester, [academic-rules-handbook-jun-2026.pdf / 6. Rules for Summer Semester].
+cached= True | answered_from_context= True | A student can repeat a maximum of 2 courses in a summer semester, [academic-rules-handbook-jun-2026.pdf / 6. Rules for Summer Semester].
+
+############ cache keys before the re-index  (2026-11-06T20:51:34Z)
+rahbar:cache:20261106202730-a7b3528e:nomic-embed-text:25b1cd7d78:entries
+rahbar:cache:current-scope
+api-6568c78cd7-2d5sm   0
+api-6568c78cd7-cg6lp   0
+api-6568c78cd7-hsddv   0
+
+############ kubectl create job --from=cronjob/reindex manual-reindex-audit -n rahbar  (2026-11-06T20:51:35Z)
+job.batch/manual-reindex-audit created
+job.batch/manual-reindex-audit condition met
+{"ts": "2026-11-06T21:00:00Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 532, "seconds": 458.6}
+
+############ the same question after the re-index (API pods untouched)  (2026-11-06T21:00:14Z)
+cached= False | answered_from_context= True | A student can repeat a maximum of 2 courses in a summer semester, [academic-rules-handbook-jun-2026.pdf / 6. Rules for Summer Semester].
+
+############ cache keys after: the old generation's scope is gone  (2026-11-06T21:00:28Z)
+rahbar:cache:20261106205959-a7b3528e:nomic-embed-text:25b1cd7d78:entries
+rahbar:cache:current-scope
+api-6568c78cd7-2d5sm   0
+api-6568c78cd7-cg6lp   0
+api-6568c78cd7-hsddv   0
+{"ts": "2026-11-06T20:27:38Z", "level": "INFO", "logger": "rahbar.cache", "msg": "cache scope changed; old entries expired", "request_id": "7b1e7a912d47aaf5070402fcf0e79a60", "scope": "20261106202730-a7b3528e:nomic-embed-text:25b1cd7d78", "deleted_keys": 0}
+{"ts": "2026-11-06T21:00:14Z", "level": "INFO", "logger": "rahbar.cache", "msg": "cache scope changed; old entries expired", "request_id": "f30e8959df7e1f5b96d3f04b4517d78f", "scope": "20261106205959-a7b3528e:nomic-embed-text:25b1cd7d78", "deleted_keys": 1}
+
+############ done  (2026-11-06T21:00:28Z)

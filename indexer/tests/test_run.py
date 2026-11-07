@@ -61,3 +61,10 @@ def test_ocr_switch_reads_the_environment(monkeypatch) -> None:
     assert get_settings().ocr_enabled is False
     monkeypatch.delenv("OCR_ENABLED")
     assert get_settings().ocr_enabled is True
+
+
+def test_every_indexer_log_line_carries_the_run_id(capsys) -> None:
+    run.log("chunked", source="a.pdf")
+    run.log("indexer finished", chunks=3)
+    lines = [json.loads(x) for x in capsys.readouterr().out.splitlines()]
+    assert {x["request_id"] for x in lines} == {run.RUN_ID} and run.RUN_ID

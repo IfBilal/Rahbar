@@ -18,7 +18,7 @@ flowchart LR
   ING -->|/| UI[ui Deployment<br/>nginx :8080]
   ING -->|/api| API[api Deployment x3<br/>FastAPI :8000<br/>HPA 3..8]
   API -->|read: registry + active generation| CH[(chroma StatefulSet<br/>PVC via volumeClaimTemplates)]
-  API <-->|semantic cache| R[(redis Deployment<br/>PVC, append-only)]
+  API <-->|semantic cache + stored turns| R[(redis Deployment<br/>PVC, append-only)]
   API -->|embed query + generate| OL[Ollama on the host<br/>nomic-embed-text, llama3.2:3b]
   JOB[indexer Job / reindex CronJob] -->|write new generation, publish pointer| CH
   JOB -->|embed chunks| OL
@@ -33,7 +33,7 @@ flowchart LR
 | `api` | Deployment, 3 replicas, HPA 3–8 | Stateless readers; interchangeable pods behind one Service |
 | `ui` | Deployment, 1 replica | Static files; nginx as uid 101, read-only root |
 | `chroma` | **StatefulSet**, 1 replica, `volumeClaimTemplates` | See below |
-| `redis` | Deployment + PVC `redis-data`, `Recreate` | One pod owns the cache volume; append-only file survives restarts |
+| `redis` | Deployment + PVC `redis-data`, `Recreate` | One pod owns the volume holding the semantic cache and the stored turns (`rahbar:turns`, 3.2 step 8); append-only file survives restarts |
 | `indexer` | Job | Runs once, writes, exits (ADR 0001) |
 | `reindex` | CronJob, Sundays 03:00, `Forbid` | Same pod template as the Job; never two writers |
 | `api`, `ui`, `chroma`, `redis` | Service, ClusterIP | Only the Ingress is reachable from outside |

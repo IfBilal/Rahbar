@@ -53,3 +53,15 @@ def test_every_response_names_the_running_version(client: TestClient) -> None:
     r = client.get("/healthz")
     assert r.json() == {"status": "alive"}                 # the body stays as the starter pins it
     assert r.headers["X-Rahbar-Version"]
+
+
+def test_abstention_and_fallback_series_exist_before_any_happen() -> None:
+    from prometheus_client import generate_latest
+
+    text = generate_latest().decode()
+    for series in ('rahbar_abstentions_total{reason="below_relevance_floor"}',
+                   'rahbar_abstentions_total{reason="model_declined"}',
+                   'rahbar_fallbacks_total{reason="retrieval_error"}',
+                   'rahbar_fallbacks_total{reason="invalid_output"}',
+                   'rahbar_tokens_total{direction="in"}'):
+        assert series in text, series
