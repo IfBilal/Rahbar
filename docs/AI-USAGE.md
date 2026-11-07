@@ -8,7 +8,7 @@ measured and reviewed by us; we can explain every line of it.
 | --- | --- | --- |
 | **Claude Code (Anthropic, Claude Opus model), as a coding agent in the terminal**, directed by Taimoor | Most of the implementation: the five indexer stages, the Chroma retriever, Ollama and hosted providers, prompt, citation guard, semantic cache, readiness and metrics; `eval/run_eval.py`'s four functions; all Dockerfiles, Kubernetes manifests, the two workflows and the helper scripts; the test suites (about 250 tests); first drafts of the ADRs and of these reports. | The agent's first versions were wrong in ways that only running the system showed. Each change below is in the git history with the measurement that forced it. |
 | An AI chat assistant, used by Bilal for planning (the planning pack committed in `f0f080c`) | The 25 planning guides in `docs/` (`AGENTS.md`, `PRD.md`, `PHASES.md`, `CRITICAL-PATH.md`, `INTERFACE-CONTRACTS.md`, ...): the requirement traceability R01–R30, the work breakdown, the two-developer split, candidate chunk settings (300/40, 400/60, 550/80), the generation-pointer idea for safe re-indexing. | We used the plans as checklists, not as truth: every candidate value was measured before use, and the PDF overruled the plans where they differed. The draft ADRs were moved to their required paths and rewritten as accepted decisions. The plan's "versioned collections + registry pointer" proposal was implemented and tested. |
-| **OpenAI Codex**, directed by Bilal | Reviewed the release, configured branch protection, merged the release PR, diagnosed the CD smoke-test failure, and implemented the CD, retrieval-ranking and numeric-table retrieval fixes with regression tests. | The fixes were reviewed in PR #4 and passed CI. A real-model deployment smoke test passed, followed by the 19-question evaluation: recall@5 0.9062, citation validity and abstention correctness 100%; q09 remained incorrect. The results and limitations are recorded in `eval/results.json` and `docs/PIPELINE.md`. |
+| **OpenAI Codex**, directed by Bilal | Reviewed the release, configured branch protection, merged the release PR, diagnosed the CD smoke-test failure, and implemented the CD, retrieval-ranking and numeric-table retrieval fixes with regression tests. | The fixes were reviewed in PR #4 and passed CI. A real-model deployment smoke test passed, followed by the 19-question evaluation: recall@5 0.9062, citation validity and abstention correctness 100%; q09 remained incorrect. After the numeric-table fix the shipped run (Actions run 42156264750) reached recall@5 0.969 with q09 answered (236 faculty); `eval/results.json` and `docs/PIPELINE.md` record both runs. |
 | GitHub Copilot | Not reported as used. | |
 
 ## What we changed after running it (AI output → measured fix)
@@ -55,6 +55,13 @@ measured and reviewed by us; we can explain every line of it.
 10. **The cache outlived a prompt change.** The second evaluation was served the first
     run's answers (`docs/evidence/eval-run2-cache-hits.json`, 15 hits in about 0.1 s each)
     because the cache key did not include the prompt. It does now.
+11. **Final audits against the PDF (Claude Code, 6–7 Nov) found gaps that tests had
+    not.** Answers cited once at the end, not per sentence (3.4): the guard now tags every
+    claim-bearing sentence. Abstention and fallback series were missing from `/metrics`
+    until the first one happened. `FAILURE-ANALYSIS.md` cited an indexer log that `*.log` in
+    `.gitignore` had kept out of Git; we re-captured it. The live injection test banned
+    "optional now", which matched the model's correct "Attendance is not optional now" in
+    2 of 3 runs; it now uses the eval's phrases. Each fix was checked on the live cluster.
 
 ## What we did not let the AI decide
 - The corpus choice and the absent topic. Every golden answer was read off the source
