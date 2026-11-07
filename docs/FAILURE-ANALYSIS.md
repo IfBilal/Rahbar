@@ -10,7 +10,10 @@ so every row is compared with that 0.906 reference.
 
 For A–E the API used the stub generator. All of them are retrieval-side breaks, and recall
 is measured on what is retrieved, so the stub removes model noise and an hour of CPU time
-per run. F needs the real model.
+per run. F needs the real model. Read only the recall columns of the A–E JSON files: the
+stub answers whenever a passage clears the relevance floor (only a03 falls below it), so their `abstention_correctness` (0.333) and
+`citation_validity` describe the stub, not RAHBAR. Abstention is measured and gated on
+real-model runs only: `eval/results.json`, 3/3 must-abstain questions declined (100%).
 
 | Stage | What we broke | recall@5 | What the number hides |
 | --- | --- | ---: | --- |
