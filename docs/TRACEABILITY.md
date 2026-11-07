@@ -103,7 +103,7 @@ manifests, run on every CI build), and `tests/system/` (live cluster, `make syst
 | --- | --- | --- |
 | `dev` for work, `main` protected (PR, CI, one approval) | branch settings | `docs/evidence/branch-protection.png`, `branch-protection.json`: PR, one approval, the six CI checks, up-to-date branches, no bypass (5 November 2026); every change since then merged through a reviewed PR (#2–#16) |
 | ci.yml: lint, test (≥ 60%), manifests, build (no push), scan, e2e-eval | `.github/workflows/ci.yml` | Actions run URLs in `docs/evidence/ci-runs.txt` |
-| cd.yml: test → build-push (SHA) → deploy (rollout, Ingress smoke) | `.github/workflows/cd.yml`, `scripts/smoke.py` | final green run on `main` 137a97a: https://github.com/IfBilal/Rahbar/actions/runs/42205103512; images https://hub.docker.com/u/ifbilal (SHA tags only); `docs/evidence/cd-main.txt` |
+| cd.yml: test → build-push (SHA) → deploy (rollout, Ingress smoke) | `.github/workflows/cd.yml`, `scripts/smoke.py` | final green run on `main` e36e13f: https://github.com/IfBilal/Rahbar/actions/runs/42382845069; images https://hub.docker.com/u/ifbilal (SHA tags only); `docs/evidence/cd-main.txt` |
 | `needs:` on publishing/deploying jobs | `cd.yml` `build-push: needs: test`, `deploy: needs: build-push` | `scripts/check_submission.py` (I) |
 | Deploy by SHA, never `:latest` | `kustomize edit set image ...:$GITHUB_SHA` | `tests/test_manifests.py::test_images_are_pinned_and_never_latest` |
 | Credentials from GitHub Secrets, least-privilege `permissions:` | both workflows: `permissions: contents: read`; `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` (an access token) as repository secrets | `scripts/check_submission.py` (I) |
@@ -117,4 +117,4 @@ manifests, run on every CI build), and `tests/system/` (live cluster, `make syst
 | No secret in Git history | `.gitignore`; `scripts/check_submission.py` section A |
 | AI usage disclosed | `docs/AI-USAGE.md` |
 | Checker clean | `docs/evidence/check-submission.txt` |
-| Submission: repo, green cd run, Docker Hub SHA images, results and baseline committed | https://github.com/IfBilal/Rahbar · run 42205103512 · https://hub.docker.com/u/ifbilal · `eval/results.json`, `eval/baseline.json` |
+| Submission: repo, green cd run, Docker Hub SHA images, results and baseline committed | https://github.com/IfBilal/Rahbar · run 42382845069 · https://hub.docker.com/u/ifbilal · `eval/results.json`, `eval/baseline.json` |

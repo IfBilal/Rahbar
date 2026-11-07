@@ -278,7 +278,9 @@ prospectus. As before, the smoke test had just asked q01, so q01 was served from
 **The six generation checks of 5.3, answer by answer** (shipped run). Re-running the
 evaluation on minikube on 7 November gave the same verdict for every question
 (`docs/evidence/eval-reproduction-minikube.json`); the only difference was that e02 cited
-the fee table instead of clause 5.22, and both state Rs. 500:
+the fee table instead of clause 5.22, and both state Rs. 500. A third run on the final
+`main`, with every sentence tagged (3.4), scored the same: recall@5 0.969, citations and
+abstention 100%, 16/16 expected terms (`docs/evidence/eval-per-sentence-citations.json`):
 
 | Q | Correct? | Uses the retrieved evidence? | Answers the question asked? | Unsupported claims? | Cites a relevant source? | Acknowledges missing information? |
 | --- | --- | --- | --- | --- | --- | --- |
