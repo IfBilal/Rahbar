@@ -30,7 +30,8 @@ per run. F needs the real model.
   to 0.667. A user asking either question would get a confident "the documents do not cover
   this", and in v03's case the 2026 rule might be quoted for a 2023 question.
 - **Diagnosis, as if we had not caused it:** the indexer's own per-document log line is
-  decisive (`docs/evidence/failures/A-no-ocr-indexer.log`):
+  decisive (`docs/evidence/failures/A-no-ocr-indexer.txt`, re-captured on 7 Nov from the
+  same image and pinned corpus, both settings side by side):
   `"source": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf", "ocr_pages": [],
   "empty_pages": [1, 2, 3, 4, 5, 6, 7, 8], "chunks": 0` and, for the 2023 rules,
   `"empty_pages": [2, ..., 25], "chunks": 1`. A healthy run says `"ocr_pages": [1, ..., 8],
