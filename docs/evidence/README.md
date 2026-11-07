@@ -4,6 +4,12 @@ Every file here was produced by running the system (minikube with Calico on Ubun
 Ollama on the host, 4–5 November 2026) or by GitHub Actions. None is hand-written. Most
 carry the command that produced them and a UTC timestamp.
 
+Retrieval experiments (`chunking/`, `exact-assist-off-results.json`, failures A–E) ran with
+the stub generator, which answers whenever a passage clears the relevance floor. In those
+files only recall is a measurement; their `abstention_correctness` of 0.333 is the stub's.
+Abstention and citation validity are measured on real-model runs: `eval/results.json`,
+`eval-reproduction-minikube.json` and `eval-run*.json`, all 100%.
+
 | File | Proves | Produced by |
 | --- | --- | --- |
 | `corpus-pdffonts-and-pages.txt` | 9 documents, 279 pages, the two scans, 9/9 SHA-256 matches | `pdfinfo`, `pdffonts`, `corpus/fetch.py --verify` |
