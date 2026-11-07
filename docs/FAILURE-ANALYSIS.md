@@ -10,7 +10,10 @@ so every row is compared with that 0.906 reference.
 
 For A–E the API used the stub generator. All of them are retrieval-side breaks, and recall
 is measured on what is retrieved, so the stub removes model noise and an hour of CPU time
-per run. F needs the real model.
+per run. F needs the real model. Read only the recall columns of the A–E JSON files: the
+stub answers whenever a passage clears the relevance floor (only a03 falls below it), so their `abstention_correctness` (0.333) and
+`citation_validity` describe the stub, not RAHBAR. Abstention is measured and gated on
+real-model runs only: `eval/results.json`, 3/3 must-abstain questions declined (100%).
 
 | Stage | What we broke | recall@5 | What the number hides |
 | --- | --- | ---: | --- |
@@ -30,7 +33,8 @@ per run. F needs the real model.
   to 0.667. A user asking either question would get a confident "the documents do not cover
   this", and in v03's case the 2026 rule might be quoted for a 2023 question.
 - **Diagnosis, as if we had not caused it:** the indexer's own per-document log line is
-  decisive (`docs/evidence/failures/A-no-ocr-indexer.log`):
+  decisive (`docs/evidence/failures/A-no-ocr-indexer.txt`, re-captured on 7 Nov from the
+  same image and pinned corpus, both settings side by side):
   `"source": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf", "ocr_pages": [],
   "empty_pages": [1, 2, 3, 4, 5, 6, 7, 8], "chunks": 0` and, for the 2023 rules,
   `"empty_pages": [2, ..., 25], "chunks": 1`. A healthy run says `"ocr_pages": [1, ..., 8],

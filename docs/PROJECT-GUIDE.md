@@ -48,10 +48,10 @@
 19. [`SUBMISSION-AND-EVIDENCE.md`](SUBMISSION-AND-EVIDENCE.md)
 20. [`TESTING-EVALUATION.md`](TESTING-EVALUATION.md)
 21. [`TWO-DEVELOPER-PLAN.md`](TWO-DEVELOPER-PLAN.md)
-22. [`ADR-0001-indexer-as-job.md`](ADR-0001-indexer-as-job.md)
-23. [`ADR-0002-structure-aware-chunking.md`](ADR-0002-structure-aware-chunking.md)
-24. [`ADR-0003-semantic-cache-store.md`](ADR-0003-semantic-cache-store.md)
-25. [`ADR-0004-llm-provider-and-data-governance.md`](ADR-0004-llm-provider-and-data-governance.md)
+22. [`ADR-0001-indexer-as-job.md`](adr/0001-indexer-as-job.md)
+23. [`ADR-0002-structure-aware-chunking.md`](adr/0002-structure-aware-chunking.md)
+24. [`ADR-0003-semantic-cache-store.md`](adr/0003-semantic-cache-store.md)
+25. [`ADR-0004-llm-provider-and-data-governance.md`](adr/0004-llm-provider-and-data-governance.md)
 
 ---
 
@@ -123,7 +123,7 @@ The preferred base is host Ollama `llama3.2:3b` + `nomic-embed-text`, Chroma ser
 RAHBAR is a citation-grounded question-answering service over a public/owned document corpus. A one-shot indexer transforms documents into Chroma vectors; multiple FastAPI replicas retrieve evidence and return validated, cited answers or safely decline unsupported questions. Kubernetes hosts nginx UI, API, persistent Chroma and Redis, and scheduled re-indexing.
 
 ### Quick navigation
-- **Start:** [Documentation index](PROJECT-GUIDE.md), [starter instructions](STARTER.md), [requirements](PRD.md).
+- **Start:** [Documentation index](PROJECT-GUIDE.md), [starter instructions](../STARTER.md), [requirements](PRD.md).
 - **Build:** [architecture](ARCHITECTURE.md), [API/data contracts](INTERFACE-CONTRACTS.md), [critical path](CRITICAL-PATH.md), [two-person plan](TWO-DEVELOPER-PLAN.md), [phase guides](PHASES.md).
 - **Quality:** [tests](TESTING-EVALUATION.md), [evaluation](TESTING-EVALUATION.md), [grader traceability](PRD.md).
 - **Operate and submit:** [deployment](DEPLOYMENT-RUNBOOK.md), [submission](SUBMISSION-AND-EVIDENCE.md), [evidence](SUBMISSION-AND-EVIDENCE.md).

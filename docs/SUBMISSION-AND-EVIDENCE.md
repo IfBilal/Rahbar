@@ -57,7 +57,7 @@ No secret in **any Git history** (rotate if one entered), no base64 live Secret 
 | Submitted before deadline | PENDING | PENDING | Google Classroom (by the team) |
 
 ### Submission data template
-`Repository: <URL> | CD run: <URL> | Docker Hub API: <URL> | UI: <URL> | Indexer: <URL> | results commit: <SHA> | baseline commit: <SHA> | submitted timestamp PKT: <actual>`.
+`Repository: https://github.com/IfBilal/Rahbar | CD run: https://github.com/IfBilal/Rahbar/actions/runs/42205103512 | Docker Hub API: https://hub.docker.com/r/ifbilal/rahbar-api/tags | UI: https://hub.docker.com/r/ifbilal/rahbar-ui/tags | Indexer: https://hub.docker.com/r/ifbilal/rahbar-indexer/tags | image tag (all three): 137a97a (full SHA in the cd run) | results and baseline commit: 5989b71 | submitted timestamp PKT: <filled in at submission>`.
 
 ---
 

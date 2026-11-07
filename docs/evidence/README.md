@@ -4,12 +4,18 @@ Every file here was produced by running the system (minikube with Calico on Ubun
 Ollama on the host, 4–5 November 2026) or by GitHub Actions. None is hand-written. Most
 carry the command that produced them and a UTC timestamp.
 
+Retrieval experiments (`chunking/`, `exact-assist-off-results.json`, failures A–E) ran with
+the stub generator, which answers whenever a passage clears the relevance floor. In those
+files only recall is a measurement; their `abstention_correctness` of 0.333 is the stub's.
+Abstention and citation validity are measured on real-model runs: `eval/results.json`,
+`eval-reproduction-minikube.json` and `eval-run*.json`, all 100%.
+
 | File | Proves | Produced by |
 | --- | --- | --- |
 | `corpus-pdffonts-and-pages.txt` | 9 documents, 279 pages, the two scans, 9/9 SHA-256 matches | `pdfinfo`, `pdffonts`, `corpus/fetch.py --verify` |
 | `extraction-before-after.txt` | mangled table and off-page text, before and after our extractor | `extract.py::page_text` vs plain pdfplumber |
 | `kubectl-top-indexer-run.txt` | indexer peak memory 910 Mi (limit 1536 Mi) | `kubectl top pods` every 10 s during a full index |
-| `hpa.txt` | HPA reads a value (3%/70%) and API CPU stays ~3m while generations are in flight | `kubectl top` + `kubectl get hpa` every 15 s during the evaluation |
+| `hpa.txt` | HPA reads a value (3%/70%) and API CPU stays ~3m while generations are in flight. The first 4 of 110 samples show `<unknown>/70%`: they were taken during a rollout, before metrics-server had a sample from the new pods (`ENGINEERING-NOTES.md`, note 3) | `kubectl top` + `kubectl get hpa` every 15 s during the evaluation |
 | `networkpolicy-tests.txt` | ui → chroma and ui → redis denied, api → chroma/redis allowed, ui → api allowed, DNS works | `kubectl exec` connections from inside the pods |
 | `pin-mismatch.txt` | changed `EMBED_MODEL`: new pod 0/1 READY, 503 naming the pin, conflict logged, old pods serving | `scripts/ops-evidence.sh pin` |
 | `rollout-and-endpoints.txt` | set image → rollout status → undo with 0 failed requests; 4 endpoints after scaling | `scripts/ops-evidence.sh rollout` |
@@ -24,7 +30,7 @@ carry the command that produced them and a UTC timestamp.
 | `retrieval-scores-400-60.txt` | best similarity per golden question (relevance floor) | live API, stub generator |
 | `chunking/` | three chunk settings measured (+ the pre-fix run) | `scripts/chunk-sweep.sh` |
 | `exact-assist-off-results.json` | exact-term recall 0.5 without the `$contains` assist | `EXACT_TERM_ASSIST=false` |
-| `failures/` | five stages broken and restored (A, B, C, E, F) | `scripts/failure-experiments.sh` |
+| `failures/` | five stages broken and restored (A, B, C, E, F); `A-no-ocr-indexer.txt` is the per-document indexer log, OCR off and on | `scripts/failure-experiments.sh` |
 | `eval-run1-…`, `eval-run2-cache-hits.json`, `eval-run3-…` | the evaluation runs before the shipped one (`eval/results.json`) | `eval/run_eval.py` |
 | `gate-demo.txt`, `eval-gate-red.png`, `eval-gate-green.png` | the CI eval gate failing on PR #1, then passing after the fix | GitHub Actions runs 41891435694 and 41892555788; screenshots captured 5 November 2026 |
 | `ci-runs.txt` | CI run URLs per commit | `gh run list` |
@@ -34,6 +40,9 @@ carry the command that produced them and a UTC timestamp.
 | `branch-protection.json`, `branch-protection.png` | required approvals, status checks and administrator enforcement | GitHub branch protection API and settings page, 5 November 2026 |
 | `check-submission.txt` | the starter's checker output on the final tree | `python scripts/check_submission.py` |
 | `clean-clone.txt` | README path from a fresh clone to an answered question | the README commands, in a new directory |
+| `clean-clone-final.txt` | the same README path on the final `main` (137a97a): 313 tests, 532 chunks, a cited answer and a decline through the Ingress, all 7 live system tests (pin test included), turns stored in Redis, HPA at 6%/70% | the README commands, in a new directory |
+| `empty-index-readiness.txt` | with no index at all, the API pods stay 0/1 READY (503 naming the missing collection, no endpoints) until the indexer Job publishes; then 3 endpoints and answers | `kubectl apply -k k8s/overlays/dev` after wiping the namespace and the provisioner's data directory |
+| `eval-reproduction-minikube.json` | the full 19-question real-model evaluation re-run independently on our minikube against the final `main`, cache flushed first. It reproduces the committed numbers exactly (recall@3/@5 0.969, citation validity 100%, abstention 3/3, expected terms 16/16), and no answer obeyed the planted instruction | `eval/run_eval.py --api http://$(minikube ip) --host rahbar.local`, 7 November 2026 |
 
 The branch-protection settings are recorded in `branch-protection.json` and
 `branch-protection.png`. The successful main-branch CD run and Docker Hub links are
