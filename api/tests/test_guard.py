@@ -97,8 +97,8 @@ def test_bracketed_numbers_are_not_citations_and_are_removed() -> None:
 def test_an_answer_without_markers_gets_its_validated_citations_inline() -> None:
     out = check_answer(_answer("Admission is closed after three semesters.",
                                [Citation(source="rules.pdf", section=P[1].section, page=10)]), P)
-    assert out.answer == ("Admission is closed after three semesters. "
-                          f"[rules.pdf / {P[1].section}]")
+    assert out.answer == ("Admission is closed after three semesters "
+                          f"[rules.pdf / {P[1].section}].")
 
 
 def test_a_real_section_with_a_wrong_page_is_served_with_the_real_page() -> None:
@@ -115,3 +115,18 @@ def test_a_clause_number_maps_to_the_passage_that_contains_it() -> None:
     out = check_answer(_answer("It starts in August.", [Citation(source="rules.pdf",
                                                                  section="1.2", page=7)]), passages)
     assert out.citations[0].section == "1. Introduction > Academic Year"
+
+
+
+def test_every_sentence_carries_a_citation_tag() -> None:
+    a, b = P[0].section, P[1].section
+    # cited once at the end: the earlier sentence takes the same evidence (3.4)
+    out = check_answer(_answer("You must attend 80% of classes. Absences up to 20% may be "
+                               "condoned for illness [B].", []), P)
+    assert out.answer == (f"You must attend 80% of classes [rules.pdf / {b}]. Absences up to "
+                          f"20% may be condoned for illness [rules.pdf / {b}].")
+    # no markers at all: each sentence gets every cited passage; 2.00 and Rs. 500 end nothing
+    out = check_answer(_answer("The CGPA floor is 2.00. The fee is Rs. 500 per course.",
+                               [Citation(source="rules.pdf", section=a, page=22)]), P)
+    assert out.answer == (f"The CGPA floor is 2.00 [rules.pdf / {a}]. "
+                          f"The fee is Rs. 500 per course [rules.pdf / {a}].")

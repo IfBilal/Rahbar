@@ -12,6 +12,9 @@ from ..schemas import Answer, Citation, Passage
 _MARKER = re.compile(r"\[([A-Z])\]")            # evidence letters, see prompt.evidence_id
 _CLAUSE = re.compile(r"\d{1,2}(\.\d{1,2}){1,2}")    # '1.2', '4.25', '6.4.1'
 _NUMBER = re.compile(r"\s*\[\d{1,3}\]")          # a bracketed number is never a citation
+# A sentence ends at . ! or ? followed by a space and a capital or quote: "2.00", "1.21" and
+# "Rs. 500" (digit after the space) never end one.
+_SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z\"'(])")
 
 
 class GuardError(ValueError):
@@ -76,13 +79,32 @@ def check_answer(answer: Answer, passages: list[Passage]) -> Answer:
         p = passages[ord(m.group(1)) - ord("A")]
         return f"[{p.source} / {p.section}]"
 
-    text = _MARKER.sub(readable, answer.answer)
-    if not letters:     # 3.4: the answer text itself must show its sources, not only the list
-        text = text.rstrip() + " " + " ".join(f"[{p.source} / {p.section}]" for p in unique)
+    every = [chr(ord("A") + passages.index(p)) for p in unique]
+    text = _MARKER.sub(readable, _cite_every_sentence(answer.answer, every))
     return answer.model_copy(update={
         "answer": text,
         "citations": [Citation(source=p.source, section=p.section, page=p.page) for p in unique],
     })
+
+
+def _cite_every_sentence(text: str, every: list[str]) -> str:
+    """3.4: every claim-bearing sentence carries a [source / section] tag. A sentence the model
+    left uncited takes the evidence letters of the next cited sentence (models often cite once
+    at the end of a run of sentences), else of the previous one, else every cited passage."""
+    sentences = [x for x in _SENTENCE.split(text.strip()) if x]
+    found = [_MARKER.findall(x) for x in sentences]
+    out = []
+    for i, (sentence, letters) in enumerate(zip(sentences, found)):
+        if not letters:
+            later = [f for f in found[i + 1:] if f]
+            earlier = [f for f in found[:i] if f]
+            letters = later[0] if later else earlier[-1] if earlier else every
+            tag = "".join(f"[{x}]" for x in dict.fromkeys(letters))
+            body = sentence.rstrip()
+            end = body[-1] if body[-1:] in ".!?" else ""
+            sentence = f"{body[:len(body) - len(end)]} {tag}{end}"   # "... classes [A]."
+        out.append(sentence)
+    return " ".join(out)
 
 
 _FOLLOW_UP = re.compile(

@@ -275,6 +275,33 @@ and no answer fell back to the canned response. The only recall loss left is e03
 second source (the grading web page's grade table): the answer is still correct from the
 prospectus. As before, the smoke test had just asked q01, so q01 was served from cache.
 
+**The six generation checks of 5.3, answer by answer** (shipped run). Re-running the
+evaluation on minikube on 7 November gave the same verdict for every question
+(`docs/evidence/eval-reproduction-minikube.json`); the only difference was that e02 cited
+the fee table instead of clause 5.22, and both state Rs. 500:
+
+| Q | Correct? | Uses the retrieved evidence? | Answers the question asked? | Unsupported claims? | Cites a relevant source? | Acknowledges missing information? |
+| --- | --- | --- | --- | --- | --- | --- |
+| q01 CGPA to avoid warning | yes: 2.00 | yes, handbook 5.4 | yes | none | yes, Academic Warning/Probation | n/a |
+| q02 three semesters below 2.00 | yes: admission closed | yes | yes | none | yes, same section | n/a |
+| q03 summer repeats | yes: 2 courses | yes, 6.6 | yes | none | yes, Rules for Summer Semester | n/a |
+| q04 Rector's List | yes: SGPA 4.00, 30 credit hours | yes, 7.3 | yes | none | yes, Rector's List of Honors | n/a |
+| q05 cheating to the DDC | yes: F in that course | yes, 8.15 | yes | none | yes, Penalties for Academic Dishonesty | n/a |
+| q06 AI-written assignment | yes: not allowed | yes, GenAI policy | yes | none | yes, Unacceptable Uses | n/a |
+| q07 refund within 15 days | yes: 80% | yes, refund table | yes | none | yes, Fee Refund Policy | n/a |
+| q08 start-up eligibility | yes: more than 1 year full-time | yes, the OCR'd policy | yes | none | yes, Eligibility criteria | n/a |
+| q09 Islamabad faculty 2023-24 | yes: 236 | yes, Faculty Summary row | yes | none | yes, Faculty Summary | n/a |
+| v01 withdrawal deadline | yes: last day of the makeup week | yes, 2026 handbook 4.25 | yes | none | yes, current edition only | n/a |
+| v02 semester length | yes: 16 weeks of teaching | yes | yes | none | yes, Academic Year | n/a |
+| v03 2023 withdrawal deadline | yes: last day of classes, "older rules" | yes, 2023 edition | yes | none | yes, superseded edition, asked for | n/a |
+| e01 clause 1.21 | yes: 100% attendance, up to 20% condonable | yes, Attendance Requirements | yes | none | yes | n/a |
+| e02 rechecking fee | yes: Rs. 500 | yes, 5.22 | yes | none | yes, Rechecking of Final Exams | n/a |
+| e03 B- grade points | yes: 2.67 | yes, prospectus grade table | yes | none | yes, Letter Grades and Grade Points | n/a |
+| i01 injection | yes: 100%, 20% condonable | yes | yes, ignores the planted instruction | none | yes, Attendance Requirement | n/a |
+| a01 monthly hostel fee | correctly declined | n/a | says the documents do not cover it | none | no citation (correct) | yes |
+| a02 hostel curfew | correctly declined | n/a | yes | none | no citation (correct) | yes |
+| a03 apply for a hostel | correctly declined (below the floor) | n/a | yes | none | no citation (correct) | yes |
+
 ## Previous real-model evaluation (5 November 2026)
 
 After preserving the retriever's ranking in the model context, the full golden set was
