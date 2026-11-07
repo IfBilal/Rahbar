@@ -1,35 +1,39 @@
-# README path from a fresh clone of main (137a97a), 6-7 November 2026 UTC: wipe the namespace, clone, make install, make test, make images, kubectl apply -k k8s/overlays/dev, wait for the indexer, ask through the Ingress; then the live system tests, the turns stored in Redis, and the HPA. Minikube (Calico, ingress, metrics-server) and host Ollama were already running (README steps 1-2).
-# Note: minikube's hostpath provisioner reused the deleted PVC's directory, so the API was ready on the previous index while this run re-indexed; docs/evidence/empty-index-readiness.txt repeats the deploy with that directory wiped.
+# README path from a fresh clone of main (e36e13f, the final main: #17, #18 and #19 merged), 7 November 2026 UTC: wipe the namespace AND minikube's hostpath-provisioner directory (so no old index or cache survives), clone, make install, make test, make images, kubectl apply -k k8s/overlays/dev, wait for the indexer, ask through the Ingress; then the live system tests, the turns stored in Redis, and the HPA. At the end, the disruptive system test (RAHBAR_DISRUPTIVE=1: change EMBED_MODEL on the API only) on the same stack. Minikube (Calico, ingress, metrics-server) and host Ollama were already running (README steps 1-2). The clone path is shown as <clone>.
 
-############ 0. wipe the rahbar namespace (PVCs and index included)  (2026-11-06T19:41:46Z)
+
+############ 0. wipe the rahbar namespace (PVCs and index included)  (2026-11-07T15:13:18Z)
 $ kubectl delete namespace rahbar --ignore-not-found --wait=true --timeout=300s
 namespace "rahbar" deleted
 exit code: 0
+$ minikube ssh -- sudo rm -rf /tmp/hostpath-provisioner/rahbar
+exit code: 0
+$ minikube ssh -- ls /tmp/hostpath-provisioner/
+exit code: 0
 
-############ git clone (main)  (2026-11-06T19:44:04Z)
+############ git clone (main)  (2026-11-07T15:15:36Z)
 $ git clone -q https://github.com/IfBilal/Rahbar.git <clone>
 exit code: 0
 $ git log --oneline -1
-137a97a Merge pull request #16 from IfBilal/feat/store-turns-real-model-gate
+e36e13f Merge pull request #19 from IfBilal/fix/cite-every-sentence
 exit code: 0
 
-############ make install  (2026-11-06T19:44:06Z)
+############ make install  (2026-11-07T15:15:38Z)
 $ make install
 python3 -m venv .venv
 <clone>/.venv/bin/pip install -q --upgrade pip
 <clone>/.venv/bin/pip install -q -r api/requirements-dev.txt -r indexer/requirements-dev.txt
 exit code: 0
 
-############ make test  (2026-11-06T19:44:57Z)
-Required test coverage of 60% reached. Total coverage: 96.43%
-127 passed, 1 skipped, 1 warning in 3.91s
+############ make test  (2026-11-07T15:16:17Z)
+Required test coverage of 60% reached. Total coverage: 96.52%
+129 passed, 1 skipped, 1 warning in 3.76s
 Required test coverage of 60% reached. Total coverage: 96.41%
-80 passed, 1 skipped in 3.03s
-14 passed in 0.11s
-92 passed in 1.16s
+81 passed, 1 skipped in 2.24s
+14 passed in 0.09s
+92 passed in 0.92s
 exit code: 0
 
-############ 1-2. cluster and Ollama (already running: minikube with Calico, ingress, metrics-server; Ollama on the gateway)  (2026-11-06T19:45:07Z)
+############ 1-2. cluster and Ollama (already running: minikube with Calico, ingress, metrics-server; Ollama on the gateway)  (2026-11-07T15:16:26Z)
 $ minikube status
 minikube
 type: Control Plane
@@ -40,19 +44,19 @@ kubeconfig: Configured
 
 exit code: 0
 $ kubectl get pods -n kube-system -l k8s-app=calico-node
-NAME                READY   STATUS    RESTARTS        AGE
-calico-node-lzp9v   1/1     Running   1 (5m35s ago)   2d8h
+NAME                READY   STATUS    RESTARTS      AGE
+calico-node-lzp9v   1/1     Running   1 (19h ago)   3d3h
 exit code: 0
 $ curl -s http://192.168.49.1:11434/api/version
 {"version":"0.17.6"}exit code: 0
 
-############ 3. make images  (2026-11-06T19:45:09Z)
+############ 3. make images  (2026-11-07T15:16:26Z)
 minikube image load rahbar-api:dev
 minikube image load rahbar-indexer:dev
 minikube image load rahbar-ui:dev
 exit code: 0
 
-############ 4. kubectl apply -k k8s/overlays/dev  (2026-11-06T19:51:08Z)
+############ 4. kubectl apply -k k8s/overlays/dev  (2026-11-07T15:16:52Z)
 $ kubectl apply -k k8s/overlays/dev
 namespace/rahbar created
 serviceaccount/api created
@@ -84,45 +88,48 @@ networkpolicy.networking.k8s.io/ui-from-ingress created
 exit code: 0
 $ kubectl get pods -n rahbar
 NAME                    READY   STATUS              RESTARTS   AGE
-api-6568c78cd7-27clg    0/1     ContainerCreating   0          1s
-api-6568c78cd7-8d7m8    0/1     ContainerCreating   0          1s
-api-6568c78cd7-qvpxj    0/1     ContainerCreating   0          1s
-chroma-0                0/1     ContainerCreating   0          1s
-indexer-xxqff           0/1     Init:0/1            0          1s
-redis-b8d9d4b69-qdj4z   0/1     ContainerCreating   0          1s
-ui-b84f8ffd9-fqsmp      0/1     ContainerCreating   0          1s
+api-6568c78cd7-5d2kr    0/1     ContainerCreating   0          0s
+api-6568c78cd7-d5j8k    0/1     ContainerCreating   0          0s
+api-6568c78cd7-zntgb    0/1     ContainerCreating   0          0s
+chroma-0                0/1     ContainerCreating   0          0s
+indexer-rmvct           0/1     Init:0/1            0          0s
+redis-b8d9d4b69-dznzm   0/1     ContainerCreating   0          0s
+ui-b84f8ffd9-594x8      0/1     ContainerCreating   0          0s
 exit code: 0
 
-############ wait for the indexer Job  (2026-11-06T19:51:10Z)
+############ wait for the indexer Job  (2026-11-07T15:16:52Z)
 $ kubectl wait --for=condition=complete job/indexer -n rahbar --timeout=40m
 job.batch/indexer condition met
 exit code: 0
 9 documents in corpus/raw, manifest written to corpus/MANIFEST.md
 corpus matches the committed MANIFEST.md
-{"ts": "2026-11-06T20:03:47Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 532, "dimension": 768, "model": "nomic-embed-text", "seconds": 461.1}
-{"ts": "2026-11-06T20:03:50Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 532, "seconds": 709.6}
+{"ts": "2026-11-07T15:24:58Z", "logger": "rahbar.indexer", "msg": "embedded", "request_id": "indexer-rmvct", "vectors": 532, "dimension": 768, "model": "nomic-embed-text", "seconds": 312.5}
+{"ts": "2026-11-07T15:24:59Z", "logger": "rahbar.indexer", "msg": "indexer finished", "request_id": "indexer-rmvct", "chunks": 532, "seconds": 445.4}
 $ kubectl rollout status deployment/api -n rahbar --timeout=600s
+Waiting for deployment "api" rollout to finish: 0 of 3 updated replicas are available...
+Waiting for deployment "api" rollout to finish: 1 of 3 updated replicas are available...
+Waiting for deployment "api" rollout to finish: 2 of 3 updated replicas are available...
 deployment "api" successfully rolled out
 exit code: 0
 $ kubectl get pods,pvc -n rahbar
 NAME                        READY   STATUS      RESTARTS   AGE
-pod/api-6568c78cd7-27clg    1/1     Running     0          12m
-pod/api-6568c78cd7-8d7m8    1/1     Running     0          12m
-pod/api-6568c78cd7-qvpxj    1/1     Running     0          12m
-pod/chroma-0                1/1     Running     0          12m
-pod/indexer-xxqff           0/1     Completed   0          12m
-pod/redis-b8d9d4b69-qdj4z   1/1     Running     0          12m
-pod/ui-b84f8ffd9-fqsmp      1/1     Running     0          12m
+pod/api-6568c78cd7-5d2kr    1/1     Running     0          8m17s
+pod/api-6568c78cd7-d5j8k    1/1     Running     0          8m17s
+pod/api-6568c78cd7-zntgb    1/1     Running     0          8m17s
+pod/chroma-0                1/1     Running     0          8m17s
+pod/indexer-rmvct           0/1     Completed   0          8m17s
+pod/redis-b8d9d4b69-dznzm   1/1     Running     0          8m17s
+pod/ui-b84f8ffd9-594x8      1/1     Running     0          8m17s
 
 NAME                                  STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
-persistentvolumeclaim/data-chroma-0   Bound    pvc-2e049bb8-21d8-457d-ad19-f08936afdf0b   2Gi        RWO            standard       <unset>                 12m
-persistentvolumeclaim/redis-data      Bound    pvc-b5910937-938d-4a72-9fc3-e5061bad88a3   1Gi        RWO            standard       <unset>                 12m
+persistentvolumeclaim/data-chroma-0   Bound    pvc-6cd4adb9-278d-4ec9-8b80-10dc2cd81b1d   2Gi        RWO            standard       <unset>                 8m17s
+persistentvolumeclaim/redis-data      Bound    pvc-9ae7c362-7613-4fba-a905-b68af596b108   1Gi        RWO            standard       <unset>                 8m17s
 exit code: 0
 
-############ 5. ask through the Ingress  (2026-11-06T20:03:55Z)
+############ 5. ask through the Ingress  (2026-11-07T15:25:10Z)
 {
-    "request_id": "f2f90350dcafe398b952e31344e11298",
-    "answer": "The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules Handbook, June 2026 edition, page 22. [academic-rules-handbook-jun-2026.pdf / 4. Registration > Withdrawal from a Course]",
+    "request_id": "7832708aeaf4d71737dc899ec8b0c4c2",
+    "answer": "The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules Handbook, June 2026 edition [academic-rules-handbook-jun-2026.pdf / 4. Registration > Withdrawal from a Course].",
     "citations": [
         {
             "source": "academic-rules-handbook-jun-2026.pdf",
@@ -173,7 +180,7 @@ exit code: 0
     "cached": false
 }
 {
-    "request_id": "69c9091558b75b24fb5c381fd4f3e60c",
+    "request_id": "f2185496a4c02d9e7a780cdb4734122f",
     "answer": "The documents do not cover this question.",
     "citations": [],
     "answered_from_context": false,
@@ -219,38 +226,44 @@ exit code: 0
     "cached": false
 }
 
-############ extra: live system tests (pin, policy, abstention, pod deletion)  (2026-11-06T20:07:20Z)
+############ extra: live system tests (pin, policy, abstention, pod deletion)  (2026-11-07T15:27:00Z)
 PASSED tests/system/test_live_cluster.py::test_ingress_serves_the_ui_and_the_api
 PASSED tests/system/test_live_cluster.py::test_the_absent_topic_is_declined
 PASSED tests/system/test_live_cluster.py::test_three_api_endpoints_behind_the_service
 PASSED tests/system/test_live_cluster.py::test_network_policy_blocks_ui_to_chroma_and_allows_api_to_chroma
 PASSED tests/system/test_live_cluster.py::test_network_policy_blocks_ui_to_redis
 PASSED tests/system/test_live_cluster.py::test_deleting_an_api_pod_does_not_interrupt_answers
-6 passed, 1 skipped in 115.67s (0:01:55)
+6 passed, 1 skipped in 78.88s (0:01:18)
 
-############ extra: stored turns in Redis (3.2 step 8)  (2026-11-06T20:09:16Z)
+############ extra: stored turns in Redis (3.2 step 8)  (2026-11-07T15:28:19Z)
 $ kubectl exec -n rahbar deploy/redis -- redis-cli LLEN rahbar:turns
 12
 exit code: 0
-{"request_id": "2167ce9c398df7c3c32c3d4c1e29a372", "ts": 1793995747, "question": "What is the deadline to withdraw from a course?", "answer": "The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules Handbook, June 2
+{"request_id": "10a26e57c9fb1366b118199197f97640", "ts": 1794065295, "question": "What is the deadline to withdraw from a course?", "answer": "The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules Handbook, June 2
 
-############ extra: HPA and kubectl top after a minute  (2026-11-06T20:09:17Z)
+############ extra: HPA and kubectl top after a minute  (2026-11-07T15:28:20Z)
 $ kubectl get hpa -n rahbar
 NAME   REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
-api    Deployment/api   cpu: 6%/70%   3         8         3          19m
+api    Deployment/api   cpu: 5%/70%   3         8         3          12m
 exit code: 0
 $ kubectl top pods -n rahbar --containers
 POD                     NAME     CPU(cores)   MEMORY(bytes)   
-api-6568c78cd7-6wlbz    api      93m          72Mi            
-api-6568c78cd7-8d7m8    api      6m           73Mi            
-api-6568c78cd7-qvpxj    api      7m           72Mi            
-chroma-0                chroma   4m           58Mi            
-redis-b8d9d4b69-qdj4z   redis    22m          3Mi             
-ui-b84f8ffd9-fqsmp      ui       2m           3Mi             
+api-6568c78cd7-d5j8k    api      5m           75Mi            
+api-6568c78cd7-znqq8    api      5m           70Mi            
+api-6568c78cd7-zntgb    api      5m           73Mi            
+chroma-0                chroma   2m           46Mi            
+redis-b8d9d4b69-dznzm   redis    17m          5Mi             
+ui-b84f8ffd9-594x8      ui       1m           3Mi             
 exit code: 0
 
-############ done  (2026-11-06T20:10:48Z)
+############ done  (2026-11-07T15:29:50Z)
 
-############ extra: the disruptive pin test (RAHBAR_DISRUPTIVE=1 make system-test -k embedding_model)
+############ extra: RAHBAR_DISRUPTIVE=1 make system-test (all 7, pin test included)
+PASSED tests/system/test_live_cluster.py::test_ingress_serves_the_ui_and_the_api
+PASSED tests/system/test_live_cluster.py::test_the_absent_topic_is_declined
+PASSED tests/system/test_live_cluster.py::test_three_api_endpoints_behind_the_service
+PASSED tests/system/test_live_cluster.py::test_network_policy_blocks_ui_to_chroma_and_allows_api_to_chroma
+PASSED tests/system/test_live_cluster.py::test_network_policy_blocks_ui_to_redis
+PASSED tests/system/test_live_cluster.py::test_deleting_an_api_pod_does_not_interrupt_answers
 PASSED tests/system/test_live_cluster.py::test_changing_the_embedding_model_on_the_api_only_blocks_readiness
-1 passed, 6 deselected in 91.80s (0:01:31)
+7 passed in 106.52s (0:01:46)

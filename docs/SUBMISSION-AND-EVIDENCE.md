@@ -53,11 +53,11 @@ No secret in **any Git history** (rotate if one entered), no base64 live Secret 
 | Indexer, provider, safety and cache | PENDING | PENDING | `docs/PIPELINE.md`; `api/tests/test_injection.py`; `docs/evidence/cache-threshold.txt` |
 | Cluster, network, probes, rollout | PENDING | PENDING | `docs/evidence/networkpolicy-tests.txt`, `pin-mismatch.txt`, `rollout-and-endpoints.txt`, `chroma-outage-probes.txt` |
 | CI/CD and real eval gate | PENDING | PENDING | `main` protected (`docs/evidence/branch-protection.png`); gate blocked then green on PR #8 (`merge-blocked.png`, `merge-green.png`); green cd on `main` (`docs/evidence/cd-main.txt`); images at https://hub.docker.com/u/ifbilal |
-| Clean clone + README + checker | PENDING | PENDING | `docs/evidence/clean-clone.txt`, `docs/evidence/check-submission.txt` |
+| Clean clone + README + checker | PENDING | PENDING | `docs/evidence/clean-clone-final.txt`, `docs/evidence/check-submission.txt` |
 | Submitted before deadline | PENDING | PENDING | Google Classroom (by the team) |
 
 ### Submission data template
-`Repository: https://github.com/IfBilal/Rahbar | CD run: https://github.com/IfBilal/Rahbar/actions/runs/42205103512 | Docker Hub API: https://hub.docker.com/r/ifbilal/rahbar-api/tags | UI: https://hub.docker.com/r/ifbilal/rahbar-ui/tags | Indexer: https://hub.docker.com/r/ifbilal/rahbar-indexer/tags | image tag (all three): 137a97a (full SHA in the cd run) | results and baseline commit: 5989b71 | submitted timestamp PKT: <filled in at submission>`.
+`Repository: https://github.com/IfBilal/Rahbar | CD run: https://github.com/IfBilal/Rahbar/actions/runs/42382845069 | Docker Hub API: https://hub.docker.com/r/ifbilal/rahbar-api/tags | UI: https://hub.docker.com/r/ifbilal/rahbar-ui/tags | Indexer: https://hub.docker.com/r/ifbilal/rahbar-indexer/tags | image tag (all three): e36e13f (full SHA in the cd run) | results and baseline commit: 5989b71 | submitted timestamp PKT: <filled in at submission>`.
 
 ---
 
