@@ -20,9 +20,14 @@ from .config import IndexerSettings, get_settings
 from .models import Chunk
 
 
+# One id per indexer run (the Job's pod name), on every line, like the API's request_id (4.8).
+RUN_ID = os.environ.get("HOSTNAME") or f"indexer-{os.getpid()}"
+
+
 def log(msg: str, **fields: object) -> None:
     print(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                      "logger": "rahbar.indexer", "msg": msg, **fields}), flush=True)
+                      "logger": "rahbar.indexer", "msg": msg, "request_id": RUN_ID,
+                      **fields}), flush=True)
 
 
 def _front_matter(path: Path) -> dict[str, str]:

@@ -133,7 +133,7 @@ evaluation). Exact terms stay worst, at 0.833.
 **hybrid retrieval** (BM25 or keyword search fused with the vector ranking), so a query
 containing "1.21" gets the chunk that literally contains "1.21". We implemented the
 cheapest form: `api/app/retrieval/chroma.py` extracts clause numbers and course codes
-(`_EXACT`, line 34) and asks Chroma for chunks that `$contains` them, ranked first
+(`_EXACT`, line 37) and asks Chroma for chunks that `$contains` them, ranked first
 (`retrieve` in `api/app/retrieval/chroma.py:156-160`). That alone moved exact-term recall@5 from 0.500 to 0.833. A
 full BM25 leg would also catch fee names and table labels ("Paper Rechecking Fee"), which
 our regex does not look for. Metadata helps too: indexing table rows with their header

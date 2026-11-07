@@ -1,0 +1,32 @@
+# Stage A evidence (docs/FAILURE-ANALYSIS.md): the indexer's per-document "chunked" lines,
+# OCR off and then on. Same image (rahbar-indexer), same pinned corpus (corpus/MANIFEST.md
+# checksums), CHUNK_SIZE=300 CHUNK_OVERLAP=40. Re-captured 7 Nov 2026 with
+#   docker run --rm --network none -e OCR_ENABLED=<false|true> -e CHUNK_SIZE=300 -e CHUNK_OVERLAP=40 \
+#     -e CORPUS_DIR=/work/corpus/raw -v "$PWD/corpus/raw:/work/corpus/raw:ro" rahbar-indexer:dev
+# --network none stops the run at the embedding call, after every document is extracted and
+# chunked, so the broken index is never published. Extraction and chunking do not touch the
+# network, so these lines are identical to the ones the cluster Job prints.
+#
+# ---- OCR_ENABLED=false (broken) ----
+{"ts": "2026-11-07T06:38:10Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "undergraduate-academic-rules-aug-2023.pdf", "doc_version": "2023-08", "superseded": true, "pages": 26, "ocr_pages": [], "empty_pages": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], "chunks": 1, "seconds": 64.8}
+{"ts": "2026-11-07T06:38:18Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "academic-rules-handbook-jun-2026.pdf", "doc_version": "2026-06", "superseded": false, "pages": 58, "ocr_pages": [], "empty_pages": [1, 2, 56, 57, 58], "chunks": 62, "seconds": 8.1}
+{"ts": "2026-11-07T06:38:20Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "prospectus-2026-academic-rules-and-regulations.pdf", "doc_version": "2026", "superseded": false, "pages": 5, "ocr_pages": [], "empty_pages": [], "chunks": 25, "seconds": 1.4}
+{"ts": "2026-11-07T06:38:28Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "student-handbook-jun-2026.pdf", "doc_version": "2026-06", "superseded": false, "pages": 64, "ocr_pages": [], "empty_pages": [1, 2, 8, 63, 64], "chunks": 78, "seconds": 8.1}
+{"ts": "2026-11-07T06:38:37Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "annual-report-2019-20.pdf", "doc_version": "2019-20", "superseded": false, "pages": 33, "ocr_pages": [], "empty_pages": [], "chunks": 63, "seconds": 8.7}
+{"ts": "2026-11-07T06:38:56Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "annual-report-2023-24.pdf", "doc_version": "2023-24", "superseded": false, "pages": 85, "ocr_pages": [], "empty_pages": [], "chunks": 211, "seconds": 19.0}
+{"ts": "2026-11-07T06:38:56Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "fee-structure-page.html", "doc_version": "2026-27", "superseded": false, "pages": 1, "ocr_pages": [], "empty_pages": [], "chunks": 9, "seconds": 0.0}
+{"ts": "2026-11-07T06:38:56Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "grading-page.html", "doc_version": "2026", "superseded": false, "pages": 1, "ocr_pages": [], "empty_pages": [], "chunks": 8, "seconds": 0.0}
+{"ts": "2026-11-07T06:38:56Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf", "doc_version": "2022-05", "superseded": false, "pages": 8, "ocr_pages": [], "empty_pages": [1, 2, 3, 4, 5, 6, 7, 8], "chunks": 0, "seconds": 0.0}
+{"ts": "2026-11-07T06:38:56Z", "logger": "rahbar.indexer", "msg": "chunking done", "chunks": 457, "chunk_size": 300, "chunk_overlap": 40, "amplification": 1.091}
+#
+# ---- OCR_ENABLED=true (healthy, as shipped) ----
+{"ts": "2026-11-07T06:41:05Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "undergraduate-academic-rules-aug-2023.pdf", "doc_version": "2023-08", "superseded": true, "pages": 26, "ocr_pages": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25], "empty_pages": [3], "chunks": 45, "seconds": 122.4}
+{"ts": "2026-11-07T06:41:25Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "academic-rules-handbook-jun-2026.pdf", "doc_version": "2026-06", "superseded": false, "pages": 58, "ocr_pages": [1, 2, 56, 57, 58], "empty_pages": [2, 56, 57], "chunks": 66, "seconds": 19.8}
+{"ts": "2026-11-07T06:41:28Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "prospectus-2026-academic-rules-and-regulations.pdf", "doc_version": "2026", "superseded": false, "pages": 5, "ocr_pages": [], "empty_pages": [], "chunks": 25, "seconds": 2.3}
+{"ts": "2026-11-07T06:41:42Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "student-handbook-jun-2026.pdf", "doc_version": "2026-06", "superseded": false, "pages": 64, "ocr_pages": [1, 2, 63, 64], "empty_pages": [2, 8, 63], "chunks": 82, "seconds": 14.1}
+{"ts": "2026-11-07T06:41:51Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "annual-report-2019-20.pdf", "doc_version": "2019-20", "superseded": false, "pages": 33, "ocr_pages": [], "empty_pages": [], "chunks": 63, "seconds": 9.1}
+{"ts": "2026-11-07T06:42:13Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "annual-report-2023-24.pdf", "doc_version": "2023-24", "superseded": false, "pages": 85, "ocr_pages": [], "empty_pages": [], "chunks": 211, "seconds": 22.5}
+{"ts": "2026-11-07T06:42:13Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "fee-structure-page.html", "doc_version": "2026-27", "superseded": false, "pages": 1, "ocr_pages": [], "empty_pages": [], "chunks": 9, "seconds": 0.0}
+{"ts": "2026-11-07T06:42:13Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "grading-page.html", "doc_version": "2026", "superseded": false, "pages": 1, "ocr_pages": [], "empty_pages": [], "chunks": 8, "seconds": 0.0}
+{"ts": "2026-11-07T06:42:42Z", "logger": "rahbar.indexer", "msg": "chunked", "source": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf", "doc_version": "2022-05", "superseded": false, "pages": 8, "ocr_pages": [1, 2, 3, 4, 5, 6, 7, 8], "empty_pages": [], "chunks": 23, "seconds": 28.9}
+{"ts": "2026-11-07T06:42:42Z", "logger": "rahbar.indexer", "msg": "chunking done", "chunks": 532, "chunk_size": 300, "chunk_overlap": 40, "amplification": 1.085}

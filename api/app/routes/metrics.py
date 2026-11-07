@@ -32,6 +32,14 @@ FALLBACKS = Counter("rahbar_fallbacks_total", "Safe canned responses served", ["
 TOKENS = Counter("rahbar_tokens_total", "LLM tokens", ["direction"])
 TOKENS_PER_REQUEST = Histogram("rahbar_tokens_per_request", "LLM tokens per request",
                                ["direction"], buckets=(50, 100, 250, 500, 1000, 2000, 4000, 8000))
+# Labelled series only appear after their first use; create them at 0 so a fresh pod's
+# /metrics already lists abstentions, fallbacks and tokens (4.8).
+for _reason in ("below_relevance_floor", "model_declined"):
+    ABSTENTIONS.labels(reason=_reason)
+for _reason in ("retrieval_error", "invalid_output"):
+    FALLBACKS.labels(reason=_reason)
+for _direction in ("in", "out"):
+    TOKENS.labels(direction=_direction)
 
 
 def record_cache(hit: bool) -> None:

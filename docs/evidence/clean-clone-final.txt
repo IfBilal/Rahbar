@@ -1,0 +1,256 @@
+# README path from a fresh clone of main (137a97a), 6-7 November 2026 UTC: wipe the namespace, clone, make install, make test, make images, kubectl apply -k k8s/overlays/dev, wait for the indexer, ask through the Ingress; then the live system tests, the turns stored in Redis, and the HPA. Minikube (Calico, ingress, metrics-server) and host Ollama were already running (README steps 1-2).
+# Note: minikube's hostpath provisioner reused the deleted PVC's directory, so the API was ready on the previous index while this run re-indexed; docs/evidence/empty-index-readiness.txt repeats the deploy with that directory wiped.
+
+############ 0. wipe the rahbar namespace (PVCs and index included)  (2026-11-06T19:41:46Z)
+$ kubectl delete namespace rahbar --ignore-not-found --wait=true --timeout=300s
+namespace "rahbar" deleted
+exit code: 0
+
+############ git clone (main)  (2026-11-06T19:44:04Z)
+$ git clone -q https://github.com/IfBilal/Rahbar.git <clone>
+exit code: 0
+$ git log --oneline -1
+137a97a Merge pull request #16 from IfBilal/feat/store-turns-real-model-gate
+exit code: 0
+
+############ make install  (2026-11-06T19:44:06Z)
+$ make install
+python3 -m venv .venv
+<clone>/.venv/bin/pip install -q --upgrade pip
+<clone>/.venv/bin/pip install -q -r api/requirements-dev.txt -r indexer/requirements-dev.txt
+exit code: 0
+
+############ make test  (2026-11-06T19:44:57Z)
+Required test coverage of 60% reached. Total coverage: 96.43%
+127 passed, 1 skipped, 1 warning in 3.91s
+Required test coverage of 60% reached. Total coverage: 96.41%
+80 passed, 1 skipped in 3.03s
+14 passed in 0.11s
+92 passed in 1.16s
+exit code: 0
+
+############ 1-2. cluster and Ollama (already running: minikube with Calico, ingress, metrics-server; Ollama on the gateway)  (2026-11-06T19:45:07Z)
+$ minikube status
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+exit code: 0
+$ kubectl get pods -n kube-system -l k8s-app=calico-node
+NAME                READY   STATUS    RESTARTS        AGE
+calico-node-lzp9v   1/1     Running   1 (5m35s ago)   2d8h
+exit code: 0
+$ curl -s http://192.168.49.1:11434/api/version
+{"version":"0.17.6"}exit code: 0
+
+############ 3. make images  (2026-11-06T19:45:09Z)
+minikube image load rahbar-api:dev
+minikube image load rahbar-indexer:dev
+minikube image load rahbar-ui:dev
+exit code: 0
+
+############ 4. kubectl apply -k k8s/overlays/dev  (2026-11-06T19:51:08Z)
+$ kubectl apply -k k8s/overlays/dev
+namespace/rahbar created
+serviceaccount/api created
+serviceaccount/chroma created
+serviceaccount/indexer created
+serviceaccount/redis created
+serviceaccount/ui created
+configmap/rahbar-config created
+service/api created
+service/chroma created
+service/redis created
+service/ui created
+persistentvolumeclaim/redis-data created
+deployment.apps/api created
+deployment.apps/redis created
+deployment.apps/ui created
+statefulset.apps/chroma created
+cronjob.batch/reindex created
+horizontalpodautoscaler.autoscaling/api created
+job.batch/indexer created
+ingress.networking.k8s.io/rahbar created
+networkpolicy.networking.k8s.io/allow-dns-egress created
+networkpolicy.networking.k8s.io/api-policy created
+networkpolicy.networking.k8s.io/chroma-from-api-and-indexer created
+networkpolicy.networking.k8s.io/default-deny-all created
+networkpolicy.networking.k8s.io/indexer-policy created
+networkpolicy.networking.k8s.io/redis-from-api created
+networkpolicy.networking.k8s.io/ui-from-ingress created
+exit code: 0
+$ kubectl get pods -n rahbar
+NAME                    READY   STATUS              RESTARTS   AGE
+api-6568c78cd7-27clg    0/1     ContainerCreating   0          1s
+api-6568c78cd7-8d7m8    0/1     ContainerCreating   0          1s
+api-6568c78cd7-qvpxj    0/1     ContainerCreating   0          1s
+chroma-0                0/1     ContainerCreating   0          1s
+indexer-xxqff           0/1     Init:0/1            0          1s
+redis-b8d9d4b69-qdj4z   0/1     ContainerCreating   0          1s
+ui-b84f8ffd9-fqsmp      0/1     ContainerCreating   0          1s
+exit code: 0
+
+############ wait for the indexer Job  (2026-11-06T19:51:10Z)
+$ kubectl wait --for=condition=complete job/indexer -n rahbar --timeout=40m
+job.batch/indexer condition met
+exit code: 0
+9 documents in corpus/raw, manifest written to corpus/MANIFEST.md
+corpus matches the committed MANIFEST.md
+{"ts": "2026-11-06T20:03:47Z", "logger": "rahbar.indexer", "msg": "embedded", "vectors": 532, "dimension": 768, "model": "nomic-embed-text", "seconds": 461.1}
+{"ts": "2026-11-06T20:03:50Z", "logger": "rahbar.indexer", "msg": "indexer finished", "chunks": 532, "seconds": 709.6}
+$ kubectl rollout status deployment/api -n rahbar --timeout=600s
+deployment "api" successfully rolled out
+exit code: 0
+$ kubectl get pods,pvc -n rahbar
+NAME                        READY   STATUS      RESTARTS   AGE
+pod/api-6568c78cd7-27clg    1/1     Running     0          12m
+pod/api-6568c78cd7-8d7m8    1/1     Running     0          12m
+pod/api-6568c78cd7-qvpxj    1/1     Running     0          12m
+pod/chroma-0                1/1     Running     0          12m
+pod/indexer-xxqff           0/1     Completed   0          12m
+pod/redis-b8d9d4b69-qdj4z   1/1     Running     0          12m
+pod/ui-b84f8ffd9-fqsmp      1/1     Running     0          12m
+
+NAME                                  STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-chroma-0   Bound    pvc-2e049bb8-21d8-457d-ad19-f08936afdf0b   2Gi        RWO            standard       <unset>                 12m
+persistentvolumeclaim/redis-data      Bound    pvc-b5910937-938d-4a72-9fc3-e5061bad88a3   1Gi        RWO            standard       <unset>                 12m
+exit code: 0
+
+############ 5. ask through the Ingress  (2026-11-06T20:03:55Z)
+{
+    "request_id": "f2f90350dcafe398b952e31344e11298",
+    "answer": "The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules Handbook, June 2026 edition, page 22. [academic-rules-handbook-jun-2026.pdf / 4. Registration > Withdrawal from a Course]",
+    "citations": [
+        {
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4. Registration > Withdrawal from a Course",
+            "page": 22
+        }
+    ],
+    "answered_from_context": true,
+    "confidence": "high",
+    "retrieved": [
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-pdf-2026-06-0028-4dcbdc1e",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4. Registration > Withdrawal from a Course",
+            "page": 22,
+            "score": 0.8384
+        },
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-pdf-2026-0011-ce61cc89",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "13. Registration of Students under",
+            "page": 2,
+            "score": 0.7595
+        },
+        {
+            "chunk_id": "academic-rules-handbook-jun-2026-pdf-2026-06-0027-3a34aced",
+            "source": "academic-rules-handbook-jun-2026.pdf",
+            "section": "4. Registration > Adding or Dropping a Course",
+            "page": 22,
+            "score": 0.7426
+        },
+        {
+            "chunk_id": "student-handbook-jun-2026-pdf-2026-06-0039-de598592",
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "VI \u2013 SEMESTER RULES",
+            "page": 29,
+            "score": 0.7039
+        },
+        {
+            "chunk_id": "prospectus-2026-academic-rules-and-regulations-pdf-2026-0024-ca4a4a7a",
+            "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+            "section": "34. Maximum Time Allowed to",
+            "page": 5,
+            "score": 0.6919
+        }
+    ],
+    "provider": "ollama",
+    "cached": false
+}
+{
+    "request_id": "69c9091558b75b24fb5c381fd4f3e60c",
+    "answer": "The documents do not cover this question.",
+    "citations": [],
+    "answered_from_context": false,
+    "confidence": "low",
+    "retrieved": [
+        {
+            "chunk_id": "fee-structure-page-html-2026-27-0004-dd56fa60",
+            "source": "fee-structure-page.html",
+            "section": "Miscellaneous Fees",
+            "page": 1,
+            "score": 0.6329
+        },
+        {
+            "chunk_id": "fee-structure-page-html-2026-27-0000-e20cd1b0",
+            "source": "fee-structure-page.html",
+            "section": "Admission Fee",
+            "page": 1,
+            "score": 0.6312
+        },
+        {
+            "chunk_id": "fee-structure-page-html-2026-27-0002-95adb291",
+            "source": "fee-structure-page.html",
+            "section": "Tuition Fee (w.e.f. Fall 2026 semester)",
+            "page": 1,
+            "score": 0.6121
+        },
+        {
+            "chunk_id": "fee-structure-page-html-2026-27-0001-4feb9f3b",
+            "source": "fee-structure-page.html",
+            "section": "Security Deposit",
+            "page": 1,
+            "score": 0.6024
+        },
+        {
+            "chunk_id": "student-handbook-jun-2026-pdf-2026-06-0015-8e388b1f",
+            "source": "student-handbook-jun-2026.pdf",
+            "section": "II - FINANCIAL RULES > Fee Structure and Mode of Payment",
+            "page": 18,
+            "score": 0.5913
+        }
+    ],
+    "provider": "ollama",
+    "cached": false
+}
+
+############ extra: live system tests (pin, policy, abstention, pod deletion)  (2026-11-06T20:07:20Z)
+PASSED tests/system/test_live_cluster.py::test_ingress_serves_the_ui_and_the_api
+PASSED tests/system/test_live_cluster.py::test_the_absent_topic_is_declined
+PASSED tests/system/test_live_cluster.py::test_three_api_endpoints_behind_the_service
+PASSED tests/system/test_live_cluster.py::test_network_policy_blocks_ui_to_chroma_and_allows_api_to_chroma
+PASSED tests/system/test_live_cluster.py::test_network_policy_blocks_ui_to_redis
+PASSED tests/system/test_live_cluster.py::test_deleting_an_api_pod_does_not_interrupt_answers
+6 passed, 1 skipped in 115.67s (0:01:55)
+
+############ extra: stored turns in Redis (3.2 step 8)  (2026-11-06T20:09:16Z)
+$ kubectl exec -n rahbar deploy/redis -- redis-cli LLEN rahbar:turns
+12
+exit code: 0
+{"request_id": "2167ce9c398df7c3c32c3d4c1e29a372", "ts": 1793995747, "question": "What is the deadline to withdraw from a course?", "answer": "The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules Handbook, June 2
+
+############ extra: HPA and kubectl top after a minute  (2026-11-06T20:09:17Z)
+$ kubectl get hpa -n rahbar
+NAME   REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+api    Deployment/api   cpu: 6%/70%   3         8         3          19m
+exit code: 0
+$ kubectl top pods -n rahbar --containers
+POD                     NAME     CPU(cores)   MEMORY(bytes)   
+api-6568c78cd7-6wlbz    api      93m          72Mi            
+api-6568c78cd7-8d7m8    api      6m           73Mi            
+api-6568c78cd7-qvpxj    api      7m           72Mi            
+chroma-0                chroma   4m           58Mi            
+redis-b8d9d4b69-qdj4z   redis    22m          3Mi             
+ui-b84f8ffd9-fqsmp      ui       2m           3Mi             
+exit code: 0
+
+############ done  (2026-11-06T20:10:48Z)
+
+############ extra: the disruptive pin test (RAHBAR_DISRUPTIVE=1 make system-test -k embedding_model)
+PASSED tests/system/test_live_cluster.py::test_changing_the_embedding_model_on_the_api_only_blocks_readiness
+1 passed, 6 deselected in 91.80s (0:01:31)
