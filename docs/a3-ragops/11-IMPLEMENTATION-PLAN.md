@@ -11,7 +11,7 @@ Total ≈ **215 person-hours** (≈ 105 h each). The A2 harness's critical path 
 * **Deadline (told by the group on 22 Nov 2026): 5 days away ⇒ about Fri 27 Nov 2026.** Confirm the exact date and time on Google Classroom and write it here: `DEADLINE = ____________ (PKT)`. The PDF does not state it and "late submissions will receive zero marks". **Because only 5 days remain, use the full-scope overtime plan in §5a, not the 14-day skeleton in §5.**
 * Convert the schedule in §5 to calendar dates: count back from the deadline, keep **the last 2 days free** (report polishing, rehearsal, final clean-cluster run).
 * With fewer than 10 working days left, **do not cut requirements** (decision of 22 Nov): follow §5a, work overtime, and only postpone the *extras* listed in §7.
-* Send the open questions of [01](01-REQUIREMENTS.md) §9 (Q1 quarantine vs archive for stale versions; Q2 disjoint golden counts; Q3 typo vs distractor docs) to the instructor/TA **on day 1**; proceed with the adopted readings meanwhile.
+* **No instructor/TA contact (group decision, 22 Nov): the readings in [01](01-REQUIREMENTS.md) §9 Q1–Q3 are final** — both members read them on day 1 and implement them as written (Q1 is designed to satisfy both literal PDF statements).
 * Create the evidence folder `docs/a3-evidence/` and the branch `dev` working discipline from A2 (protected `main`, PRs, one approval).
 
 ---
@@ -24,7 +24,7 @@ Legend for requirement IDs: see [01](01-REQUIREMENTS.md). "Acceptance" is what a
 
 | ID | Task | Own | Depends | h | P | Acceptance | Closes |
 |---|---|---|---|---|---|---|---|
-| T01 | Deadline, open questions, branch plan, `docs/a3-evidence/`, swap-review pairing | A+B | — | 1 | P0 | file §1 filled; questions sent | G-05 |
+| T01 | Deadline, read 01 §9 decisions together, branch plan, `docs/a3-evidence/`, swap-review pairing | A+B | — | 1 | P0 | file §1 filled; questions sent | G-05 |
 | T02 | Skeleton: `ragops/` package (`suite/ gate/ trace/ coverage/ config/`), `rahbar-ragops` Dockerfile + requirements, Makefile targets, add package to ruff/mypy/pytest and CI | B | T01 | 3 | P0 | `make lint test` green with an empty test; image builds; `minikube image load` works | G-02 |
 | T03 | Shared **embed profiles** module (doc/query prefix, lowercase) used by indexer **and** API; tests that both sides agree per model | A | T01 | 2 | P1 | unit tests; A2 tests still green | C1 |
 
@@ -42,7 +42,7 @@ Legend for requirement IDs: see [01](01-REQUIREMENTS.md). "Acceptance" is what a
 | T11 | `ops`: `restore`, `delete`, `count` (orphans), `status`, `unregister` | A | T10 | 4 | P0 | tests; orphan proof output | A2-03, A2-05 |
 | T12 | `run.py sync` orchestrator, summary line, exit codes, Job wrapper (1→0) | A | T10, T08 | 3 | P0 | `python -m pipeline.run sync` end-to-end on a local inbox | F2-01 |
 | T13 | **Registered indexes**: `build-index` (candidate from lake) + `sync` maintains every registered index | A | T10, T03 | 4 | P1 | candidate collection built; later `sync` updates both | F3-01 |
-| T14 | **Batch B** (12 files) + `corpus/batch-b/README.md` stating the planted problem and expected result per file | A | T06 | 4 | P0 | listing; each file's expected outcome written **before** running | A-B-* |
+| T14 | **Batch B** (13 files, B01–B13) + `corpus/batch-b/README.md` stating the planted problem and expected result per file | A | T06 | 4 | P0 | listing; each file's expected outcome written **before** running | A-B-* |
 | T15 | Run Batch A then Batch B through `sync` against a port-forwarded cluster Chroma; save reports | A | T12, T14 | 3 | P0 | verification reports for A and B; counts; all planted problems handled as designed or discrepancies logged | A-B-08 |
 | T16 | Part A review + PR hardening (cross-review by B); update `tests/test_boundaries.py` (14 §10) | B | T15 | 2 | P0 | PR approved | — |
 
@@ -253,7 +253,7 @@ Total ≈ **5 full suite runs** (≈ 5–10 h machine time on CPU) plus short ru
 | **D4** Wed 25 | T20 · T21 · T22 · T23 · T25 (suite) · T28 · T29 (build candidates; calibrate floors) | T52 (network matrix) · T32 · T33 · T41 (write live queries) · T53 prep | T24 (hand labels, after run 1) | **baseline runs 1 and 2 started/finished overnight** |
 | **D5** Thu 26 | T24 · T26 · T27 · T30 · **T31 (commit thresholds first)** · T42 · T43 | T53 (measure while no suite runs) · T54 · T55 · T57 · T34 scenarios S1–S3 | T34 (release decision text) · T56 (Batch A evidence) | gate decisions + release scenarios captured; coverage-before done; E3 started |
 | **D6** Fri 27 | T44 · T45 (E3, E4) · T56 (Batch B evidence) | T58 (clean-cluster rehearsal) · T61 | **T59 · T60 · T62 · T63** (report, appendix, rehearsal, submit **before the deadline hour**) | submitted |
-If any day's gate is missed, **add hours that night; do not drop a requirement.** If a whole gate is at risk, the *order* of rescue is: (1) call the other member in, (2) re-split tasks across both, (3) ask the instructor/TA about the specific ambiguity, (4) only then reduce a **P2 extra** from the list above.
+If any day's gate is missed, **add hours that night; do not drop a requirement.** If a whole gate is at risk, the *order* of rescue is: (1) call the other member in, (2) re-split tasks across both, (3) re-read the PDF sentence and 01 §9 and decide as a pair, (4) only then reduce a **P2 extra** from the list above.
 
 ## 6. Gates (stop-and-verify points)
 

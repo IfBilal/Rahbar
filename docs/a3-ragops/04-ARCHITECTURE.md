@@ -138,10 +138,9 @@ Because the chunk id carries the digest of its text, an unchanged document regen
 ```mermaid
 stateDiagram-v2
   [*] --> Pending: file seen in inbox
-  Pending --> Quarantined: any of quality / completeness / uniqueness FAIL
-  Pending --> Current: all pass, newest of its series
-  Pending --> Archived: recency FAIL (a newer version exists)
-  Current --> Archived: a newer version is accepted
+  Pending --> Quarantined: quality / completeness / uniqueness FAIL, or recency FAIL (a newer version is ALREADY in the ledger: late stale file)
+  Pending --> Current: all four pass (newest of its series at that moment)
+  Current --> Archived: a newer version is accepted (the old version's recency record becomes FAIL R-SUPERSEDED-BY)
   Archived --> Current: restore (rollback)
   Current --> Deleted: removed from inbox / explicit delete
   Archived --> Deleted: explicit purge (not used by default)
@@ -256,7 +255,7 @@ Each decision is final unless a task reveals a blocker; if so, change the decisi
 | **D-02** | The data lake is a directory tree on PVC `ragops-data` with a JSON ledger. | Needs only a filesystem; survives pod restarts (F1-04); human-inspectable for screenshots. | S3/MinIO: extra service; SQLite: opaque in screenshots. |
 | **D-03** | Update the live Chroma collection **in place**, driven by the ledger; keep the registry, with `generation` = data revision counter. Full rebuild only for candidate collections. | A2-01 (zero re-embeds) is impossible with rebuild-every-run. | Rebuild a new generation but copy vectors from the old one: still writes everything, and complicates rollback. |
 | **D-04** | `doc_id` (series) + `doc_version` + `content_sha` + ledger `revision`; chunk id = `<doc_id>@<version>#<ordinal>-<sha8>`. | A2 already hashes chunk text; adding `doc_id` makes delete-by-document exact. | Filename identity: breaks on renamed duplicates and versions. |
-| **D-05** | Recency failure ⇒ **archive** (superseded flag), not quarantine. Quality/completeness/uniqueness failure ⇒ quarantine. | Resolves the PDF's two statements (A1 quarantine vs A2 archive/restore). Listed in 01 §9 Q1. | Quarantine stale docs: makes restore/rollback meaningless. |
+| **D-05** | Both PDF statements applied literally to two events: a **newer version arriving** passes recency and the **older indexed version is archived** (recency re-evaluated as FAIL `R-SUPERSEDED-BY`, outcome archive, restorable); a **late stale file** (older than a version already in the ledger) **fails recency and is quarantined**. Same-run versions are processed oldest-first. Quality/completeness/uniqueness failure ⇒ quarantine. | Satisfies A1 ("fail ⇒ quarantine") and A2 ("superseded ⇒ archived, restorable") together; keeps A2's version questions working. 01 §9 Q1 (final). | Archiving every stale file (my first design) contradicts A1; quarantining the superseded version contradicts A2. |
 | **D-06** | Metadata resolution order: catalog > embedded > derived; page count always computed. | The demo batch is unseen; completeness must be a real check. | Require a catalog: fails the demo. |
 | **D-07** | Add `POST /api/retrieve` (no generation) and eval request headers behind env flags. | Makes the suite tractable on CPU; enables seeds and cache bypass. | Hit `/api/ask` for everything: hours per run. Query Chroma directly from the eval Job: bypasses the filter/assist logic being tested. |
 | **D-08** | `eval/golden.jsonl`; relevance judged at `(doc, page)`; hard questions carry ground truth; `requires_batch` for Batch-B questions. | PDF requires document + page; allows E3 drift runs. | `(source, section)`: PDF says page. |

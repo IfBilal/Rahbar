@@ -2,12 +2,12 @@
 
 > **What this folder is.** The plan of record for CS4032 Assignment 03 (*RAGOps*, 185 marks, group of 2). It sits next to the Assignment 02 harness in `docs/` and plays the same role: a coding engineer (or coding agent) who reads these files in order knows **what to build, where it goes, how to prove it, and what to screenshot**. It is a *plan*, not evidence. Nothing in here claims a test, number, screenshot or run exists until you have produced it. `MEASURE` marks a value that must come from your own runs.
 
-**Sources of truth, in order of authority**
+**Sources of truth — only two (group decision, 22 Nov 2026)**
 
-1. `docs/A3.pdf` — the instructor's assignment (5 pages). Every sentence of it is turned into a numbered requirement in [`01-REQUIREMENTS.md`](01-REQUIREMENTS.md). If anything in this folder disagrees with the PDF, the PDF wins.
-2. The reference paper — Xu, Weytjens, Zhang, Lu, Weber, Zhu, *RAGOps: Operating and Managing Retrieval-Augmented Generation Pipelines*, arXiv:2506.03401 (Jun 2025). Digested section by section in [`02-PAPER-DIGEST.md`](02-PAPER-DIGEST.md). The PDF says: *"Sections 3.2, 4.2, Table 1, Table 2, 5.1 and 6.2 matter most. Figure 3 is the map of this assignment."*
-3. The working Assignment 02 code in this repository (RAHBAR). Its real state, and where A3 collides with it, is in [`03-GAP-ANALYSIS.md`](03-GAP-ANALYSIS.md).
-4. [`14-INTERFACE-CONTRACTS.md`](14-INTERFACE-CONTRACTS.md) — the exact file formats, CLIs, exit codes and paths. When two files in this folder disagree, **14 wins**, then fix the other file.
+1. **`docs/A3.pdf`** — the instructor's assignment (5 pages). Every sentence of it is a numbered requirement in [`01-REQUIREMENTS.md`](01-REQUIREMENTS.md). If anything in this folder disagrees with the PDF, the PDF wins.
+2. **The reference paper** — Xu, Weytjens, Zhang, Lu, Weber, Zhu, *RAGOps: Operating and Managing Retrieval-Augmented Generation Pipelines*, arXiv:2506.03401. Digested section by section in [`02-PAPER-DIGEST.md`](02-PAPER-DIGEST.md). The PDF says: *"Sections 3.2, 4.2, Table 1, Table 2, 5.1 and 6.2 matter most. Figure 3 is the map of this assignment."* Where the PDF is silent, the paper decides what a RAGOps behaviour should be.
+
+**Everything else in this folder is derived design, not requirement.** The RAHBAR (Assignment 02) code is only the **starting codebase** the PDF tells us to build on ([`03-GAP-ANALYSIS.md`](03-GAP-ANALYSIS.md) describes what it already does); it adds no requirements of its own. [`14-INTERFACE-CONTRACTS.md`](14-INTERFACE-CONTRACTS.md) fixes formats so the two of us build compatible pieces — when two *design* files disagree, **14 wins**, but if a design choice ever conflicts with the PDF or the paper, **the PDF/paper win and the design is changed**. Where the PDF is ambiguous, the group has decided ([`01`](01-REQUIREMENTS.md) §9, final, no instructor contact). Anything in the plan that is **not** asked by the PDF or the paper is marked as an *extra* (priority P2 in [`11`](11-IMPLEMENTATION-PLAN.md)) and may slip; nothing the PDF or paper asks for may.
 
 > **Not in the PDF:** the submission deadline and the per-part mark split. The PDF only says *"Late submissions will receive zero marks"* and *"Marks: 185"*. Read the deadline off Google Classroom today and put it in [`11-IMPLEMENTATION-PLAN.md`](11-IMPLEMENTATION-PLAN.md) §1. Do not guess a split; treat every part as graded.
 
@@ -46,7 +46,7 @@ RAGOps = the **query pipeline** (ordinary DevOps lifecycle) **plus a data-manage
 | # | File | Purpose |
 |---|---|---|
 | — | `README.md` | this index and the agent operating manual |
-| 01 | [`01-REQUIREMENTS.md`](01-REQUIREMENTS.md) | the PDF as a numbered requirement ledger; evidence and screenshot map; open questions for the instructor |
+| 01 | [`01-REQUIREMENTS.md`](01-REQUIREMENTS.md) | the PDF as a numbered requirement ledger; evidence and screenshot map; the final readings of the PDF's ambiguities |
 | 02 | [`02-PAPER-DIGEST.md`](02-PAPER-DIGEST.md) | the paper, end to end, mapped onto the assignment; what the paper has that the assignment does not require |
 | 03 | [`03-GAP-ANALYSIS.md`](03-GAP-ANALYSIS.md) | what RAHBAR already does, what A3 needs, and the design collisions between them |
 | 04 | [`04-ARCHITECTURE.md`](04-ARCHITECTURE.md) | target architecture, Figure 3 mapping, data-lake layout, ledger, decisions D-01…D-15 |

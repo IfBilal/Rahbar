@@ -156,7 +156,7 @@ If a live step fails twice: **say what you saw, show the logs, switch to the com
 **Part A — data**
 1. Why does verification run *before* chunking? What would break if it ran after? *(cost, bad chunks in the index, orphan cleanup)*
 2. Name the four checks and show the code for one. What is the reason string for a truncated file?
-3. Why is a stale version **archived** rather than quarantined (our reading of the PDF)? How is it excluded from retrieval? *(metadata flag + the A2 filter)*
+3. What happens when a **newer** version arrives, and what when an **older** version arrives late? Why is the first *archived* and the second *quarantined*? How is an archived version excluded from retrieval and how is it restored? *(R-SUPERSEDES/R-SUPERSEDED-BY vs R-NEWER-EXISTS; metadata flag + the A2 filter; `ops restore`)*
 4. How do you detect a near-duplicate? How did you choose the threshold? What is the false-positive risk? *(matrix, Jaccard)*
 5. How does the second run embed zero chunks? What if a file is renamed? What if its bytes change?
 6. Delete a document: what exactly is removed, where, and how do you prove no orphans remain?

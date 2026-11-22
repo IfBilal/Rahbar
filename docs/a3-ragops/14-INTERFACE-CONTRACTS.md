@@ -100,6 +100,7 @@ Corpus-state **digest** and **batch** tags feed the suite (`corpus_digest`, `--b
    "outcome": "quarantined",                    // accepted | quarantined | archived | unchanged_skipped
    "destination": "quarantine/ingest-20261125T095501Z-1a2b/Student_Handbook_Copy.pdf"}
  ],
+ "reevaluated": [ {"doc": "faculty-entrepreneurship@2022-05", "check": "recency", "status": "fail", "code": "R-SUPERSEDED-BY", "reason": "a newer version exists: faculty-entrepreneurship@2026-11", "outcome": "archived"} ],
  "unchanged": ["academic-rules-handbook-jun-2026.pdf", "…"],
  "summary": {"documents": 12, "accepted": 6, "quarantined": 6, "archived": 1, "unchanged": 9,
              "failures_by_check": {"quality": 1, "completeness": 2, "recency": 0, "uniqueness": 3},
@@ -107,7 +108,7 @@ Corpus-state **digest** and **batch** tags feed the suite (`corpus_digest`, `--b
 }
 ```
 
-**Reason codes** (stable; unit-tested): quality `Q-OK, Q-EXTRACT-FAIL, Q-EMPTY, Q-GARBLED` · completeness `C-OK, C-MISSING-SOURCE, C-MISSING-TITLE, C-MISSING-DATE-VERSION, C-MISSING-PAGES, C-TRUNCATED` · recency `R-OK-FIRST, R-OK-NEWEST, R-OK-REVISION, R-NEWER-EXISTS` · uniqueness `U-OK, U-EXACT-DUP, U-NEAR-DUP`. `status` ∈ `pass|fail`; **every document has all four check records**.
+**Reason codes** (stable; unit-tested): quality `Q-OK, Q-EXTRACT-FAIL, Q-EMPTY, Q-GARBLED` · completeness `C-OK, C-MISSING-SOURCE, C-MISSING-TITLE, C-MISSING-DATE-VERSION, C-MISSING-PAGES, C-TRUNCATED` · recency `R-OK-FIRST, R-SUPERSEDES, R-OK-REVISION, R-NEWER-EXISTS (late stale file → quarantine), R-SUPERSEDED-BY (re-evaluation of an older indexed version → archive)` · uniqueness `U-OK, U-EXACT-DUP, U-NEAR-DUP`. `status` ∈ `pass|fail`; **every document has all four check records**.
 
 `quarantine/<run_id>/<file>.reason.json`: `{"file","sha256","codes":[…],"reasons":[…],"resolved":{…},"run_id","ts"}`.
 

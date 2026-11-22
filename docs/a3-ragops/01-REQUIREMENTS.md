@@ -168,22 +168,22 @@ Status legend for your own tracking: `☐` not started · `◐` in progress · `
 
 ---
 
-## 9. Ambiguities, and the reading we adopt (confirm with the instructor/TA if you can)
+## 9. Ambiguities, and the readings we adopt (FINAL — decided by the group, 22 Nov 2026)
 
-Write the chosen reading in the report so a grader sees a deliberate decision. None of these changes a requirement; each fixes a gap in the wording.
+**There is no contact with the instructor or TA: every ambiguity below is decided by us, here, and is final.** Where possible the design is built so that it satisfies **both** plausible readings of the PDF, so a grader reading either way finds the behaviour. Write the chosen reading in the report so a grader sees a deliberate decision. None of these changes a requirement; each fixes a gap in the wording.
 
-| # | Ambiguity | Reading adopted | Why |
+| # | Ambiguity | Reading adopted (final) | Why |
 |---|---|---|---|
-| Q1 | "Documents that fail are moved to a quarantine folder and are not indexed" vs "A superseded version is archived and excluded from retrieval through metadata". Does a document that fails **recency** go to quarantine? | **No.** Failing *quality*, *completeness* or *uniqueness* → quarantine (not indexed). A *stale* version (recency) → **archive**: kept, flagged `superseded`, excluded from default retrieval, restorable. | A2-04/A2-05 say superseded versions are archived and restorable; quarantining them would make restore meaningless and break version-sensitive questions from A2. |
-| Q2 | "At least 25 questions: ≥ 15 answerable, ≥ 5 unanswerable, ≥ 5 hard" — are the three counts disjoint (15+5+5 = 25)? | Build **≥ 30** with disjoint categories, `hard` questions also carrying ground truth. Then it satisfies both the disjoint and the overlapping reading. | Costs one extra afternoon; removes the risk. |
-| Q3 | "add ≥ 3 irrelevant documents, **or** add typos" | **Typos** (seeded, deterministic, read-only, no writes to Chroma). Distractor documents only if time remains. | The PDF offers either; typos keep the single-writer rule trivially true. |
+| Q1 | "Documents that fail are moved to a quarantine folder and are not indexed" (A1) vs "A superseded version is archived and excluded from retrieval through metadata, and you can restore it" (A2). What happens on **recency**? | **Both statements are applied literally, to two different events.** (1) **A newer version arrives** → the incoming document *passes* recency (`R-SUPERSEDES`: "newer version detected, supersedes X") and the **older, already-indexed version is re-evaluated**: its recency record is a **fail** (`R-SUPERSEDED-BY`) and its outcome is **archive** — kept, flagged `superseded`, excluded from default retrieval, **restorable** (A2-04/05). (2) **A stale version arrives *after* a newer one is already in the ledger** (a late old file) → recency **fails** (`R-NEWER-EXISTS`) and the file is **quarantined, not indexed** (A1-07). Versions of the same series that arrive **in the same run** are processed **oldest first**, so the A2 corpus (2023 rules + 2026 rules in one batch) ends with the 2023 edition archived and nothing quarantined. A planted *late-arriving old version* (B13) demonstrates case (2) and puts a visible recency **fail** in the Batch-B report; B07 demonstrates case (1). | satisfies A1 ("fail ⇒ quarantine") and A2 ("superseded ⇒ archived, restorable") at once, keeps A2's version-sensitive questions working, and shows the recency check *failing* somewhere a grader can see it |
+| Q2 | "At least 25 questions: ≥ 15 answerable, ≥ 5 unanswerable, ≥ 5 hard" — disjoint counts (15+5+5 = 25) or overlapping? | **Build ≥ 30 with disjoint categories, and `hard` questions also carry ground truth.** This satisfies the disjoint reading (16 + 6 + 8 = 30 ≥ 25) and the overlapping reading (24 answerable ≥ 15). | costs one extra afternoon; removes the risk |
+| Q3 | "add ≥ 3 irrelevant documents, **or** add typos" | **Typos**, seeded and deterministic (the PDF says "or": either is a complete answer). Distractor documents are an optional extra. | read-only, no writes to Chroma, cheap |
 | Q4 | Which retrieval levels does "component level" measure — Chroma directly or the API? | Through the API's read-only retrieval endpoint, so it tests the same code path that serves users, including the superseded filter and exact-term assist. | Table 1 puts retrieval quality at the component level. |
 | Q5 | "Embedding model and version" in the trace | Model name **and** the Ollama model digest (plus the release id). | Names alone do not identify what ran. |
 | Q6 | "Prompt hash (or the full prompt)" | Store the **hash in the line** and the **full prompt in a content-addressed prompt store**, so the trace tool can print and re-verify it. | Satisfies "or", and makes D2 provable. |
 | Q7 | Unseen batch at the demo | The ingestion Job must derive metadata from the files themselves (PDF info, headings, text) when no catalog row exists. | The instructor cannot know our catalog format. |
 | Q8 | Which "latency" for p50/p95 | End-to-end wall-clock of `/api/ask` with the cache bypassed, plus per-stage from the trace. | A cached answer would hide model latency. |
 | Q9 | "Live testing" in Figure 3 | We implement *shadow-style* testing: the candidate Deployment receives the same eval traffic in parallel with live; staged rollout by `maxSurge`/`maxUnavailable`. | Paper 4.2.6 lists shadow, A/B and staged roll-out as options, not obligations. |
-| Q10 | Deadline | Not in the PDF. | Read Classroom. |
+| Q10 | Deadline | Not in the PDF. The group was told it is about **5 days** from 22 Nov (≈ Fri 27 Nov 2026). | Confirm the exact date and hour on Classroom (no need to ask anyone). |
 
 ---
 

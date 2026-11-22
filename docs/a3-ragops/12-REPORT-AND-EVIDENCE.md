@@ -28,7 +28,7 @@ Tight budget ⇒ tables over prose, **at most three figures** (architecture; met
 ---
 
 ## 2. Page 1 content checklist
-Names and roll numbers (both) · repository URL · commit SHA of the submitted state · date · one sentence on what RAGOps layer was added to RAHBAR · one sentence stating the **corpus and batches** (Batch A = nine public FAST-NUCES documents, Batch B = twelve group-authored planted-problem fixtures) · note that all numbers come from `eval/results/` files.
+Names and roll numbers (both) · repository URL · commit SHA of the submitted state · date · one sentence on what RAGOps layer was added to RAHBAR · one sentence stating the **corpus and batches** (Batch A = nine public FAST-NUCES documents, Batch B = thirteen group-authored planted-problem fixtures) · note that all numbers come from `eval/results/` files.
 
 ---
 
@@ -72,7 +72,7 @@ Columns: **quality → what you measure → your threshold → the evidence**. D
 | File | Planted problem | Expected check | Observed outcome + code | Caught? |
 |---|---|---|---|---|
 | B01 `Student_Handbook_Copy.pdf` | exact duplicate | uniqueness | `U-EXACT-DUP` → quarantine | ✔/✘ |
-| … (12 rows) | | | | |
+| … (13 rows, B01–B13) | | | | |
 
 **Table A2 — counters:** Batch A first sync, unchanged re-run (0 embeds), Batch B sync, one changed doc, one deleted doc (orphans 0), supersede + restore — columns: `docs_new/unchanged/updated/quarantined`, `chunks_embedded/written/deleted`, `revision_bumped`, seconds. **Failures by check** (from the report summary) feeds short answer (a).
 
@@ -132,7 +132,7 @@ Extras worth appending (not required): network matrix, `kubectl top`, PVC-surviv
 Each answer should be **4–6 lines**, cite a number or file, and be consistent with the rest of the report.
 
 **(a) Which verification check caught the most problems in Batch B, and which problem did you *not* catch? What would catch it?**
-*How:* read `summary.failures_by_check` from the Batch-B report. The check with the highest count is the answer (expected shape: uniqueness fires for B01–B03; completeness for B05–B06; quality for B04; recency for the superseded version — your *measured* counts decide). *The uncaught problem:* the **injected-instruction document (B08)** passes all four checks (it is well-formed, complete, current and unique) — the paper (§8) names this gap. *Anything else you found* (e.g., a near-duplicate under the threshold, a document whose content is plausible but wrong) is more convincing than the textbook example. *What would catch it:* an advisory injection scan at ingest (pattern/classifier), source trust weighting or human review for new sources, the paper's *consistency* check for contradictory content; **until then the retrieval rail (D4) is the defence** — show it neutralised B08 at query time.
+*How:* read `summary.failures_by_check` from the Batch-B report. The check with the highest count is the answer (expected shape: uniqueness fires for B01–B03; completeness for B05–B06; quality for B04; recency (B13 quarantined; the 2022 version re-evaluated `R-SUPERSEDED-BY`) — your *measured* counts decide). *The uncaught problem:* the **injected-instruction document (B08)** passes all four checks (it is well-formed, complete, current and unique) — the paper (§8) names this gap. *Anything else you found* (e.g., a near-duplicate under the threshold, a document whose content is plausible but wrong) is more convincing than the textbook example. *What would catch it:* an advisory injection scan at ingest (pattern/classifier), source trust weighting or human review for new sources, the paper's *consistency* check for contradictory content; **until then the retrieval rail (D4) is the defence** — show it neutralised B08 at query time.
 
 **(b) A module-level metric looked fine but component/end-to-end did not — or why not?**
 *How:* compare embedding-gap results with recall/faithfulness across baseline and candidates. A strong paraphrase-vs-unrelated gap with **lower recall on exact terms** (clause numbers, course codes) or **higher false-abstention** after a floor mismatch is the typical pattern; the 07 §2.3 score-scale issue is a concrete candidate. Give the two numbers side by side. If you saw none, explain *why not* in terms of your data (e.g., the corpus is small, the golden set has few exact-term questions, the exact-term assist hides embedding weaknesses).
@@ -194,7 +194,7 @@ Also: repository layout (`k8s/`, `eval/`, `traces/`, `ragops/`, `corpus/batch-b/
 - [ ] `k8s/` — all manifests, `k8s/eval-job.yaml`, `k8s/ingest-job.yaml`, `k8s/candidate.yaml`, `k8s/README.md`
 - [ ] `eval/golden.jsonl` (≥ 30 incl. E4 additions), `eval/pairs.jsonl`, `eval/live_queries.jsonl`, `eval/judge_labels.jsonl`, `eval/results/*` (baseline, two stochasticity runs, bad, good, E3 before/after, coverage before/after, decisions)
 - [ ] `traces/` — curated sample (≤ a few hundred lines; include the B08 rail trace, the undo trace, the D5 trace)
-- [ ] `corpus/batch-b/` (12 files + README of planted problems)
+- [ ] `corpus/batch-b/` (13 files + README of planted problems)
 - [ ] `ragops/` code, `indexer/pipeline/` changes, `api/app/services/{trace,rails}.py`, tests green (`make test lint`)
 - [ ] root README: command per part A–F (tested from a clean clone)
 - [ ] no secret in the tree or history; `make check` / A2 checker still clean; no `:latest`
