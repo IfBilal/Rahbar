@@ -8,9 +8,9 @@ Total ≈ **215 person-hours** (≈ 105 h each). The A2 harness's critical path 
 
 ## 1. Before you start (T01)
 
-* **Deadline (told by the group on 22 Nov 2026): 5 days away ⇒ about Fri 27 Nov 2026.** Confirm the exact date and time on Google Classroom and write it here: `DEADLINE = ____________ (PKT)`. The PDF does not state it and "late submissions will receive zero marks". **Because only 5 days remain, use the compressed plan in §5a, not the 14-day skeleton in §5.**
+* **Deadline (told by the group on 22 Nov 2026): 5 days away ⇒ about Fri 27 Nov 2026.** Confirm the exact date and time on Google Classroom and write it here: `DEADLINE = ____________ (PKT)`. The PDF does not state it and "late submissions will receive zero marks". **Because only 5 days remain, use the full-scope overtime plan in §5a, not the 14-day skeleton in §5.**
 * Convert the schedule in §5 to calendar dates: count back from the deadline, keep **the last 2 days free** (report polishing, rehearsal, final clean-cluster run).
-* If fewer than **10 working days** remain, execute the **cut list** in §7 immediately and tell the other member which P1/P2 items are dropped.
+* With fewer than 10 working days left, **do not cut requirements** (decision of 22 Nov): follow §5a, work overtime, and only postpone the *extras* listed in §7.
 * Send the open questions of [01](01-REQUIREMENTS.md) §9 (Q1 quarantine vs archive for stale versions; Q2 disjoint golden counts; Q3 typo vs distractor docs) to the instructor/TA **on day 1**; proceed with the adopted readings meanwhile.
 * Create the evidence folder `docs/a3-evidence/` and the branch `dev` working discipline from A2 (protected `main`, PRs, one approval).
 
@@ -181,8 +181,8 @@ CPU-only `llama3.2:3b` makes each end-to-end question take tens of seconds to mi
 | Baseline suite | ≈ 30 asks + ≈ 24 judge | after T25 | overnight if needed |
 | Suite run ×2 (stochasticity) | ×2 | T26 | overnight |
 | Candidate-bad, candidate-good suites | 2 × (30 + 24) | T34 | each can run overnight; use retrieval-only first to pre-screen |
-| E3 re-run (A,B) | 1 × | T44 | |
-| After-E4 run | 1 × | T45 | |
+| E3 re-run (A,B) | 1 × full | T44 | after Batch B is ingested live |
+| After-E4 run | only the ≥ 6 new questions (`--only-added E4`) + coverage | T45 | coverage rise is the requirement |
 | Rehearsals | 1–2 partial | T62 | use `--limit` |
 
 Total ≈ **8–10 full suite runs** — budget **≥ 10–15 hours** of unattended machine time and protect it (no laptop sleep: `systemd-inhibit` / `caffeinate`; disable suspend; keep Ollama warm). **Pre-screen** candidates with the module and component levels (minutes) before spending hours on the endpoint level.
@@ -212,33 +212,48 @@ If you have more calendar time, add slack *before* D8 (the first long run) — e
 
 ---
 
-## 5a. Compressed 5-day plan (ACTIVE — deadline ≈ Fri 27 Nov 2026)
+## 5a. Five-day FULL-SCOPE plan (ACTIVE — deadline ≈ Fri 27 Nov 2026)
 
-**Reality check:** the full plan is ≈ 215 person-hours; two people for 5 days at a hard 10 h/day is ≈ 100 h. So **roughly half the plan must go, and machine time (§4) must be started on Day 2–3, not later.** Apply the cut list (§7) now and *do not* spend the saved time on polish.
+**Decision (22 Nov, both members): nothing the PDF asks for is dropped, shrunk or "minimum-viable'd".** Every row of [01](01-REQUIREMENTS.md) §2–§7 is delivered at the specification in docs 05–10: golden set **≥ 30** (not the 25 minimum), the **whole suite run twice**, all **four** verification checks with calibration, all **F1–F5** items, **both** gate decisions, **S1, S2 and S3**, every screenshot **A1…F6**, the full report. The team works **overtime** instead. This section only decides *order and parallelism*.
 
-**What stays (all P0 rows in 01 §2–§7, minimum viable form):**
-* Part A: T04–T12, T14, T15 (verify, quarantine, incremental, archive/restore/delete/count, Batch B). Calibration (T07) = one pass over Batch A + Batch B, not an exploration.
-* Part D: T35–T40 in their simplest form (trace record, one rail, `/api/retrieve`, trace tool, summary).
-* Part B: golden at the **minimum safe size 26–28** (≥ 15 answerable, ≥ 5 unanswerable, ≥ 5 hard; ≥ 8 human; ≥ 8 synthetic, all reviewed), 15+15 pairs, hand labels = 8, suite run twice.
-* Part C: **one** candidate pair (bad + good), thresholds committed first.
-* Part E: 40 live queries, coverage + calibration on ~20 labelled pairs, drift run, ≥ 6 new questions.
-* Part F: PVCs, ConfigMaps, ingest/eval Jobs, candidate Deployment, release script, network matrix, resources (measure only api, chroma, ingest, eval).
-* Report + screenshots + README + one full rehearsal.
+**What is allowed to slip (and only this):** items that are **my additions beyond the PDF**, never PDF requirements — T46 (coverage as a Job), chunk-level embedding reuse (05 §6.2), retrieval/vocabulary coverage (09 §7), the second noise test with distractor documents, the UMAP figure, and the "S3-b live regression" variant (S3-a alone satisfies F3-04). Every other task T01–T45 and T47–T63 is in scope.
 
-**What goes first:** T03 (unless the change is the embedding model — then keep it, it is small), T13 (only the candidate `build-index`; skip multi-index maintenance and document that undo returns to a snapshot to be re-synced), T16, T27 (use `diff` by hand), T46, chunk-level reuse, optional coverage extras, second noise test, UMAP, the judge's extra model; **pick chunk size as the change if the embedding feasibility check (T28) takes more than 30 minutes.**
+### Capacity, honestly
+* Hand-coded estimates total ≈ **215 h**. Two people × 5 days × ~13 h ≈ **130 h** of work time. With an AI coding assistant writing tests and boilerplate (you still review and run everything — G-03), the *coding* hours shrink a lot; the hours that do **not** shrink are **machine time** (CPU LLM), **evidence capture**, **cluster debugging** and **review**.
+* So the schedule is built around the machine: **never let Ollama sit idle** from Day 4 onward, and **never run two heavy things on it at once** (it corrupts the latency numbers the gate uses — p95).
+* **Ask now:** does either laptop have a **GPU**? Ollama on a GPU turns a 1.5-hour suite into minutes and removes the main risk. If yes, use that laptop as the Ollama host for the long runs.
+* Two shifts per day: **Shift 1** (morning → evening) = build; **Shift 2** (evening → night) = review, run, capture evidence, and start the overnight run. Pair on the critical path (T05, T10, T25, T34).
 
-| Day | Date (assumed) | A (data + evaluation) | B (cluster + observability) | End-of-day gate |
+### Live-state discipline (do not skip — it protects the numbers)
+The live index must be in **corpus state A** (the nine documents) for the whole of Parts B and C, and receive **Batch B only at E3** — otherwise baseline, candidates and the drift comparison are not comparable. Therefore:
+1. **Day 3:** develop and demonstrate Batch B on a **scratch** target (`DATA_DIR`/inbox and collection `rahbar-scratch`, deleted afterwards), including the verification report and quarantine behaviour. This is also your regression rehearsal for the unseen-batch demo.
+2. **Live cluster:** seed **Batch A** → first `sync` → **second `sync` (0 embeds, Screenshot A2)** → freeze baselines on state A.
+3. **E3 moment (Day 5 night / Day 6 morning):** ingest **Batch B for real** on the live PVC → verification report **A1**, quarantine, supersede/restore, orphan count → re-run the suite `--batches A,B`.
+Candidates are built from the lake while it is in state A (T29), so Part C compares like with like.
+
+### Machine-time schedule (the real critical path; one Ollama, one run at a time)
+| Slot | Run | Needs | Notes |
+|---|---|---|---|
+| Day 4 evening | **baseline-A run 1** (full suite, all three levels) | T25 done, golden frozen | becomes the baseline candidate |
+| Day 4 night | **baseline-A run 2** (stochasticity, same seed/config) | run 1 finished | diff → thresholds |
+| Day 5 morning | module + component **pre-screen** of cand-bad and cand-good (minutes) | T29 | cheap sanity before the long runs |
+| Day 5 midday (after **thresholds are committed**, T31) | **cand-bad full suite** | T29–T31 | gate FAIL expected, decided by the gate |
+| Day 5 afternoon | **cand-good full suite** | | gate decision; S1/S2/S3 scenarios follow (they need little LLM) |
+| Day 5 night | *(machine free for scenario rehearsals / `kubectl top` measurements / demo-profile baseline)* | | resource measurements here, **not** while a suite runs |
+| Day 5 late night → Day 6 morning | **E3: ingest Batch B live, then full suite `--batches A,B`** | T44 | the 5th full run |
+| Day 6 | E4 coverage re-run (seconds); suite run **restricted to the ≥ 6 new questions** (`--only-added E4`) | T45 | a full re-run is *not* what the PDF asks here — it asks that coverage rises; the restricted run shows the new questions are handled |
+Total ≈ **5 full suite runs** (≈ 5–10 h machine time on CPU) plus short runs. This is feasible **only if** the suite works by Day 4 evening — which is why T17–T25 are the top priority on Days 3–4.
+
+### Day-by-day (every task is placed; none removed)
+| Day | A (data + evaluation) | B (cluster + observability) | Both | End-of-day gate |
 |---|---|---|---|---|
-| **D1** | Sun 22 Nov | T01, **T05 spike**, T04, T06; start T14 (write Batch B) | T01, T02, T47, T35; start T36 | skeleton green; Chroma spike answered |
-| **D2** | Mon 23 | T07 (+calibration), T08, T09, T10 | T36, T38, T48, T37 | trace + `/api/retrieve` live; ledger/verify working locally |
-| **D3** | Tue 24 | T11, T12, T15; **T17/T18 golden frozen by evening**; T19 | T39, T40, T49, T50 (Jobs run on the cluster) | **G1/G2:** Batch A+B ingested, 2nd run = 0 embeds, golden frozen, eval Job smoke passes |
-| **D4** | Wed 25 | T20–T25 (suite) → **start baseline run ×2 overnight**; T28, T29 (build candidates) | T32, T33, T51, T52, T53 | one-command suite works; baseline running |
-| **D5** | Thu 26 | T26–T31, T34 (candidates, gate, S1–S3), T41–T45 (E; start live queries on D4 evening) | T34 scenarios, T54–T58, T57 | gate decisions + release scenarios captured; E numbers exist |
-| **D6 (buffer)** | Fri 27 | T59–T63: report, screenshots, README, rehearsal, **submit before the deadline hour** | same | submitted |
-
-Rules for the compressed plan: (1) **freeze the golden set on D3 evening** — everything downstream waits for it; (2) start the long suite runs **overnight** (D4 night, D5 night) and pre-screen candidates with the module and component levels first; (3) write screenshots and raw outputs into `docs/a3-evidence/` **as you produce them**; (4) if D5 ends without S1–S3 captured, drop S3-b and keep S3-a; (5) the report is written from the evidence files on D6 morning — **do not leave the clean-cluster rehearsal (T58) for after the report**; (6) if a P0 slips, tell the other member immediately and re-split rather than both stalling.
-
----
+| **D1** Sun 22 | T01 · **T05 Chroma spike** · T04 · T06 · start T14 (author Batch B) | T01 · T02 · T47 · T35 · start T36 | confirm deadline; ask GPU question | skeleton green; spike answered |
+| **D2** Mon 23 | T07 (calibration on Batch A **and** the drafted Batch B) · T08 · T09 · start T10 · finish T14 | T36 · T37 · T38 · T48 · T19 (pairs) | review swap | trace + `/api/retrieve` live on cluster; verification works locally |
+| **D3** Tue 24 | T10 · T11 · T12 · T13 · T03 · **T15 (Batch B on scratch)** | T39 · T40 · T49 · T50 · T51 (Jobs run on cluster) | **T17 + T18 in the evening: write and review the golden set together; freeze v1** | Batch A on the live cluster, 2nd run = 0 embeds; golden frozen |
+| **D4** Wed 25 | T20 · T21 · T22 · T23 · T25 (suite) · T28 · T29 (build candidates; calibrate floors) | T52 (network matrix) · T32 · T33 · T41 (write live queries) · T53 prep | T24 (hand labels, after run 1) | **baseline runs 1 and 2 started/finished overnight** |
+| **D5** Thu 26 | T24 · T26 · T27 · T30 · **T31 (commit thresholds first)** · T42 · T43 | T53 (measure while no suite runs) · T54 · T55 · T57 · T34 scenarios S1–S3 | T34 (release decision text) · T56 (Batch A evidence) | gate decisions + release scenarios captured; coverage-before done; E3 started |
+| **D6** Fri 27 | T44 · T45 (E3, E4) · T56 (Batch B evidence) | T58 (clean-cluster rehearsal) · T61 | **T59 · T60 · T62 · T63** (report, appendix, rehearsal, submit **before the deadline hour**) | submitted |
+If any day's gate is missed, **add hours that night; do not drop a requirement.** If a whole gate is at risk, the *order* of rescue is: (1) call the other member in, (2) re-split tasks across both, (3) ask the instructor/TA about the specific ambiguity, (4) only then reduce a **P2 extra** from the list above.
 
 ## 6. Gates (stop-and-verify points)
 
@@ -256,16 +271,15 @@ Rules for the compressed plan: (1) **freeze the golden set on D3 evening** — e
 
 ---
 
-## 7. Cut list (if time is short) — never cut a P0, cut in this order
+## 7. What may slip (extras only) — requirements are never cut
 
-1. **P2s:** T46 (coverage Job), optional retrieval/vocabulary coverage, UMAP figure, second noise test, chunk-level reuse (05 §6.2).
-2. **Run fewer suite repetitions:** stochasticity on the module+component levels + one repeated end-to-end subset (but run the full set **twice** at least once — B-S-01 says "the whole suite twice").
-3. **Smaller golden:** stay at the quota **30** (do not go below 25/15/5/5); synthetic ≤ 8 (all reviewed); human ≥ 8.
-4. **Single candidate pair:** only one change type, no extra experiments.
-5. **P1s:** T03 (shared profiles) if the chosen change is not the embedding model; T13 only needed for candidates (if the change is not an index change, T13 shrinks).
-Never cut: any requirement row in 01 §2–§7 (A1…F5), the Kubernetes demo path, thresholds-before-candidates, both screenshots of the gate, the trace-after-undo evidence.
-
----
+Nothing in [01](01-REQUIREMENTS.md) §2–§7 may be removed, reduced below its stated minimum, or replaced by a weaker substitute. The only things that may be postponed are **my additions beyond the PDF**, in this order:
+1. T46 (coverage as a Job), optional retrieval/vocabulary coverage (09 §7), the UMAP figure.
+2. The second noise test with distractor documents (typos satisfy B-C-02).
+3. Chunk-level embedding reuse (05 §6.2) — the required behaviour is document-level.
+4. The S3-b "live regression" release variant (S3-a satisfies F3-04/F3-05).
+5. Extra Table-2 evidence beyond one measured item per quality.
+Do **not** shorten: the golden set (stay ≥ 30), the whole-suite-twice stochasticity run, the four checks, the near-duplicate calibration, the threshold-before-candidates rule, any screenshot, the unseen-batch rehearsal.
 
 ## 8. Working agreement (two people, one repo)
 
@@ -294,7 +308,7 @@ Never cut: any requirement row in 01 §2–§7 (A1…F5), the Kubernetes demo pa
 | R9 | Network policies block the new pods | M | M | §7 of 10; matrix test before the demo | B |
 | R10 | `rollout undo` does not restore the release values | L (by design) | H | release values in the pod template; rehearse S3 twice | B |
 | R11 | Traces from 3+ replicas unreadable/corrupt | L | M | per-pod files; tests | B |
-| R12 | Time: deadline closer than assumed | ? | H | T01 first; cut list §7 | both |
+| R12 | Time: deadline closer than assumed | ? | H | T01 first; §5a overtime plan; only §7 extras may slip | both |
 | R13 | A2 regressions from the instrumentation | M | H | T36 acceptance = A2 tests unchanged; run the A2 eval before/after | B |
 | R14 | Golden labels wrong (page numbers) | M | M | second member verifies every gold page; label fixes in separate commits | A |
 | R15 | Demo laptop differs from dev laptop | L | H | rehearse on the demo machine; keep the cluster running; no dependence on internet during the demo | both |

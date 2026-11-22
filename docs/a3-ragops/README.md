@@ -56,7 +56,7 @@ RAGOps = the **query pipeline** (ordinary DevOps lifecycle) **plus a data-manage
 | 08 | [`08-OBSERVABILITY-TRACING.md`](08-OBSERVABILITY-TRACING.md) | Part D: trace record, instrumentation points, trace tool, metrics, guardrail logging, root cause |
 | 09 | [`09-DRIFT-COVERAGE.md`](09-DRIFT-COVERAGE.md) | Part E: live queries, coverage, drift, closing the gap |
 | 10 | [`10-KUBERNETES.md`](10-KUBERNETES.md) | Part F: every manifest, apply order, rollout/undo mechanics, resources, network policy |
-| 11 | [`11-IMPLEMENTATION-PLAN.md`](11-IMPLEMENTATION-PLAN.md) | work breakdown T01…T63, owners, dependencies, machine-time plan, schedule, gates, cut list, risks |
+| 11 | [`11-IMPLEMENTATION-PLAN.md`](11-IMPLEMENTATION-PLAN.md) | work breakdown T01…T63, owners, dependencies, machine-time plan, 5-day full-scope schedule, gates, risks |
 | 12 | [`12-REPORT-AND-EVIDENCE.md`](12-REPORT-AND-EVIDENCE.md) | Part G: page budget, table drafts, short-answer guidance, screenshot checklist, README content |
 | 13 | [`13-DEMO-RUNBOOK.md`](13-DEMO-RUNBOOK.md) | the demo script, rehearsal, failure modes, viva questions |
 | 14 | [`14-INTERFACE-CONTRACTS.md`](14-INTERFACE-CONTRACTS.md) | schemas, CLIs, exit codes, env vars, paths — the single source for formats |
