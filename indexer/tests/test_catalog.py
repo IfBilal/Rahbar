@@ -8,8 +8,8 @@ from pathlib import Path
 import yaml
 
 from pipeline.catalog import (
-    InboxFile, derive_doc_id, find_date, find_version, is_newer, load_catalog,
-    resolve_metadata, scan_inbox, sha256_file, version_key,
+    InboxFile, derive_doc_id, derive_title, find_date, find_date_in_filename, find_version,
+    is_newer, load_catalog, resolve_metadata, scan_inbox, sha256_file, version_key,
 )
 
 
@@ -73,7 +73,7 @@ def test_unseen_file_with_no_catalog_derives_what_it_can(tmp_path: Path) -> None
     m = resolve_metadata(f, [f.path.read_text()])
     assert m.title.value == "Hostel Allotment Policy" and m.title.route == "derived"
     assert m.date.value == "2025-01-12"
-    assert m.doc_id == "hostel-allotment-policy"
+    assert m.doc_id == "hostel-policy"          # a series id never comes from a title read off the page
 
 
 def test_nothing_resolvable_is_reported_missing_and_mtime_is_ignored(tmp_path: Path) -> None:
@@ -107,3 +107,55 @@ def test_batch_yaml_declares_batch_and_rows(tmp_path: Path) -> None:
     rows, _ = load_catalog(tmp_path)
     assert rows["drop/a.md"]["title"] == "T" and rows["a.md"]["title"] == "T"
     assert scan_inbox(tmp_path)[0].batch == "C"
+
+
+# ---- found by running the unseen-document path over the real nine-document corpus (T07)
+def test_real_world_date_forms_are_recognised() -> None:
+    assert find_date("Policy 30.05.2022/FacultyEntrepreneurshipPolicy") == "2022-05-30"
+    assert find_date("Annual Report 2019-20") == "2019-20"
+    assert find_date("Annual Report 2023-2024") == "2023-24"
+    assert find_date("Budget 2023-08 summary") == "2023-08"          # ISO month wins over a range
+    assert find_date("Reference 2019-77 and 12 items") is None        # not a plausible academic year
+    assert find_date("order of 31/12/2025") == "2025-12-31"
+
+
+def test_a_year_in_the_file_name_counts_but_no_name_means_no_date() -> None:
+    assert find_date_in_filename("annual-report-2023-24.pdf") == "2023-24"
+    assert find_date_in_filename("academic-rules-handbook-jun-2026.pdf") == "2026-06"
+    assert find_date_in_filename("undergraduate-academic-rules-aug-2023.pdf") == "2023-08"
+    assert find_date_in_filename("Prospectus 2026.pdf") == "2026"
+    assert find_date_in_filename("untitled-notes.txt") is None
+    assert find_date_in_filename("notes.txt") is None
+
+
+def test_junk_titles_are_skipped() -> None:
+    assert derive_title("final layout.cdr\nAcademic Rules Handbook\ntext.") == "Academic Rules Handbook"
+    assert derive_title("Microsoft Word - Annual.Report-2019-20\nANNUAL REPORT") == "ANNUAL REPORT"
+    assert derive_title("1\n2\n\n") is None
+    assert derive_title("This line is a whole sentence that ends with a full stop.") is None
+
+
+def test_two_documents_with_the_same_cover_header_do_not_become_one_series(tmp_path: Path) -> None:
+    """The real corpus: three PDFs open with 'FAST National University'. A series id taken from
+    that derived title would make them versions of one document and let one replace another."""
+    header = "FAST National University\nof Computer and Emerging Sciences\n"
+    a = _file(tmp_path, "student-handbook-jun-2026.md", header + "Student handbook text. " * 20)
+    b = _file(tmp_path, "academic-rules-handbook-jun-2026.md", header + "Academic rules text. " * 20)
+    ma, mb = resolve_metadata(a, [a.path.read_text()]), resolve_metadata(b, [b.path.read_text()])
+    assert ma.title.value == mb.title.value and ma.title.route == "derived"
+    assert ma.doc_id == "student-handbook" and mb.doc_id == "academic-rules-handbook"
+    assert ma.version.value == mb.version.value == "2026-06"          # from the file name
+
+
+def test_an_unseen_annual_report_resolves_a_version_without_any_catalog(tmp_path: Path) -> None:
+    f = _file(tmp_path, "annual-report-2019-20.txt", "ANNUAL REPORT\nThe institute grew steadily.")
+    m = resolve_metadata(f, [f.path.read_text()])
+    assert m.version.value == "2019-20" and m.doc_id == "annual-report"
+    assert m.title.value == "ANNUAL REPORT"
+
+
+def test_an_embedded_pdf_creation_date_is_the_last_resort(tmp_path: Path, monkeypatch) -> None:
+    f = _file(tmp_path, "report.txt", "Some Heading\nwords without any date at all in them")
+    monkeypatch.setattr("pipeline.catalog.embedded_metadata", lambda p: {"pdf_date": "2025-02"})
+    m = resolve_metadata(f, [f.path.read_text()])
+    assert (m.date.value, m.date.route) == ("2025-02", "embedded")

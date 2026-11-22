@@ -36,10 +36,12 @@ _ISO = re.compile(r"\b((?:19|20)\d{2})-(0[1-9]|1[0-2])(?:-(0[1-9]|[12]\d|3[01]))
 _DMY = re.compile(rf"\b(\d{{1,2}})(?:st|nd|rd|th)?\s+({_MONTH_RE})\s*,?\s+((?:19|20)\d{{2}})\b", re.I)
 _MDY = re.compile(rf"\b({_MONTH_RE})\s+(?:(\d{{1,2}})(?:st|nd|rd|th)?\s*,?\s+)?((?:19|20)\d{{2}})\b",
                   re.I)
+_DMY_NUM = re.compile(r"\b(0?[1-9]|[12]\d|3[01])[./-](0?[1-9]|1[0-2])[./-]((?:19|20)\d{2})\b")
+_YEAR_RANGE = re.compile(r"\b((?:19|20)\d{2})\s*[-\u2013/]\s*((?:19|20)\d{2}|\d{2})\b")
 _KEYED_YEAR = re.compile(rf"\b{_KEYWORD}\b[^\n\d]{{0,30}}((?:19|20)\d{{2}})\b", re.I)
 _VERSION = re.compile(r"\bversion\s*[:\-]?\s*v?(\d+(?:\.\d+)*)\b|\bv(\d+(?:\.\d+)+)\b", re.I)
 _FILENAME_NOISE = re.compile(
-    r"\b(?:19|20)\d{2}\b|\b(?:" + "|".join(m[:3] for m in _MONTHS) + r")[a-z]*\b|"
+    r"\b(?:19|20)\d{2}\s*[-/]\s*(?:\d{4}|\d{2})\b|\b(?:19|20)\d{2}\b|\b(?:" + "|".join(m[:3] for m in _MONTHS) + r")[a-z]*\b|"
     r"\bv\d+(?:\.\d+)*\b|\b(?:version|edition|draft|copy|final|backup|rev\d*|new|old|latest)\b",
     re.I)
 
@@ -94,7 +96,7 @@ def slugify(text: str) -> str:
 def derive_doc_id(title: str | None, file_name: str) -> str:
     """The series a document belongs to: the title (or file stem) with version, year and
     month words stripped, so 'Academic Rules 2023' and 'Academic Rules 2026' share an id."""
-    base = title if title else Path(file_name).stem.replace("_", " ").replace("-", " ")
+    base = title if title else re.sub(r"[_.]+", " ", Path(file_name).stem)   # keep '-' so 2019-20 stays one token
     slug = slugify(_FILENAME_NOISE.sub(" ", base))
     return slug or slugify(Path(file_name).stem) or "document"
 
@@ -109,21 +111,38 @@ def normalise_date(y: str, m: str | None = None, d: str | None = None) -> str:
 
 
 def find_date(text: str) -> str | None:
-    """First date-like pattern in `text`, normalised to YYYY[-MM[-DD]]. Keyword-introduced
-    dates win; a bare year counts only after a word like 'edition' or 'effective'."""
+    """First date-like pattern in `text`, normalised to YYYY[-MM[-DD]] (or an academic year
+    such as 2023-24). A bare year counts only after a word like 'edition' or 'effective'."""
     head = text[:3000]
-    for rx in (_ISO,):
-        m = rx.search(head)
-        if m:
-            return normalise_date(m.group(1), m.group(2), m.group(3))
+    m = _ISO.search(head)
+    if m:
+        return normalise_date(m.group(1), m.group(2), m.group(3))
     m = _DMY.search(head)
     if m:
         return normalise_date(m.group(3), str(_MONTH_NUM[m.group(2)[:3].lower()]), m.group(1))
     m = _MDY.search(head)
     if m:
         return normalise_date(m.group(3), str(_MONTH_NUM[m.group(1)[:3].lower()]), m.group(2))
+    m = _DMY_NUM.search(head)
+    if m:
+        return normalise_date(m.group(3), m.group(2), m.group(1))
+    m = _YEAR_RANGE.search(head)
+    if m and int(m.group(1)[2:]) < int(m.group(2)[-2:]) <= int(m.group(1)[2:]) + 1:
+        return f"{m.group(1)}-{m.group(2)[-2:]}"          # 2019-20, 2023-2024 -> 2023-24
     m = _KEYED_YEAR.search(head)
     return normalise_date(m.group(1)) if m else None
+
+
+def find_date_in_filename(name: str) -> str | None:
+    """A year in the file name ('annual-report-2023-24.pdf', 'rules-jun-2026.pdf') is content
+    the author chose, unlike the modification time, so it counts as a derived date."""
+    stem = Path(name).stem
+    return find_date(stem) or find_date(re.sub(r"[-_.]+", " ", stem)) or _bare_year(stem)
+
+
+def _bare_year(stem: str) -> str | None:
+    m = re.search(r"(?<!\d)((?:19|20)\d{2})(?!\d)", stem)
+    return m.group(1) if m else None
 
 
 def find_version(text: str) -> str | None:
@@ -241,25 +260,30 @@ def embedded_metadata(path: Path) -> dict[str, str]:
             from pypdf import PdfReader
             info = PdfReader(str(path)).metadata
             title = (info.title or "").strip() if info else ""
-            if title and not re.search(r"\.(pdf|docx?|indd)$|^untitled|^microsoft word", title,
-                                       re.I):
+            if title and not _JUNK_TITLE.search(title):
                 out["title"] = title
             created = info.creation_date if info else None
             if created:
-                out["pdf_year"] = str(created.year)
+                out["pdf_date"] = f"{created.year}-{created.month:02d}"
     except Exception:           # a damaged file is the quality check's problem, not ours
         return {}
     return out
 
 
+_JUNK_TITLE = re.compile(
+    r"\.(pdf|docx?|indd|cdr|pmd|qxd|ai|ps|tmp|txt|html?)$|^untitled|^microsoft (word|powerpoint)|"
+    r"^document\d*$|^new document", re.I)
 _BAD_TITLE = re.compile(r"^(page\s+\d+|\d+|table of contents|contents|abstract)$", re.I)
 
 
 def derive_title(first_page_text: str) -> str | None:
+    """The first heading-like line of the first page: short, not a sentence, mostly letters."""
     for raw in first_page_text.splitlines()[:25]:
         line = raw.strip().lstrip("#").strip()
-        if (3 <= len(line) <= 120 and not line.endswith((".", ",", ";"))
-                and sum(c.isalpha() for c in line) >= 3 and not _BAD_TITLE.match(line)):
+        letters = sum(c.isalpha() for c in line)
+        if (3 <= len(line) <= 120 and not line.endswith((".", ",", ";", ":"))
+                and letters >= 3 and letters / len(line) >= 0.6 and not _BAD_TITLE.match(line)
+                and not _JUNK_TITLE.search(line)):
             return line
     return None
 
@@ -280,14 +304,17 @@ def resolve_metadata(f: InboxFile, pages: list[str],
         return Field(derived, "derived" if derived else "missing")
 
     title = pick("title", derive_title(pages[0]) if pages else None)
-    derived_date = find_date(top)
-    date = pick("date", derived_date)
-    if date.route == "missing" and emb.get("pdf_year") and emb["pdf_year"] in top:
-        date = Field(emb["pdf_year"], "embedded")      # PDF creation year, confirmed by the text
-    derived_version = find_version(top)
+    date = pick("date", find_date(top) or find_date_in_filename(f.path.name))
+    if date.route == "missing" and emb.get("pdf_date"):
+        date = Field(emb["pdf_date"], "embedded")     # the PDF's own creation date, last resort
+    derived_version = find_version(top) or find_version(f.path.stem)
     version = pick("doc_version", derived_version or (date.value if date.value else None))
-    doc_id = (str(row.get("doc_id") or emb.get("doc_id") or "").strip()
-              or derive_doc_id(title.value, f.path.name))
+    # A series id from a title read off the page is unsafe (two documents with the same cover
+    # header would merge into one series and one would replace the other), so only a title the
+    # catalog or the file itself declares is used; otherwise the file name is.
+    explicit = str(row.get("doc_id") or emb.get("doc_id") or "").strip()
+    reliable = title.value if title.route in ("catalog", "embedded") else None
+    doc_id = explicit or derive_doc_id(reliable, f.path.name)
     return ResolvedMeta(source=f.path.name, title=title, version=version, date=date,
                         doc_id=slugify(doc_id), batch=str(row.get("batch") or f.batch).upper(),
                         row=row)
