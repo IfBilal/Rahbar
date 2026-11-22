@@ -116,8 +116,9 @@ class ChromaRetriever:
                 return self._cached[1], self._cached[2]
         base = self.settings.collection
         client = self.client             # an unreachable Chroma raises here, never falls back
+        pointer: dict[str, Any] = {}
         try:
-            pointer = client.get_collection(f"{base}-registry").metadata or {}
+            pointer = dict(client.get_collection(f"{base}-registry").metadata or {})
             name = str(pointer.get("active") or base)
         except Exception:  # no registry: week-1 dummy index, read the base collection
             name = base
@@ -127,7 +128,12 @@ class ChromaRetriever:
         info = IndexInfo(collection=name, count=int(col.count()),
                          embed_model=str(meta.get("embed_model", "")),
                          dimension=int(dim) if dim is not None else None,
-                         generation=str(meta.get("generation", name)))
+                         # Assignment 03 updates the live collection in place, so its own
+                         # metadata cannot carry the data revision: the registry does (bumped by
+                         # the ingestion Job after every change), and the API's semantic cache
+                         # scope follows it. Assignment 02 registries carry the same value as
+                         # the collection, so this is backward compatible.
+                         generation=str(pointer.get("generation") or meta.get("generation", name)))
         with self._lock:
             self._cached = (time.monotonic(), col, info)
         return col, info

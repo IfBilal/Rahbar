@@ -1,0 +1,23 @@
+# The release gate (docs/a3-ragops/07 section 5). In the cluster this file is the ConfigMap
+# `ragops-gate` (key gate.yaml), so a threshold changes without rebuilding any image.
+#
+# TWO thresholds are deliberately UNSET (value: null) until you derive them from your own
+# measurements and commit them BEFORE running the candidates (07 section 5.2). The gate
+# refuses to run (exit 2) while any value is null, so this cannot be skipped by accident.
+version: 1
+require_same: [golden_hash, corpus_digest, suite_schema, seed, profile_hash]
+on_missing_metric: fail          # a missing metric is a failure, never a pass
+rules:
+  # The PDF's own example: recall@5 may not drop by more than 2 points against the baseline.
+  - {id: recall5_drop,      level: component, metric: "recall@5",              type: max_drop_abs,           value: 0.02}
+  # The PDF's own example: abstention correctness not lower than the baseline.
+  - {id: abstention,        level: endpoint,  metric: abstention_correctness,  type: not_lower_than_baseline, value: 0.0}
+  # Carried over from Assignment 02: at least 95% of citations must match a retrieved passage.
+  - {id: citation_validity, level: endpoint,  metric: citation_validity,       type: min_value,              value: 0.95}
+  # TO DERIVE: baseline faithfulness minus run-to-run variation (stochasticity test) minus margin.
+  - {id: faithfulness_min,  level: endpoint,  metric: faithfulness,            type: min_value,              value: null}
+  # TO DERIVE: a user-visible latency budget, not just 1.25 x the baseline p95.
+  - {id: p95_latency,       level: endpoint,  metric: latency_p95_s,           type: max_value,              value: null}
+justification:
+  faithfulness_min: "TO WRITE: baseline X, runs vary by +-Y, so below X-Z is a real loss, not noise."
+  p95_latency: "TO WRITE: measured baseline p95, the Ingress/client timeout, and the arithmetic."

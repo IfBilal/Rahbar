@@ -1,0 +1,55 @@
+LOCAL DRY RUN, NOT CLUSTER EVIDENCE (do not use as a screenshot)
+Date: 2026-11-22, Bilal's laptop (CPU). What ran: the real pipeline code (real extraction and OCR,
+the four verification checks, incremental sync) over the 9 real Batch-A documents fetched into
+corpus/raw (9 of 9 match corpus/MANIFEST.md), seeded with the catalog from corpus/sources.yaml.
+What did NOT run: the embedding model (a deterministic fake stood in), Chroma (an in-memory fake),
+Kubernetes. Purpose: prove verification does not wrongly quarantine real documents and that
+the 2023 rules are archived by the 2026 edition. The cluster run (Taimoor's laptop) replaces this.
+Script: the scratchpad script is reproduced by indexer/tests/test_incremental.py's Env harness.
+================================================================================================
+seeded 9
+--- run 1: 80s {"type": "ingest_summary", "schema": 1, "run_id": "real1", "command": "sync", "docs_seen": 9, "docs_unchanged": 0, "docs_new": 9, "docs_updated": 0, "docs_superseded": 1, "docs_deleted": 0, "docs_quarantined": 0, "docs_rename
+# Verification report real1
+
+embedding `fake` · documents 9 · unchanged 0
+
+| document | quality | complete | recency | unique | outcome | reason |
+| --- | --- | --- | --- | --- | --- | --- |
+| undergraduate-academic-rules-aug-2023.pdf | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| academic-rules-handbook-jun-2026.pdf | PASS | PASS | PASS | PASS | accepted | newer version detected: supersedes academic-rules@2023-08 |
+| annual-report-2019-20.pdf | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| annual-report-2023-24.pdf | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| faculty-entrepreneurship-and-technical-start-ups-policy.pdf | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| fee-structure-page.html | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| grading-page.html | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| prospectus-2026-academic-rules-and-regulations.pdf | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| student-handbook-jun-2026.pdf | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| academic-rules@2023-08 (already indexed) | – | – | FAIL | – | archived | R-SUPERSEDED-BY: a newer version exists: academic-rules@2026-06 |
+
+**accepted 9 · quarantined 0 · archived 1 · unchanged 0**
+failures by check: quality 0 · completeness 0 · recency 1 · uniqueness 0
+
+--- run 2: 0s {"type": "ingest_summary", "schema": 1, "run_id": "real2", "command": "sync", "docs_seen": 9, "docs_unchanged": 9, "docs_new": 0, "docs_updated": 0, "docs_superseded": 0, "docs_deleted": 0, "docs_quarantined": 0, "docs_renamed
+# Verification report real2
+
+embedding `fake` · documents 0 · unchanged 9
+
+| document | quality | complete | recency | unique | outcome | reason |
+| --- | --- | --- | --- | --- | --- | --- |
+
+**accepted 0 · quarantined 0 · archived 0 · unchanged 9**
+failures by check: quality 0 · completeness 0 · recency 0 · uniqueness 0
+
+second run embeds: 0
+academic-rules 2023-08 archived 44
+academic-rules 2026-06 current 66
+annual-report-2019-20 2019-20 current 63
+annual-report-2023-24 2023-24 current 211
+faculty-entrepreneurship-and-technical-start-ups-policy 2022-05 current 23
+fee-structure 2026-27 current 9
+grading 2026 current 8
+prospectus-academic-rules 2026 current 25
+student-handbook 2026-06 current 83
+chunks in index: 532
+
+[exited with code 0]

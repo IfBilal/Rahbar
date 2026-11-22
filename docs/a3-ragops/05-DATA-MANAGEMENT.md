@@ -34,6 +34,7 @@ The ingestion Job's container runs `python -m pipeline.run <command>`; default c
 | `report [--last\|--run ID] [--md]` | print a stored verification/ingest report | no | screenshots A1/F2 |
 | `status` | print ledger summary and the registry's revision | no | demos |
 | `--dummy` | A2's three fake chunks | yes | kept for A2 compatibility only |
+| *(no command)* | the Assignment 02 full rebuild (`run_pipeline`) | yes | kept so the A2 image and tests keep working until the manifests switch to `sync` |
 
 Every command prints **one JSON summary line** at the end (schema §4 of 14) and exits `0` (done), `1` (completed with documents quarantined — **not** an error), `2` (usage), `3` (fatal: lock held, ledger corrupt, Chroma unreachable, embed failure). A Job should fail the Kubernetes way only on fatal errors; quarantined documents are normal data-quality outcomes, so **`1` is mapped to success by the Job manifest** (`successPolicy`/wrapper script: see [10](10-KUBERNETES.md) §5).
 
@@ -96,7 +97,7 @@ Required: `source`, `title`, `doc_version` **or** `date`, `page_count` (computed
 
 | Signal | Rule | Weight |
 |---|---|---|
-| S1 ends mid-sentence | last 120 characters contain no `. ! ? : ) ] "` terminator **and** the last token is alphabetic | 2 |
+| S1 ends mid-sentence | the last line has ≥ 6 words, does not end in `. ! ? : ) ] "` and its last word is alphabetic (a short heading or signature line never fires) | 2 |
 | S2 "Page X of Y" mismatch | the highest `Page N of M` seen has `N < M` | 3 |
 | S3 declared vs found | catalog/PDF `/Count`/front matter `pages:` exceeds extracted pages | 3 |
 | S4 unclosed structure | open code fence, unbalanced `\|`-table row at end, HTML missing `</html>` / `</body>`, Markdown list/table cut mid-line | 2 |

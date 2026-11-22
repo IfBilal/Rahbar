@@ -71,7 +71,7 @@ Exit codes: `0` done · `1` done, **one or more documents quarantined** (the Job
 ```
 Rules: atomic write (temp + `fsync` + rename), previous copy kept as `ledger.json.bak`; lock `/data/ledger/ingest.lock` = `{"pod","run_id","started_at"}`; **status transitions only as in 04 §4.4**; a version in `quarantine` never appears under `documents`.
 
-**Chunk snapshots** `lake/docs/<doc_id>/<version>/chunks.jsonl` (one line per chunk): `{"chunk_id","text","source","section","page","doc_id","doc_version","chunk_sha"}` — the **immutable** record the trace tool rebuilds from. Moved with the version when archived.
+**Chunk snapshots** `lake/docs/<doc_id>/<version>/chunks.jsonl` (one line per chunk): `{"chunk_id","text","source","section","page","doc_id","doc_version","chunk_sha","metadata":{the full Chroma metadata}}` — the **immutable** record the trace tool rebuilds from, and the source for metadata flips (archive and restore pass the FULL metadata, so the result is the same whether Chroma merges or replaces on `update`). Moved with the version when archived. A ledger version record also carries `indexed: {<index name>: [chunk ids]}` (one list per maintained index; `chunk_ids` is the live index's) and, for in-place revisions, `history`.
 
 **Chunk metadata in Chroma** (the five A2 keys are mandatory): `source, section, page, doc_version, superseded` **+** `doc_id, status ("current"|"archived"), content_sha, chunk_sha, ingest_run, revision`. Chunk id: `<doc_id>@<doc_version>#<ordinal:04d>-<sha8>` (sha8 = first 8 hex of SHA-1/256 of the chunk text; A2 uses SHA-1[:8] — keep it for continuity or document the change).
 
@@ -118,10 +118,10 @@ Corpus-state **digest** and **batch** tags feed the suite (`corpus_digest`, `--b
 
 ```json
 {"type":"ingest_summary","schema":1,"run_id":"…","command":"sync","started_at":"…","seconds":2.1,
- "docs_seen":9,"docs_unchanged":9,"docs_new":0,"docs_updated":0,"docs_superseded":0,"docs_archived_stale":0,
+ "docs_seen":9,"docs_unchanged":9,"docs_new":0,"docs_updated":0,"docs_superseded":0,
  "docs_deleted":0,"docs_quarantined":0,"docs_renamed":0,
  "chunks_embedded":0,"chunks_reused":0,"chunks_written":0,"chunks_deleted":0,"verification_embeddings":0,
- "repairs":0,"indexes":{"rahbar":{"revision":"r0007","revision_bumped":false}},"exit":0}
+ "repairs":0,"indexes":{"rahbar":{"revision":"r0007","revision_bumped":false,"chunks_embedded":0,"chunks_written":0,"chunks_deleted":0}},"exit":0}
 ```
 Invariant tests: on an unchanged corpus `chunks_embedded == 0 and verification_embeddings == 0 and revision_bumped == false`; `chunks_written − chunks_deleted` equals the change in Chroma's count; per index.
 

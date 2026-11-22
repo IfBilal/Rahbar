@@ -26,3 +26,6 @@ venv/
 .coverage
 coverage.xml
 htmlcov/
+
+# Batch B build output (corpus/batch-b/build.py --out ...)
+corpus/batch-b/out/
