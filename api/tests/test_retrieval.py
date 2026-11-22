@@ -171,3 +171,13 @@ def test_an_unreachable_chroma_fails_fast_instead_of_hanging(monkeypatch) -> Non
     with pytest.raises(httpx.ConnectTimeout):
         r.index_info()
     assert calls == [("http://chroma:8000/api/v2/heartbeat", ch.CHROMA_TIMEOUT)]
+
+
+def test_the_data_revision_comes_from_the_registry_when_it_has_one() -> None:
+    """Assignment 03 updates the collection in place; only the registry carries the revision
+    that the semantic cache scope follows."""
+    cols = [FakeCollection("rahbar-gg7", dict(META), ROWS),
+            FakeCollection("rahbar-registry", {"active": "rahbar-gg7", "generation": "r0003"}, [])]
+    settings = Settings(retriever="chroma", embed_model="nomic-embed-text")
+    r = ChromaRetriever(settings, client=FakeClient(cols), embedder=FixedEmbedder(3))
+    assert r.generation == "r0003" and r.index_info().generation == "r0003"

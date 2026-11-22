@@ -36,11 +36,12 @@ jobs:
           cache-dependency-path: "**/requirements*.txt"
       - run: pip install -r api/requirements-dev.txt -r indexer/requirements-dev.txt
       - name: ruff
-        run: ruff check api indexer eval corpus tests
+        run: ruff check api indexer eval corpus tests ragops
       - name: mypy
         run: |
           (cd api && mypy app)
           (cd indexer && mypy pipeline)
+          (cd ragops && mypy suite gate)
       # The UI is one static index.html with no build step, so there is no eslint/tsc job.
 
   test:
@@ -65,6 +66,8 @@ jobs:
         run: cd indexer && pytest -q --cov=pipeline --cov-report=term --cov-fail-under=60
       - name: evaluator arithmetic
         run: cd eval && pytest -q tests
+      - name: ragops tests
+        run: cd ragops && pytest -q
       - name: architecture and manifest tests
         run: pytest -q tests --ignore=tests/system
 

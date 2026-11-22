@@ -32,13 +32,26 @@ class Chunk:
     page: int
     doc_version: str
     superseded: bool
+    # Assignment 03 (docs/a3-ragops/14 section 2): set by the incremental pipeline only, so
+    # chunks built the Assignment 02 way keep exactly the five required metadata keys.
+    doc_id: str = ""
+    status: str = ""             # "current" | "archived"
+    content_sha: str = ""        # SHA-256 of the source file's bytes
+    chunk_sha: str = ""          # first 8 hex digits of the chunk text digest
+    ingest_run: str = ""
+    revision: int = 0
 
     def metadata(self) -> dict[str, str | int | bool]:
         """Chroma metadata values must be str, int, float or bool."""
-        return {
+        meta: dict[str, str | int | bool] = {
             "source": self.source,
             "section": self.section,
             "page": self.page,
             "doc_version": self.doc_version,
             "superseded": self.superseded,
         }
+        if self.doc_id:
+            meta.update(doc_id=self.doc_id, status=self.status or "current",
+                        content_sha=self.content_sha, chunk_sha=self.chunk_sha,
+                        ingest_run=self.ingest_run, revision=self.revision)
+        return meta

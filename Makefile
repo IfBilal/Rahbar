@@ -27,12 +27,14 @@ test: ## all unit, design and manifest tests (stubs only: no cluster, no model, 
 	cd api && $(BIN)/pytest -q --cov=app --cov-report=term --cov-fail-under=60
 	cd indexer && $(BIN)/pytest -q --cov=pipeline --cov-report=term --cov-fail-under=60
 	cd eval && $(BIN)/pytest -q tests
+	cd ragops && $(BIN)/pytest -q
 	$(BIN)/pytest -q tests --ignore=tests/system
 
 lint: ## ruff and mypy over everything in Python
-	$(BIN)/ruff check api indexer eval corpus tests
+	$(BIN)/ruff check api indexer eval corpus tests ragops
 	cd api && $(BIN)/mypy app
 	cd indexer && $(BIN)/mypy pipeline
+	cd ragops && $(BIN)/mypy suite gate
 
 dev: ## run the API with stubs on http://localhost:8000, serving the chat UI too
 	cd api && SERVE_UI_DIR=../ui RETRIEVER=stub LLM_PROVIDER=stub $(BIN)/uvicorn app.main:app --reload --port 8000

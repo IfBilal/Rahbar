@@ -1,0 +1,12 @@
+# The offline suite configuration (docs/a3-ragops/06 section 2). Everything that influences
+# a number is here and its hash is recorded in every result file.
+seed: 20261122
+api: {url: http://api:8000}
+top_k: 5
+levels: [module, component, endpoint]
+typo_noise: {rate: 0.06, kinds: [swap, drop, dup, sub], min_word_len: 5, seed_offset: 1}
+module: {embed_sample_chunks: 50, determinism_texts: 20, warmup_calls: 3}
+judge: {provider: ollama, model: llama3.2:3b, temperature: 0, seed: 7, max_context_chars: 6000}
+e2e: {temperature: 0, seed: 20261122, bypass_cache: true, timeout_s: 900}
+latency: {percentiles: [50, 95], include_failures: true}
+paths: {golden: eval/golden.jsonl, pairs: eval/pairs.jsonl, judge_labels: eval/judge_labels.jsonl}

@@ -6,6 +6,31 @@ Total ≈ **215 person-hours** (≈ 105 h each). The A2 harness's critical path 
 
 ---
 
+## 0. Progress ledger (branch `feat/a3-a-data-core`, 22 Nov 2026)
+
+"Done" here means **code + unit tests passing on Bilal's laptop; NOT yet run on the cluster** — the acceptance checks in §2 that need the cluster, Ollama or the real corpus are still open and listed in the right-hand column. Nothing below has produced a result for the report.
+
+| Task | State | What exists | Still open (needs the cluster / real data / the other half) |
+|---|---|---|---|
+| T04 ledger, lake, lock | done (tests) | `indexer/pipeline/ledger.py`, `lake.py` | — |
+| T05 Chroma spike | **NOT DONE — blocks trust in T10** | the adapter `index.py` assumes `upsert`, `delete(ids)`, `update(metadatas)`, `get(where, include)`, registry `modify()` | run on the cluster's Chroma 1.0.12 (Taimoor) |
+| T06 catalog / metadata | done (tests) | `catalog.py`, `seed.py` (inbox seeding with a catalog) | rehearse with unfamiliar documents |
+| T07 verification | done (tests); **thresholds not calibrated on the real corpus yet** | `verify.py` (4 checks), `calibrate.py` | run `python -m pipeline.calibrate corpus/raw --embed` with Ollama, set thresholds, commit `docs/a3-evidence/verify-calibration.md` + near-dup matrix |
+| T08 report | done (tests) | `report.py` (JSON + terminal-sized Markdown, `reevaluated` rows) | Screenshot A1 from the cluster |
+| T09 quarantine / archive | done (tests) | `lake.py` | — |
+| T10 incremental sync | done against an in-memory fake index (tests) | `incremental.py`, `index.py` | confirm against real Chroma (T05); measure on the real corpus |
+| T11 ops | done (tests) | `ops.py`: restore, delete, count, status, unregister | — |
+| T12 `sync` command | done (tests) | `run.py` subcommands, one summary line, exit codes | the Job wrapper that maps exit 1 → 0 (T49) |
+| T13 candidate index | done (tests) | `ops.build_index`, multi-index `sync` | run for real with a candidate embedding model |
+| T14 Batch B | authored + tested | `corpus/batch-b/` (fixtures, `build.py`, README with expected outcomes), `indexer/tests/test_batch_b.py` | run on the cluster; confirm B01/B02 with the real files |
+| T20 metrics | done (tests) | `ragops/suite/metrics.py` | — |
+| T17 golden (validator only) | partial | `ragops/suite/golden.py` (schema, quotas, batch-aware selection) | **the questions themselves**: migrate the 19 A2 questions to `(doc, page)`, write the rest, review, freeze (T17/T18) |
+| T30 gate | done (tests); **two thresholds deliberately unset** | `ragops/gate/apply.py`, `ragops/config/gate.yaml` (refuses to run until `faithfulness_min` and `p95_latency` are derived) | derive thresholds from the stochasticity run (T31) |
+| T02 skeleton | partial | `ragops/` package, `Dockerfile`, Makefile + CI wiring, boundary tests | build/load the image into minikube; the trace-tool files (Taimoor, T35–T40) |
+| shared | done | API reads the data revision from the registry (`api/app/retrieval/chroma.py`) so the semantic cache invalidates on in-place updates | — |
+
+**Taimoor's side (not started):** T05 spike, T35–T40 (trace, rails, `/api/retrieve`, eval headers, trace tool, summary), T47–T58 (PVCs, ConfigMaps, ingest/eval Jobs, candidate Deployment, network policies, resources, clean-cluster rehearsal), T19 pairs.
+
 ## 1. Before you start (T01)
 
 * **Deadline (told by the group on 22 Nov 2026): 5 days away ⇒ about Fri 27 Nov 2026.** Confirm the exact date and time on Google Classroom and write it here: `DEADLINE = ____________ (PKT)`. The PDF does not state it and "late submissions will receive zero marks". **Because only 5 days remain, use the full-scope overtime plan in §5a, not the 14-day skeleton in §5.**

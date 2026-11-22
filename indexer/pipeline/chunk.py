@@ -179,13 +179,19 @@ def _pack(units: list[_Para], size: int, overlap: int) -> list[tuple[int, str]]:
     return chunks
 
 
-def chunk_id(source: str, doc_version: str, ordinal: int, text: str) -> str:
-    stem = re.sub(r"[^a-z0-9]+", "-", source.lower()).strip("-")[:60]
+def chunk_id(source: str, doc_version: str, ordinal: int, text: str,
+             doc_id: str | None = None) -> str:
+    """Stable id. Assignment 03 passes `doc_id`, giving `<doc_id>@<version>#<ordinal>-<sha8>`
+    (docs/a3-ragops/04 section 4.3); without it the Assignment 02 format is unchanged."""
     digest = hashlib.sha1(text.encode("utf-8")).hexdigest()[:8]
+    if doc_id:
+        return f"{doc_id}@{doc_version}#{ordinal:04d}-{digest}"
+    stem = re.sub(r"[^a-z0-9]+", "-", source.lower()).strip("-")[:60]
     return f"{stem}-{doc_version}-{ordinal:04d}-{digest}"
 
 
-def chunk(doc: Document, size: int, overlap: int) -> list[Chunk]:
+def chunk(doc: Document, size: int, overlap: int, doc_id: str | None = None,
+          content_sha: str = "") -> list[Chunk]:
     """Split on sections, then paragraphs, then sentences, keeping each chunk under
     `size` tokens, with `overlap` tokens shared between neighbours. Every chunk keeps
     the section heading it sits under, its page, doc_version and superseded."""
@@ -196,9 +202,12 @@ def chunk(doc: Document, size: int, overlap: int) -> list[Chunk]:
         units = [u for p in section.paras for u in _split_long(p, size - overlap)]
         for page, body in _pack(units, size, overlap):
             text = f"{section.label}\n{body}"
-            out.append(Chunk(id=chunk_id(doc.source, doc.doc_version, len(out), text),
-                             text=text, source=doc.source, section=section.label, page=page,
-                             doc_version=doc.doc_version, superseded=doc.superseded))
+            cid = chunk_id(doc.source, doc.doc_version, len(out), text, doc_id)
+            out.append(Chunk(id=cid, text=text, source=doc.source, section=section.label,
+                             page=page, doc_version=doc.doc_version, superseded=doc.superseded,
+                             doc_id=doc_id or "", content_sha=content_sha,
+                             chunk_sha=cid[-8:] if doc_id else "",
+                             status="archived" if doc.superseded else "current"))
     return out
 
 
