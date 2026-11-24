@@ -44,13 +44,15 @@ cluster: ## start minikube with Calico, then enable metrics-server and ingress
 	minikube addons enable metrics-server
 	minikube addons enable ingress
 
-images: ## build the three images and load them into minikube (needs yours: Dockerfiles)
+images: ## build the four images (api, indexer, ui, ragops) and load them into minikube
 	docker build -t rahbar-api:$(TAG) api
 	docker build -t rahbar-indexer:$(TAG) -f indexer/Dockerfile .
 	docker build -t rahbar-ui:$(TAG) ui
+	docker build -t rahbar-ragops:$(TAG) -f ragops/Dockerfile .
 	minikube image load rahbar-api:$(TAG)
 	minikube image load rahbar-indexer:$(TAG)
 	minikube image load rahbar-ui:$(TAG)
+	minikube image load rahbar-ragops:$(TAG)
 
 apply: ## apply the dev overlay (needs yours: manifests)
 	kubectl apply -k k8s/overlays/dev

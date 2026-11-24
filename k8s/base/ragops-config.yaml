@@ -1,0 +1,35 @@
+# RAGOps knobs (A3). Release-scoped values (collection, embedding model and version, floor,
+# top-k) are deliberately NOT here: they live in the API pod template so that
+# `kubectl rollout undo` restores them (docs/a3-ragops/03 C-07, 10 section 3).
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: ragops-config, namespace: rahbar}
+data:
+  # API: traces on a volume and on stdout; the evaluation endpoints are off in code and on here.
+  TRACE_ENABLED: "true"
+  TRACE_DIR: "/traces"
+  EVAL_ENDPOINTS_ENABLED: "true"
+  EVAL_HEADERS_ENABLED: "true"
+  # Ingest Job: where the lake lives and which indexes it keeps current.
+  DATA_DIR: "/data"
+  INDEX_TARGETS: "registered"
+  LOCK_TTL_SECONDS: "7200"
+  # Verification thresholds (docs/a3-ragops/05); the near-duplicate values are calibrated in
+  # docs/a3-evidence/verify-calibration.md.
+  QUALITY_MIN_CHARS: "200"
+  QUALITY_MIN_CHARS_PER_PAGE: "40"
+  GARBLED_MAX_BAD_RATIO: "0.02"
+  GARBLED_MIN_WORD_RATIO: "0.35"
+  TRUNCATION_FAIL_SCORE: "3"
+---
+# What the eval Job tests and how. `make eval TARGET=live|candidate LABEL=...` rewrites it.
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: ragops-eval-target, namespace: rahbar}
+data:
+  TARGET_URL: "http://api:8000"
+  LABEL: "baseline"
+  MODE: "suite+gate"            # suite+gate | suite | gate
+  BASELINE_RESULT: ""
+  CANDIDATE_RESULT: ""
+  SUITE_ARGS: "--batches A"

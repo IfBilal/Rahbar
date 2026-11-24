@@ -1,0 +1,96 @@
+# The candidate (A3 F3): the SAME image as the live API, a different CONFIG (one change: the
+# embedding model), its own Deployment, Service, label and Chroma collection. The live Service
+# selects app=api, so it never routes here, and the live HPA never counts it. No Ingress, and the
+# cache is off (REDIS_URL empty) so a cached answer cannot hide a regression.
+# Render another candidate with scripts/ragops/candidate.sh <name> (reads ragops/config/candidates/).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-candidate
+  namespace: rahbar
+  labels: {app: api-candidate}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 900
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}
+  selector:
+    matchLabels: {app: api-candidate}
+  template:
+    metadata:
+      labels: {app: api-candidate}
+    spec:
+      serviceAccountName: api
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: api
+          image: rahbar-api:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 8000}
+          envFrom:
+            - configMapRef: {name: rahbar-config}
+            - configMapRef: {name: ragops-config}
+          env:
+            - {name: HOME, value: /tmp}
+            - {name: RELEASE_ID, value: "R2-mxbai"}
+            - {name: CHROMA_COLLECTION, value: "rahbar-cand-mxbai"}
+            - {name: EMBED_MODEL, value: "mxbai-embed-large"}
+            - {name: EMBED_VERSION, value: "468836162de7"}
+            - {name: RELEVANCE_FLOOR, value: "0.60"}     # replaced by the calibrated value (docs/a3-evidence)
+            - {name: TOP_K, value: "5"}
+            - {name: REDIS_URL, value: ""}                # cache off
+            - name: POD_NAME
+              valueFrom: {fieldRef: {fieldPath: metadata.name}}
+          startupProbe:
+            httpGet: {path: /healthz, port: 8000}
+            failureThreshold: 30
+            periodSeconds: 2
+          livenessProbe:
+            httpGet: {path: /healthz, port: 8000}
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: {path: /readyz, port: 8000}
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 3
+          resources:
+            requests: {cpu: 100m, memory: 96Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+            - {name: traces, mountPath: /traces}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: traces
+          persistentVolumeClaim: {claimName: ragops-traces}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-candidate
+  namespace: rahbar
+  labels: {app: api-candidate}
+spec:
+  type: ClusterIP
+  selector: {app: api-candidate}
+  ports:
+    - {name: http, port: 8000, targetPort: 8000}

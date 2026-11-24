@@ -33,6 +33,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 10001
         runAsGroup: 10001
+        fsGroup: 10001                  # the traces volume is writable by the non-root user
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: api
@@ -42,9 +43,22 @@ spec:
             - {name: http, containerPort: 8000}
           envFrom:
             - configMapRef: {name: rahbar-config}
+            - configMapRef: {name: ragops-config}                # trace and evaluation switches
             - secretRef: {name: rahbar-secret, optional: true}   # LLM_API_KEY, hosted mode only
           env:
             - {name: HOME, value: /tmp}
+            # RELEASE-SCOPED values live in the pod template on purpose (A3 F3): a rollout creates a
+            # new ReplicaSet with new values and `kubectl rollout undo` restores the old ones. A key
+            # left in a shared ConfigMap would survive an undo. They override envFrom, and
+            # tests/test_manifests.py checks they agree with rahbar-config for the ingest Job.
+            - {name: RELEASE_ID, value: "R1-nomic"}
+            - {name: CHROMA_COLLECTION, value: "rahbar"}
+            - {name: EMBED_MODEL, value: "nomic-embed-text"}
+            - {name: EMBED_VERSION, value: "0a109f422b47"}       # ollama digest, docs/a3-evidence/embed-versions.txt
+            - {name: RELEVANCE_FLOOR, value: "0.60"}
+            - {name: TOP_K, value: "5"}
+            - name: POD_NAME
+              valueFrom: {fieldRef: {fieldPath: metadata.name}}
           startupProbe:          # finished booting? liveness and readiness wait for it
             httpGet: {path: /healthz, port: 8000}
             failureThreshold: 30
@@ -72,6 +86,7 @@ spec:
               memory: 256Mi
           volumeMounts:
             - {name: tmp, mountPath: /tmp}
+            - {name: traces, mountPath: /traces}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -81,3 +96,5 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+        - name: traces
+          persistentVolumeClaim: {claimName: ragops-traces}

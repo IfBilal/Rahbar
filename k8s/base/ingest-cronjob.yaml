@@ -1,0 +1,125 @@
+# Scheduled re-ingestion with the same image and arguments as the Job (A3 F2). Forbid means a
+# second writer can never start while one is running; the lock file on the PVC is the second
+# guard. Run it now, with no redeploy:  kubectl create job --from=cronjob/ingest ingest-manual-1 -n rahbar
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ingest
+  namespace: rahbar
+  labels: {app: indexer}
+spec:
+  schedule: "0 3 * * 0"               # Sundays 03:00, the weekly slot A2 used
+  concurrencyPolicy: Forbid           # never two writers at once
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 3600
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels: {app: indexer}
+        spec:
+              restartPolicy: OnFailure
+              serviceAccountName: indexer
+              automountServiceAccountToken: false
+              # No CHROMA_PORT=tcp://... service links: Chroma reads CHROMA_* as its own config.
+              enableServiceLinks: false
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 10001
+                runAsGroup: 10001
+                fsGroup: 10001                  # the PVC is writable by the non-root user
+                seccompProfile: {type: RuntimeDefault}
+              initContainers:
+                # 1. Fetch the public corpus from the committed source list, but only when the inbox has
+                #    never been seeded: a re-run (CronJob, manual) must not download 279 pages again.
+                #    A diff against the committed MANIFEST.md fails closed: changed bytes are never
+                #    indexed until a reviewed commit updates the manifest.
+                - name: fetch-corpus
+                  image: rahbar-indexer
+                  imagePullPolicy: IfNotPresent
+                  command: ["sh", "-c"]
+                  args:
+                    - >-
+                      set -e;
+                      if [ -f /data/inbox/.seeded ]; then echo "inbox already seeded: nothing to fetch"; exit 0; fi;
+                      mkdir -p /work/corpus;
+                      cp /app/corpus/fetch.py /app/corpus/sources.yaml /work/corpus/;
+                      cp /app/corpus/MANIFEST.md /work/MANIFEST.committed;
+                      cd /work && python corpus/fetch.py;
+                      if ! diff /work/MANIFEST.committed /work/corpus/MANIFEST.md; then
+                      echo "CORPUS CHANGED: refusing to index bytes that differ from the committed MANIFEST.md";
+                      exit 1; fi;
+                      echo "corpus matches the committed MANIFEST.md"
+                  env:
+                    - {name: HOME, value: /tmp}
+                  resources:
+                    requests: {cpu: 50m, memory: 64Mi}
+                    limits: {cpu: 500m, memory: 256Mi}
+                  volumeMounts:
+                    - {name: work, mountPath: /work}
+                    - {name: tmp, mountPath: /tmp}
+                    - {name: data, mountPath: /data}
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    capabilities:
+                      drop:
+                        - ALL
+                # 2. Copy the fetched files into the inbox once, with a catalog (title, version, series).
+                - name: seed-inbox
+                  image: rahbar-indexer
+                  imagePullPolicy: IfNotPresent
+                  command: ["python", "-m", "pipeline.seed", "--inbox", "/data/inbox",
+                            "--source", "/work/corpus/raw"]
+                  env:
+                    - {name: HOME, value: /tmp}
+                  resources:
+                    requests: {cpu: 50m, memory: 64Mi}
+                    limits: {cpu: 500m, memory: 256Mi}
+                  volumeMounts:
+                    - {name: work, mountPath: /work}
+                    - {name: tmp, mountPath: /tmp}
+                    - {name: data, mountPath: /data}
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    capabilities:
+                      drop:
+                        - ALL
+              containers:
+                - name: indexer
+                  image: rahbar-indexer
+                  imagePullPolicy: IfNotPresent
+                  command: ["/app/job_entry.sh"]   # pipeline.run, with exit 1 (quarantined) mapped to 0
+                  args: ["sync"]                   # verify, quarantine, update incrementally (the only writer)
+                  envFrom:
+                    - configMapRef: {name: rahbar-config}
+                    - configMapRef: {name: ragops-config}
+                  env:
+                    - {name: HOME, value: /tmp}
+                    - {name: EMBED_VERSION, value: "0a109f422b47"}   # ollama digest of EMBED_MODEL, see docs/a3-evidence/embed-versions.txt
+                  resources:
+                    # A2 measured peak 1268m / 910Mi while OCRing; verification adds document vectors.
+                    # Re-measured for A3 in docs/a3-evidence/top-ingest.txt (F5).
+                    requests: {cpu: "1", memory: 1Gi}
+                    limits: {cpu: "2", memory: 1536Mi}
+                  volumeMounts:
+                    - {name: work, mountPath: /work}
+                    - {name: tmp, mountPath: /tmp}
+                    - {name: data, mountPath: /data}
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    capabilities:
+                      drop:
+                        - ALL
+              volumes:
+                - name: data
+                  persistentVolumeClaim: {claimName: ragops-data}
+                - name: work
+                  emptyDir: {sizeLimit: 512Mi}
+                - name: tmp
+                  emptyDir: {sizeLimit: 512Mi}

@@ -11,6 +11,7 @@ images:
   - {name: rahbar-api, newTag: ci}
   - {name: rahbar-ui, newTag: ci}
   - {name: rahbar-indexer, newTag: ci}
+  - {name: rahbar-ragops, newTag: ci}
 patches:
   - target: {kind: ConfigMap, name: rahbar-config}
     patch: |-
