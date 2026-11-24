@@ -280,3 +280,29 @@ def test_a_superseding_document_is_accepted_and_reports_what_it_supersedes(tmp_p
     led = _ledger(tmp_path, {"2023-08": CURRENT})
     v = verify_document(ctx(tmp_path, version="2026-06"), led, TH, fake_embed, _load_none, RunSeen())
     assert v.outcome == "accepted" and v.supersedes == [("attendance", "2023-08")]
+
+
+def test_document_vector_windows_stay_inside_the_embedding_context() -> None:
+    """Regression (first cluster run): 400-word windows of table/OCR text overflowed the 2048-token
+    context of nomic-embed-text. A word can be 5 tokens, so a window must be at most 250 words."""
+    from pipeline.verify import windows
+    pages = [" ".join(f"w{i}" for i in range(5000))]
+    wins = windows(pages)
+    assert 1 < len(wins) <= 8
+    assert all(len(w.split()) <= 250 for w in wins)
+    assert windows(["only a few words here"]) == ["only a few words here"]
+
+
+def test_a_window_the_model_refuses_is_halved_for_the_document_vector_only() -> None:
+    from pipeline.verify import build_docvec
+    calls: list[int] = []
+
+    def picky(texts: list[str]) -> list[list[float]]:
+        calls.append(max(len(t.split()) for t in texts))
+        if any(len(t.split()) > 100 for t in texts):
+            raise ValueError("400 input length exceeds the context length")
+        return [[1.0, 0.0] for _ in texts]
+
+    doc = build_docvec([" ".join(f"w{i}" for i in range(2000))], picky)
+    assert doc["vector"] == [1.0, 0.0] and doc["windows"] >= 2
+    assert max(calls) >= 250 and calls[-1] <= 100        # first the whole batch, then halved windows
