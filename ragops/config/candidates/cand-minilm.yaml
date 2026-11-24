@@ -1,0 +1,15 @@
+# Candidate-bad (docs/a3-ragops/07 section 2.2): a deliberately weak embedding model of the same
+# change type, expected to be stopped by the gate.
+name: cand-minilm
+release_id: R3-minilm
+change: embedding_model
+collection: rahbar-cand-minilm
+embed_model: all-minilm
+embed_version: ""
+chunk_size: 300
+chunk_overlap: 40
+top_k: 5
+relevance_floor: null
+cache_threshold: null
+prompt_version: same
+expected: fail

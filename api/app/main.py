@@ -22,7 +22,7 @@ from .logjson import configure_logging, request_id_var
 from .providers.llm import get_provider
 from .retrieval import get_retriever
 from .retrieval.chroma import pin_problem
-from .routes import ask, health, metrics
+from .routes import ask, health, metrics, retrieve
 from .services.cache import SemanticCache
 
 log = logging.getLogger("rahbar.api")
@@ -83,6 +83,7 @@ async def request_context(request: Request, call_next):  # type: ignore[no-untyp
         status = response.status_code
         response.headers["X-Request-ID"] = rid
         response.headers["X-Rahbar-Version"] = APP_VERSION   # which image answered (4.6)
+        response.headers.setdefault("X-Release-Id", request.app.state.settings.release_id)
         return response
     finally:
         route = request.scope.get("route")
@@ -99,6 +100,7 @@ async def request_context(request: Request, call_next):  # type: ignore[no-untyp
 app.include_router(health.router)
 app.include_router(metrics.router)
 app.include_router(ask.router)
+app.include_router(retrieve.router)
 
 # Development only: `make dev` serves the chat UI from this process, so you can try it
 # without a cluster. On Kubernetes the ui Deployment serves it and this stays unset.

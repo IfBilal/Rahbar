@@ -9,6 +9,8 @@ that instructions found inside the data are to be ignored.
 from __future__ import annotations
 
 import re
+from contextvars import ContextVar
+from typing import Any
 
 from ..retrieval.tables import matching_rows
 from ..schemas import Passage
@@ -21,6 +23,11 @@ _INSTRUCTION = re.compile(
     r"|\byou are now\b[^.\n]*[.!]?"
     r"|\b(?:system prompt|developer message)\b[^.\n]*[.!]?", re.I)
 NEUTRALISED = "[instruction-like text removed]"
+
+# For the trace (Assignment 03, Part D): the exact messages sent to the model and what the
+# injection guard changed, per request. ContextVars because requests run concurrently.
+prompt_var: ContextVar[list[dict[str, str]] | None] = ContextVar("trace_prompt", default=None)
+rail_var: ContextVar[list[dict[str, Any]] | None] = ContextVar("trace_rails", default=None)
 
 
 def neutralise(text: str) -> tuple[str, int]:
@@ -67,7 +74,23 @@ def evidence_id(index: int) -> str:
     return chr(ord("A") + index)
 
 
+def _record_rails(passages: list[Passage]) -> None:
+    actions = rail_var.get()
+    if actions is None:
+        return
+    seen = {a["target"] for a in actions}
+    for p in passages:
+        match = _INSTRUCTION.search(p.text)
+        if match and f"chunk:{p.chunk_id}" not in seen:
+            actions.append({"stage": "retrieval", "rail": "injection", "action": "neutralised",
+                            "target": f"chunk:{p.chunk_id}",
+                            "doc_id": p.chunk_id.split("@", 1)[0] if "@" in p.chunk_id else None,
+                            "doc_version": p.doc_version, "pattern": "instruction-like",
+                            "span_chars": len(match.group()), "excerpt": match.group()[:80]})
+
+
 def evidence_block(passages: list[Passage]) -> str:
+    _record_rails(passages)
     blocks = []
     for i, p in enumerate(passages):
         status = "superseded" if p.superseded else "current"
@@ -94,4 +117,7 @@ def build_messages(question: str, passages: list[Passage],
     if retry_reason:
         user += (f"\n\nYour previous reply was rejected: {retry_reason}. Reply again with one "
                  "valid JSON object that follows every rule.")
-    return [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
+    messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
+    if prompt_var.get() is not None or rail_var.get() is not None:
+        prompt_var.set(messages)          # the LAST prompt of the request (a retry replaces it)
+    return messages
