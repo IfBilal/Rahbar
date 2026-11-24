@@ -346,3 +346,505 @@ ingest-f4zgx            indexer   1251m   533Mi
 ragops-loader           loader    0m      1Mi     
 redis-b8d9d4b69-wg8cb   redis     8m      3Mi     
 ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:24:16Z
+api-6c8bc44955-hgbzk    api       3m      69Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       3m      71Mi    
+chroma-0                chroma    1m      29Mi    
+ingest-f4zgx            indexer   1251m   533Mi   
+ragops-loader           loader    0m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     8m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:24:26Z
+api-6c8bc44955-hgbzk    api       3m      69Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       3m      71Mi    
+chroma-0                chroma    1m      29Mi    
+ingest-f4zgx            indexer   1251m   533Mi   
+ragops-loader           loader    0m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     8m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:24:36Z
+api-6c8bc44955-hgbzk    api      3m    69Mi   
+api-6c8bc44955-ps4qw    api      3m    71Mi   
+api-6c8bc44955-tvlqq    api      3m    71Mi   
+chroma-0                chroma   1m    29Mi   
+ragops-loader           loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb   redis    8m    3Mi    
+ui-b84f8ffd9-f5kt6      ui       1m    2Mi    
+2026-11-24T17:24:46Z
+api-6c8bc44955-hgbzk    api      3m    69Mi   
+api-6c8bc44955-ps4qw    api      3m    71Mi   
+api-6c8bc44955-tvlqq    api      3m    71Mi   
+chroma-0                chroma   1m    29Mi   
+ragops-loader           loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb   redis    8m    3Mi    
+ui-b84f8ffd9-f5kt6      ui       1m    2Mi    
+2026-11-24T17:24:56Z
+api-6c8bc44955-hgbzk    api       3m      69Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       3m      71Mi    
+chroma-0                chroma    2m      31Mi    
+ingest-svx5k            indexer   1125m   671Mi   
+ragops-loader           loader    1m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     9m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:25:06Z
+api-6c8bc44955-hgbzk    api       3m      69Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       3m      71Mi    
+chroma-0                chroma    2m      31Mi    
+ingest-svx5k            indexer   1125m   671Mi   
+ragops-loader           loader    1m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     9m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:25:16Z
+api-6c8bc44955-hgbzk    api       3m      69Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       3m      71Mi    
+chroma-0                chroma    2m      31Mi    
+ingest-svx5k            indexer   1125m   671Mi   
+ragops-loader           loader    1m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     9m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:25:26Z
+api-6c8bc44955-hgbzk    api       3m      69Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       3m      71Mi    
+chroma-0                chroma    2m      31Mi    
+ingest-svx5k            indexer   1125m   671Mi   
+ragops-loader           loader    1m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     9m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:25:36Z
+api-6c8bc44955-hgbzk    api       3m      69Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       3m      71Mi    
+chroma-0                chroma    2m      31Mi    
+ingest-svx5k            indexer   1125m   671Mi   
+ragops-loader           loader    1m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     9m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:25:46Z
+api-6c8bc44955-hgbzk    api       3m      69Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       3m      71Mi    
+chroma-0                chroma    2m      31Mi    
+ingest-svx5k            indexer   1125m   671Mi   
+ragops-loader           loader    1m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     9m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:25:57Z
+api-6c8bc44955-hgbzk    api       3m      70Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       2m      71Mi    
+chroma-0                chroma    1m      31Mi    
+ingest-svx5k            indexer   1377m   846Mi   
+ragops-loader           loader    0m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     8m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:26:07Z
+api-6c8bc44955-hgbzk    api       3m      70Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       2m      71Mi    
+chroma-0                chroma    1m      31Mi    
+ingest-svx5k            indexer   1377m   846Mi   
+ragops-loader           loader    0m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     8m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:26:17Z
+api-6c8bc44955-hgbzk    api       3m      70Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       2m      71Mi    
+chroma-0                chroma    1m      31Mi    
+ingest-svx5k            indexer   1377m   846Mi   
+ragops-loader           loader    0m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     8m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:26:27Z
+api-6c8bc44955-hgbzk    api       3m      70Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       2m      71Mi    
+chroma-0                chroma    1m      31Mi    
+ingest-svx5k            indexer   1377m   846Mi   
+ragops-loader           loader    0m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     8m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:26:37Z
+api-6c8bc44955-hgbzk    api       3m      70Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       2m      71Mi    
+chroma-0                chroma    1m      31Mi    
+ingest-svx5k            indexer   1377m   846Mi   
+ragops-loader           loader    0m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     8m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:26:47Z
+api-6c8bc44955-hgbzk    api       3m      70Mi    
+api-6c8bc44955-ps4qw    api       3m      71Mi    
+api-6c8bc44955-tvlqq    api       2m      71Mi    
+chroma-0                chroma    1m      31Mi    
+ingest-svx5k            indexer   1377m   846Mi   
+ragops-loader           loader    0m      1Mi     
+redis-b8d9d4b69-wg8cb   redis     8m      3Mi     
+ui-b84f8ffd9-f5kt6      ui        1m      2Mi     
+2026-11-24T17:26:57Z
+api-6c8bc44955-hgbzk    api       3m     69Mi     
+api-6c8bc44955-ps4qw    api       3m     71Mi     
+api-6c8bc44955-tvlqq    api       3m     71Mi     
+chroma-0                chroma    1m     31Mi     
+ingest-svx5k            indexer   764m   1198Mi   
+ragops-loader           loader    0m     1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m     3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m     2Mi      
+2026-11-24T17:27:07Z
+api-6c8bc44955-hgbzk    api       3m     69Mi     
+api-6c8bc44955-ps4qw    api       3m     71Mi     
+api-6c8bc44955-tvlqq    api       3m     71Mi     
+chroma-0                chroma    1m     31Mi     
+ingest-svx5k            indexer   764m   1198Mi   
+ragops-loader           loader    0m     1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m     3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m     2Mi      
+2026-11-24T17:27:17Z
+api-6c8bc44955-hgbzk    api       3m     69Mi     
+api-6c8bc44955-ps4qw    api       3m     71Mi     
+api-6c8bc44955-tvlqq    api       3m     71Mi     
+chroma-0                chroma    1m     31Mi     
+ingest-svx5k            indexer   764m   1198Mi   
+ragops-loader           loader    0m     1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m     3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m     2Mi      
+2026-11-24T17:27:28Z
+api-6c8bc44955-hgbzk    api       3m     69Mi     
+api-6c8bc44955-ps4qw    api       3m     71Mi     
+api-6c8bc44955-tvlqq    api       3m     71Mi     
+chroma-0                chroma    1m     31Mi     
+ingest-svx5k            indexer   764m   1198Mi   
+ragops-loader           loader    0m     1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m     3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m     2Mi      
+2026-11-24T17:27:38Z
+api-6c8bc44955-hgbzk    api       3m     69Mi     
+api-6c8bc44955-ps4qw    api       3m     71Mi     
+api-6c8bc44955-tvlqq    api       3m     71Mi     
+chroma-0                chroma    1m     31Mi     
+ingest-svx5k            indexer   764m   1198Mi   
+ragops-loader           loader    0m     1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m     3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m     2Mi      
+2026-11-24T17:27:48Z
+api-6c8bc44955-hgbzk    api       3m     69Mi     
+api-6c8bc44955-ps4qw    api       3m     71Mi     
+api-6c8bc44955-tvlqq    api       3m     71Mi     
+chroma-0                chroma    1m     31Mi     
+ingest-svx5k            indexer   764m   1198Mi   
+ragops-loader           loader    0m     1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m     3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m     2Mi      
+2026-11-24T17:27:58Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    3m    33Mi     
+ingest-svx5k            indexer   3m    1200Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    7Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:28:08Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    3m    33Mi     
+ingest-svx5k            indexer   3m    1200Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    7Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:28:18Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    3m    33Mi     
+ingest-svx5k            indexer   3m    1200Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    7Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:28:28Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    3m    33Mi     
+ingest-svx5k            indexer   3m    1200Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    7Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:28:38Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    3m    33Mi     
+ingest-svx5k            indexer   3m    1200Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    7Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:28:49Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    3m    33Mi     
+ingest-svx5k            indexer   3m    1200Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    7Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:28:59Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    4m    36Mi     
+ingest-svx5k            indexer   3m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     10m   3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:29:09Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    4m    36Mi     
+ingest-svx5k            indexer   3m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     10m   3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:29:19Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    4m    36Mi     
+ingest-svx5k            indexer   3m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     10m   3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:29:29Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    4m    36Mi     
+ingest-svx5k            indexer   3m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     10m   3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:29:39Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    4m    36Mi     
+ingest-svx5k            indexer   3m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     10m   3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:29:49Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    4m    36Mi     
+ingest-svx5k            indexer   3m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     10m   3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:29:59Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    37Mi     
+ingest-svx5k            indexer   4m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:30:10Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    37Mi     
+ingest-svx5k            indexer   4m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:30:20Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    37Mi     
+ingest-svx5k            indexer   4m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:30:30Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    37Mi     
+ingest-svx5k            indexer   4m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:30:40Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    37Mi     
+ingest-svx5k            indexer   4m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:30:50Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    37Mi     
+ingest-svx5k            indexer   4m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:31:00Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    36Mi     
+ingest-svx5k            indexer   1m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:31:10Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    36Mi     
+ingest-svx5k            indexer   1m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:31:20Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    36Mi     
+ingest-svx5k            indexer   1m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:31:30Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    36Mi     
+ingest-svx5k            indexer   1m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:31:41Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    1m    36Mi     
+ingest-svx5k            indexer   1m    1202Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:31:51Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    5m    42Mi     
+ingest-svx5k            indexer   3m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:32:01Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    5m    42Mi     
+ingest-svx5k            indexer   3m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:32:11Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    5m    42Mi     
+ingest-svx5k            indexer   3m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:32:21Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    5m    42Mi     
+ingest-svx5k            indexer   3m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:32:31Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    5m    42Mi     
+ingest-svx5k            indexer   3m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:32:41Z
+api-6c8bc44955-hgbzk    api       3m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       3m    71Mi     
+chroma-0                chroma    5m    42Mi     
+ingest-svx5k            indexer   3m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:32:51Z
+api-6c8bc44955-hgbzk    api       4m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       4m    71Mi     
+chroma-0                chroma    4m    43Mi     
+ingest-svx5k            indexer   4m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:33:02Z
+api-6c8bc44955-hgbzk    api       4m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       4m    71Mi     
+chroma-0                chroma    4m    43Mi     
+ingest-svx5k            indexer   4m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:33:12Z
+api-6c8bc44955-hgbzk    api       4m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       4m    71Mi     
+chroma-0                chroma    4m    43Mi     
+ingest-svx5k            indexer   4m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:33:22Z
+api-6c8bc44955-hgbzk    api       4m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       4m    71Mi     
+chroma-0                chroma    4m    43Mi     
+ingest-svx5k            indexer   4m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      
+2026-11-24T17:33:32Z
+api-6c8bc44955-hgbzk    api       4m    69Mi     
+api-6c8bc44955-ps4qw    api       3m    71Mi     
+api-6c8bc44955-tvlqq    api       4m    71Mi     
+chroma-0                chroma    4m    43Mi     
+ingest-svx5k            indexer   4m    1206Mi   
+ragops-loader           loader    0m    1Mi      
+redis-b8d9d4b69-wg8cb   redis     9m    3Mi      
+ui-b84f8ffd9-f5kt6      ui        1m    2Mi      

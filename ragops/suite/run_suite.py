@@ -189,11 +189,11 @@ def main(argv: list[str] | None = None) -> int:
         golden = load_golden(Path(cfg["paths"]["golden"]))
         pairs = load_jsonl(Path(cfg["paths"]["pairs"]))
         digest, ledger_batches, docs = corpus_state(args.ledger)
-        problems, _ = validate(golden, docs)
+        batches = {b.strip().upper() for b in (args.batches or ",".join(ledger_batches) or "A").split(",")}
+        problems, _ = validate(golden, docs, batches)
         if problems:
             print("golden set invalid:\n  " + "\n  ".join(problems), file=sys.stderr)
             return 2
-        batches = {b.strip().upper() for b in (args.batches or ",".join(ledger_batches) or "A").split(",")}
         levels = [lv.strip() for lv in (args.levels or ",".join(cfg["levels"])).split(",")]
         if args.profile != "full":
             print("note: reduced profile; the gate will not compare it with a full baseline",

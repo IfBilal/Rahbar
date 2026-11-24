@@ -58,9 +58,12 @@ def ledger_pages(ledger: dict[str, Any]) -> dict[str, int]:
 
 
 def validate(rows: list[dict[str, Any]], docs: dict[str, int] | None = None,
-             ) -> tuple[list[str], dict[str, int]]:
+             batches: set[str] | None = None) -> tuple[list[str], dict[str, int]]:
     """Return (violations, quota counts). `docs` (file name -> page count) enables the
-    check that every gold document exists and every gold page is inside it."""
+    check that every gold document exists and every gold page is inside it. With `batches`
+    (the batches in the ledger), a question that needs a batch not yet ingested is not checked
+    against the ledger: its document cannot be there yet (found on the first cluster run, when
+    Batch B questions made a Batch-A suite run refuse to start)."""
     bad: list[str] = []
     seen_ids: set[str] = set()
     seen_q: set[str] = set()
@@ -98,7 +101,7 @@ def validate(rows: list[dict[str, Any]], docs: dict[str, int] | None = None,
         for g in gold:
             if not g.get("doc") or not isinstance(g.get("page"), int) or g["page"] < 1:
                 bad.append(f"{qid}: gold needs a document and an integer page >= 1: {g}")
-            elif docs is not None:
+            elif docs is not None and (batches is None or applicable(row, batches)[0]):
                 pages = docs.get(str(g["doc"]).lower())
                 if pages is None:
                     bad.append(f"{qid}: gold document {g['doc']!r} is not in the ledger")

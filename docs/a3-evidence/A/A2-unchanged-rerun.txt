@@ -1,0 +1,7 @@
+$ scripts/ragops/job.sh sync
+job.batch/ingest-sync-1124173342 created
+job/ingest-sync-1124173342
+job.batch/ingest-sync-1124173342 condition met
+{"chunks_deleted": 0, "chunks_embedded": 0, "chunks_reused": 0, "chunks_written": 0, "command": "sync", "docs_deleted": 0, "docs_new": 0, "docs_quarantined": 0, "docs_renamed": 0, "docs_seen": 9, "docs_superseded": 0, "docs_unchanged": 9, "docs_updated": 0, "exit": 0, "indexes": {"rahbar": {"chunks_deleted": 0, "chunks_embedded": 0, "chunks_written": 0, "revision": "r0001", "revision_bumped": false}}, "repairs": 0, "run_id": "ingest-20261124T173345Z-8c89", "schema": 1, "seconds": 0.06, "type": "ingest_summary", "verification_embeddings": 0}
+
+[exit 0 at 2026-11-24T17:33:49 UTC]
