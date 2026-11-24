@@ -29,7 +29,7 @@ Total ≈ **215 person-hours** (≈ 105 h each). The A2 harness's critical path 
 | T02 skeleton | partial | `ragops/` package, `Dockerfile`, Makefile + CI wiring, boundary tests | build/load the image into minikube; the trace-tool files (Taimoor, T35–T40) |
 | shared | done | API reads the data revision from the registry (`api/app/retrieval/chroma.py`) so the semantic cache invalidates on in-place updates | — |
 
-**Taimoor's side (not started):** T05 spike, T35–T40 (trace, rails, `/api/retrieve`, eval headers, trace tool, summary), T47–T58 (PVCs, ConfigMaps, ingest/eval Jobs, candidate Deployment, network policies, resources, clean-cluster rehearsal), T19 pairs.
+**Update 24 Nov 2026 (suite, coverage, traces built on Bilal's laptop; still not run on any cluster):** T20-T27 suite code (module, component, endpoint, judge, proxy, one command, stochasticity, diff, agreement), T28 candidate specs + validator, T30 promote, T35 trace writer, T36 (partial, see 15 §3), T38 `/api/retrieve` + eval headers + trace/release ids, T39/T40 trace `show`/`summary`, T42 coverage + calibration + clustering, and DRAFTS of T17/T18 golden, T19 pairs and T41 live queries (need human review). **Everything left, in order, is in [15-HANDOFF-TAIMOOR.md](15-HANDOFF-TAIMOOR.md):** T05 spike, T47-T53, T58 manifests and cluster work, the measured runs, evidence, report.
 
 ## 1. Before you start (T01)
 

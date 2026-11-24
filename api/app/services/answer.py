@@ -29,6 +29,7 @@ from ..retrieval.base import Retriever
 from ..retrieval.tables import matching_rows
 from ..routes import metrics as m
 from ..schemas import Answer, AskResponse, Passage, RetrievedRef
+from ..trace import note
 from .cache import SemanticCache
 from .guard import GuardError, check_answer, is_follow_up
 from .prompt import REMINDER, SYSTEM
@@ -134,6 +135,8 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
             hit, similarity = cache.lookup(scope, vector)
             m.record_cache(hit is not None)
             turn["cache_similarity"] = round(similarity, 4)
+            note(cache={"enabled": True, "hit": hit is not None,
+                        "similarity": round(similarity, 4), "scope": scope})
             if hit is not None:
                 response = AskResponse(**{**hit, "request_id": request_id_var.get(),
                                           "cached": True})
@@ -149,6 +152,7 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
         passages = retriever.retrieve(question, k=settings.top_k)
     except Exception as exc:
         m.RETRIEVAL.observe(time.perf_counter() - started)
+        note(fallback="retrieval_error")
         m.FALLBACKS.labels(reason="retrieval_error").inc()
         log.error("retrieval failed", extra={"error": f"{type(exc).__name__}: {exc}"})
         response = _declined(FALLBACK_TEXT, [], provider.name)
@@ -156,13 +160,16 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
         return response
     turn["retrieval_ms"] = round((time.perf_counter() - started) * 1000, 1)
     m.RETRIEVAL.observe(time.perf_counter() - started)
+    note(passages=passages, retrieve_ms=turn["retrieval_ms"])
 
     # relevance floor: nothing relevant enough means an honest abstention, no model call
     relevant = [p for p in passages if p.score >= settings.relevance_floor]
     # Keep the retriever ranking: exact-term matches may intentionally precede
     # higher-scoring semantic matches. The floor still applies to every passage.
     relevant = relevant[:settings.max_context_passages]
+    note(relevant=relevant)
     if not relevant:
+        note(abstained="below_relevance_floor")
         m.ABSTENTIONS.labels(reason="below_relevance_floor").inc()
         response = _declined(ABSTAIN_TEXT, passages, provider.name)
         _log_turn(turn, response, abstained="below_relevance_floor")
@@ -177,7 +184,9 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
     tokens_in, tokens_out = usage_var.get()
     m.record_tokens(tokens_in, tokens_out)
     turn.update(tokens_in=tokens_in, tokens_out=tokens_out)
+    note(generation_ms=turn["generation_ms"], attempts=attempts, tokens=(tokens_in, tokens_out))
     if answer is None:
+        note(fallback=failure or "invalid_output")
         m.FALLBACKS.labels(reason="invalid_output").inc()
         response = _declined(FALLBACK_TEXT, passages, provider.name)
         _log_turn(turn, response, fallback=failure)
@@ -189,6 +198,7 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
                            confidence=answer.confidence, retrieved=_refs(passages),
                            provider=provider.name)
     if not response.answered_from_context:
+        note(abstained="model_declined")
         m.ABSTENTIONS.labels(reason="model_declined").inc()
 
     # 8. store: cache only a grounded, validated, standalone answer. Fallbacks and
@@ -198,7 +208,7 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
     if cacheable and cache is not None and scope is not None and vector is not None:
         try:
             cache.store(scope, question, vector,
-                        response.model_dump(exclude={"request_id", "cached"}))
+                        response.model_dump(exclude={"request_id", "cached", "trace_id", "release_id"}))
         except Exception as exc:
             log.warning("cache store failed", extra={"error": f"{type(exc).__name__}: {exc}"})
     _log_turn(turn, response, cached_now=cacheable, follow_up=follow_up)

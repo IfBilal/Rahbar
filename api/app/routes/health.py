@@ -35,6 +35,7 @@ def readiness_checks(state: object) -> tuple[dict[str, str], list[str]]:
         try:
             info = retriever.index_info()
             checks["chroma"] = "ok"
+            checks["revision"] = info.generation
             if not info.is_empty:
                 checks["collection"] = f"ok: {info.collection} ({info.count} chunks)"
             else:
@@ -47,6 +48,10 @@ def readiness_checks(state: object) -> tuple[dict[str, str], list[str]]:
         except Exception as exc:
             checks["chroma"] = f"unreachable or no collection: {type(exc).__name__}: {exc}"[:300]
             failed.append("chroma")
+    # Assignment 03: which release this pod serves (contract 14 section 9).
+    checks["release_id"] = settings.release_id
+    checks["embed_model"] = settings.embed_model
+    checks["embed_version"] = settings.embed_version
     cache = state.cache  # type: ignore[attr-defined]
     if settings.redis_url:
         try:

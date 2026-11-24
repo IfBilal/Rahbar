@@ -1,0 +1,51 @@
+"""Evaluation controls (Assignment 03, docs/a3-ragops/14 section 9).
+
+The offline suite must be able to run the live system reproducibly: bypass the semantic cache,
+fix the seed, pin the temperature, and label the run in the trace. Honoured ONLY when
+EVAL_HEADERS_ENABLED=true, so ordinary traffic can never switch the cache off.
+"""
+
+from __future__ import annotations
+
+from contextvars import ContextVar
+from dataclasses import dataclass
+
+from fastapi import Request
+
+from .config import Settings
+
+
+@dataclass(frozen=True)
+class EvalControls:
+    bypass_cache: bool = False
+    seed: int | None = None
+    temperature: float | None = None
+    run: str | None = None
+    label: str | None = None
+
+    @property
+    def active(self) -> bool:
+        return any((self.bypass_cache, self.seed is not None, self.temperature is not None,
+                    self.run, self.label))
+
+
+eval_var: ContextVar[EvalControls | None] = ContextVar("eval_controls", default=None)
+TEMPERATURE_MAX = 0.3
+
+
+def parse(request: Request, settings: Settings) -> EvalControls:
+    if not settings.eval_headers_enabled:
+        return EvalControls()
+    h = request.headers
+
+    def num(name: str, cast: type) -> float | int | None:
+        try:
+            return cast(h[name]) if name in h else None   # type: ignore[no-any-return]
+        except ValueError:
+            return None
+    temp = num("X-Eval-Temperature", float)
+    return EvalControls(
+        bypass_cache=h.get("X-Eval-Bypass-Cache", "").lower() == "true",
+        seed=num("X-Eval-Seed", int),            # type: ignore[arg-type]
+        temperature=None if temp is None else min(max(float(temp), 0.0), TEMPERATURE_MAX),
+        run=h.get("X-Eval-Run"), label=h.get("X-Eval-Label"))

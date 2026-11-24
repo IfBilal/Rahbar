@@ -37,7 +37,7 @@ RAGOps = the **query pipeline** (ordinary DevOps lifecycle) **plus a data-manage
 |---|---|
 | **Everyone, first hour** | this file → [01](01-REQUIREMENTS.md) → [02](02-PAPER-DIGEST.md) → [03](03-GAP-ANALYSIS.md) → [04](04-ARCHITECTURE.md) |
 | **Developer A (data + evaluation)** | [05](05-DATA-MANAGEMENT.md) → [06](06-OFFLINE-TESTING.md) → [07](07-CHANGE-AND-RELEASE.md) → [09](09-DRIFT-COVERAGE.md) → [14](14-INTERFACE-CONTRACTS.md) |
-| **Developer B (cluster + observability)** | [08](08-OBSERVABILITY-TRACING.md) → [10](10-KUBERNETES.md) → [13](13-DEMO-RUNBOOK.md) → [14](14-INTERFACE-CONTRACTS.md) |
+| **Developer B (cluster + observability)** | [15 hand-off](15-HANDOFF-TAIMOOR.md) → [08](08-OBSERVABILITY-TRACING.md) → [10](10-KUBERNETES.md) → [13](13-DEMO-RUNBOOK.md) → [14](14-INTERFACE-CONTRACTS.md) |
 | **Both, before every work session** | [11](11-IMPLEMENTATION-PLAN.md) (pick a task) |
 | **Both, last two days** | [12](12-REPORT-AND-EVIDENCE.md) and [13](13-DEMO-RUNBOOK.md) |
 

@@ -63,6 +63,18 @@ class Settings:
     cache_max_entries: int = 500
     cache_ttl_seconds: int = 7 * 24 * 3600
 
+    # Assignment 03 (docs/a3-ragops/14 section 13). Release identity lives in the pod template
+    # so `kubectl rollout undo` restores it with the rest of the release.
+    release_id: str = "dev"
+    embed_version: str = ""
+    prompt_version: str = ""
+    trace_enabled: bool = True
+    trace_dir: str = ""              # empty = traces go to the log only (tests, `make dev`)
+    trace_max_bytes: int = 52428800
+    pod_name: str = "local"
+    eval_endpoints_enabled: bool = False   # POST /api/retrieve
+    eval_headers_enabled: bool = False     # X-Eval-* request headers
+
 
 def _bool(name: str, default: bool) -> bool:
     return os.environ.get(name, str(default)).strip().lower() in ("1", "true", "yes", "on")
@@ -92,4 +104,13 @@ def get_settings() -> Settings:
         cache_threshold=_float("CACHE_THRESHOLD", 0.95),
         cache_max_entries=_int("CACHE_MAX_ENTRIES", 500),
         cache_ttl_seconds=_int("CACHE_TTL_SECONDS", 7 * 24 * 3600),
+        release_id=os.environ.get("RELEASE_ID", "dev"),
+        embed_version=os.environ.get("EMBED_VERSION", ""),
+        prompt_version=os.environ.get("PROMPT_VERSION", ""),
+        trace_enabled=_bool("TRACE_ENABLED", True),
+        trace_dir=os.environ.get("TRACE_DIR", ""),
+        trace_max_bytes=_int("TRACE_MAX_BYTES", 52428800),
+        pod_name=os.environ.get("POD_NAME", "local"),
+        eval_endpoints_enabled=_bool("EVAL_ENDPOINTS_ENABLED", False),
+        eval_headers_enabled=_bool("EVAL_HEADERS_ENABLED", False),
     )

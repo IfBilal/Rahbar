@@ -69,3 +69,6 @@ class AskResponse(BaseModel):
     # Added (ADR 0003): true when this response came from the semantic cache. The UI
     # shows a cache chip for it. Defaults to false, so existing clients are unaffected.
     cached: bool = False
+    # Added (Assignment 03, contract 14 section 9): which trace and release produced this answer.
+    trace_id: str | None = None
+    release_id: str | None = None

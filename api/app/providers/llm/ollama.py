@@ -12,6 +12,7 @@ import httpx
 
 from ...config import Settings
 from ...schemas import Answer, Passage
+from ...evalctl import eval_var
 from ...services.prompt import build_messages
 from .base import usage_var
 
@@ -33,6 +34,12 @@ class OllamaProvider:
             "format": Answer.model_json_schema(),
             "options": {"temperature": self.settings.temperature, "num_ctx": 4096},
         }
+        controls = eval_var.get()            # Assignment 03: reproducible evaluation runs
+        if controls is not None:
+            if controls.temperature is not None:
+                payload["options"]["temperature"] = controls.temperature  # type: ignore[index]
+            if controls.seed is not None:
+                payload["options"]["seed"] = controls.seed                # type: ignore[index]
         r = self.http.post(f"{self.settings.ollama_url.rstrip('/')}/api/chat", json=payload)
         r.raise_for_status()
         data = r.json()
