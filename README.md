@@ -191,6 +191,39 @@ whose passages clear the relevance floor. The deploy now uses the real model. It
 One commit reached `main` before protection existed: `f0f080c`, the planning pack, pushed on
 the first day. Every change since then has gone through a reviewed pull request.
 
+## Assignment 03: RAGOps
+
+CS4032 Assignment 03 adds the RAGOps layer (reference paper: Xu et al., 2026) on top of RAHBAR: a verify-and-update
+data lifecycle, a three-level offline suite, a release gate, traces and metrics, a coverage check, and a controlled
+release, all on Kubernetes. Team: Taimoor Shaukat (24I-3015), Muhammad Bilal Tahir (24I-3166). Report:
+`docs/a3-report/report.pdf`. The fresh-cluster order and the object-by-object responsibilities are in
+[`k8s/README.md`](k8s/README.md); design and plan in [`docs/a3-ragops/`](docs/a3-ragops/README.md); raw outputs
+behind every number and screenshot in [`docs/a3-evidence/`](docs/a3-evidence/host.md).
+
+```bash
+make cluster && make ollama-host && make images && make apply     # see k8s/README.md (8 GB minikube, Calico)
+kubectl -n rahbar wait --for=condition=complete job/ingest --timeout=3600s
+```
+
+| Part | Command | Output |
+| --- | --- | --- |
+| A ingest, verify, update | `scripts/ragops/job.sh sync` | the last log line is the run summary (`chunks_embedded`); `/data/reports/verification/<run>.md` and `.json` on the `ragops-data` volume |
+| A Batch B | `kubectl cp <batch-b dir> rahbar/ragops-loader:/data/inbox/` then `scripts/ragops/job.sh sync` (`python corpus/batch-b/build.py --out DIR` writes the 13 files) | verification report with a pass or fail and a reason per check; quarantined files under `/data/quarantine/` |
+| A counts, restore, delete | `scripts/ragops/job.sh count -- count --json`, `... restore -- restore <doc>@<ver>`, `... delete -- delete <doc>` | chunk count per document id, orphans, archived and restored versions |
+| B suite | `make eval-suite LABEL=baseline` (or `scripts/ragops/eval.sh suite baseline --suite-args "--batches A --repeat 2"`) | `/results/<timestamp>_<label>.json` with a summary table; committed under `eval/results/` |
+| B stochasticity | `python -m ragops.suite.stochasticity run1.json run2.json` | per-metric difference between two runs |
+| C gate | `make eval-gate LABEL=cand-mxbai` (suite then gate); thresholds in `ragops/config/gate.yaml`, served as ConfigMap `ragops-gate` | `<timestamp>_<label>.decision.json`; the Job fails when the gate fails |
+| C candidate and release | `scripts/ragops/job.sh build-index -- build-index --collection rahbar-cand-mxbai --embed-model mxbai-embed-large`, `scripts/ragops/candidate.sh cand-mxbai`, `scripts/ragops/release.sh cand-mxbai`, undo with `kubectl rollout undo deployment/api -n rahbar` | `kubectl rollout status` output; the next trace shows the collection and embedding version |
+| D traces | `kubectl exec -n rahbar ragops-loader -- python -m ragops.trace.show <trace_id> --traces /traces --lake /data`; summary: `... python -m ragops.trace.summary --traces /traces` | the exact context and prompt behind an answer; metrics over a window |
+| D metrics | `kubectl port-forward -n rahbar deploy/api 8000:8000`, `curl localhost:8000/metrics` | Prometheus text |
+| E coverage | `kubectl delete job coverage -n rahbar --ignore-not-found && kubectl apply -f k8s/coverage-job.yaml` | `<timestamp>_coverage.json`; exit 1 below the threshold |
+| F | `kubectl get all,pvc,configmap,cronjob,job -n rahbar` | see `k8s/README.md` |
+
+`eval/golden.jsonl` (frozen in the commit `golden: freeze v1`), `eval/pairs.jsonl`, `eval/live_queries.jsonl`, the
+Batch B fixtures in `corpus/batch-b/` and the committed result files in `eval/results/` are the data behind the report.
+The evaluation endpoint `/api/retrieve` and the `X-Eval-*` headers need the run-time token created by
+`scripts/ragops/eval-token.sh`; they are not reachable through the Ingress.
+
 ## Documents
 
 | File | What it answers |
