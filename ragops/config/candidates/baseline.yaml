@@ -1,0 +1,12 @@
+# The live pipeline. A candidate spec may differ from this in exactly ONE dimension (07 section 2.2).
+name: baseline
+release_id: R1-nomic
+change: none
+collection: rahbar
+embed_model: nomic-embed-text
+embed_version: ""                # the Ollama model digest, filled in at the first deploy
+chunk_size: 300
+chunk_overlap: 40
+top_k: 5
+relevance_floor: 0.60
+prompt_version: same

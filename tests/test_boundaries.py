@@ -86,3 +86,38 @@ def test_both_sides_prepare_text_identically_for_the_pinned_model() -> None:
             d = doc.prepare_document(model, text)
             # identical apart from the task prefix
             assert q.removeprefix(query.query_prefix(model)) == d.removeprefix(doc.document_prefix(model))
+
+
+# ---------------------------------------------------------------- Assignment 03 (docs/a3-ragops/14 section 10)
+RAGOPS = sorted(p for p in (ROOT / "ragops").rglob("*.py") if "tests" not in p.parts)
+WRITERS = {"store.py", "incremental.py", "ops.py", "index.py", "dummy.py"}
+CHROMA_WRITE = {"upsert", "create_collection", "get_or_create_collection", "delete_collection",
+                "modify"}
+
+
+def test_the_ragops_tools_never_import_chroma_or_the_indexer() -> None:
+    """The suite, gate, coverage and trace tools read results and call the API; only the
+    ingestion Job writes the vector store, and the tools have no way to reach it."""
+    for path in RAGOPS:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        names = {a.name.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.Import)
+                 for a in n.names}
+        names |= {(n.module or "").split(".")[0] for n in ast.walk(tree)
+                  if isinstance(n, ast.ImportFrom)}
+        assert not names & {"chromadb", "pipeline"}, f"{path.relative_to(ROOT)} imports {names}"
+
+
+def test_only_the_designated_indexer_modules_write_to_chroma() -> None:
+    """Writes to the vector store live in index.py (the adapter) and the modules that drive
+    it; verify/lake/ledger/catalog/report never call a Chroma write method."""
+    for path in INDEXER:
+        if path.name in WRITERS:
+            continue
+        bad = _calls(path) & CHROMA_WRITE
+        assert not bad, f"{path.relative_to(ROOT)} calls Chroma write methods: {bad}"
+
+
+def test_the_api_has_no_ingestion_code_paths() -> None:
+    for path in API:
+        text = path.read_text(encoding="utf-8")
+        assert "pipeline.incremental" not in text and "pipeline.ops" not in text
