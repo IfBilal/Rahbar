@@ -27,7 +27,8 @@ case "$mode" in suite|suite+gate|gate) ;; *) echo "bad mode $mode" >&2; exit 2 ;
 kubectl create configmap ragops-eval-target -n "$NS" --dry-run=client -o yaml \
   --from-literal=TARGET_URL="$target" --from-literal=LABEL="$label" --from-literal=MODE="$mode" \
   --from-literal=BASELINE_RESULT="$baseline" --from-literal=CANDIDATE_RESULT="$candidate" \
-  --from-literal=SUITE_ARGS="$sargs" | kubectl apply -f - >/dev/null
+  --from-literal=SUITE_ARGS="$sargs" \
+  --from-literal=GIT_SHA="$(git -C "$here" rev-parse --short HEAD)" | kubectl apply -f - >/dev/null
 kubectl delete job eval -n "$NS" --ignore-not-found >/dev/null
 kubectl apply -f "$here/k8s/eval-job.yaml" >/dev/null
 echo "job/eval started: mode=$mode label=$label target=$target"
