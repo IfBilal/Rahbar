@@ -57,6 +57,8 @@ spec:
             - {name: EMBED_VERSION, value: "0a109f422b47"}       # ollama digest, docs/a3-evidence/embed-versions.txt
             - {name: RELEVANCE_FLOOR, value: "0.60"}
             - {name: TOP_K, value: "5"}
+            - name: EVAL_TOKEN                                   # shared secret for /api/retrieve and X-Eval-* (runtime Secret)
+              valueFrom: {secretKeyRef: {name: ragops-eval-token, key: token}}
             - name: POD_NAME
               valueFrom: {fieldRef: {fieldPath: metadata.name}}
           startupProbe:          # finished booting? liveness and readiness wait for it

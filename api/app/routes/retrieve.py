@@ -4,7 +4,7 @@ docs/a3-ragops/06 section 5, contract 14 section 9).
 No generation and no cache, so it is cheap and reproducible. It returns the ranked chunks the
 live retriever produced (after filters and exact-term assists) with document and page, which is
 what recall, MRR and nDCG are computed from. Enabled only when EVAL_ENDPOINTS_ENABLED=true;
-otherwise it is a 404, as if it did not exist.
+otherwise (or without the X-Eval-Token when EVAL_TOKEN is set) it is a 404, as if it did not exist.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import time
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
-from .. import trace
+from .. import evalctl, trace
 
 router = APIRouter(prefix="/api")
 
@@ -28,7 +28,7 @@ class RetrieveRequest(BaseModel):
 def retrieve(body: RetrieveRequest, request: Request, http_response: Response) -> dict:  # type: ignore[type-arg]
     state = request.app.state
     settings = state.settings
-    if not settings.eval_endpoints_enabled:
+    if not settings.eval_endpoints_enabled or not evalctl.authorised(request, settings):
         raise HTTPException(status_code=404, detail="Not Found")
     started = time.perf_counter()
     try:

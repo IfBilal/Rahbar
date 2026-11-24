@@ -54,7 +54,8 @@ images: ## build the four images (api, indexer, ui, ragops) and load them into m
 	minikube image load rahbar-ui:$(TAG)
 	minikube image load rahbar-ragops:$(TAG)
 
-apply: ## apply the dev overlay (needs yours: manifests)
+apply: ## create the eval token Secret if needed, then apply the dev overlay
+	scripts/ragops/eval-token.sh
 	kubectl apply -k k8s/overlays/dev
 
 secret: ## create the LLM key Secret from the LLM_API_KEY variable; never from a file

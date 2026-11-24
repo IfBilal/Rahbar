@@ -74,6 +74,10 @@ class Settings:
     pod_name: str = "local"
     eval_endpoints_enabled: bool = False   # POST /api/retrieve
     eval_headers_enabled: bool = False     # X-Eval-* request headers
+    # Shared secret for the two switches above. When set, /api/retrieve and the X-Eval-* headers are
+    # honoured only with a matching X-Eval-Token header, so they cannot be used through the Ingress.
+    # Empty = no token check (make dev, unit tests); the cluster manifests always set it from a Secret.
+    eval_token: str = ""
 
 
 def _bool(name: str, default: bool) -> bool:
@@ -113,4 +117,5 @@ def get_settings() -> Settings:
         pod_name=os.environ.get("POD_NAME", "local"),
         eval_endpoints_enabled=_bool("EVAL_ENDPOINTS_ENABLED", False),
         eval_headers_enabled=_bool("EVAL_HEADERS_ENABLED", False),
+        eval_token=os.environ.get("EVAL_TOKEN", ""),
     )

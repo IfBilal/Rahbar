@@ -32,6 +32,8 @@ curl -sf "http://$gateway:11434/api/version" >/dev/null || {
 if [ "${PRELOADED:-1}" = "1" ]; then
   for image in api ui indexer; do kind load docker-image "rahbar-$image:$TAG" --name "$CLUSTER"; done
 fi
+kubectl create namespace rahbar --dry-run=client -o yaml | kubectl apply -f -
+scripts_dir="$here/scripts/ragops"; "$scripts_dir/eval-token.sh"
 manifests=$(kustomize build "$here/k8s/overlays/$OVERLAY" | sed "s/OLLAMA_HOST_IP/$gateway/g")
 # The ingress admission webhook can refuse connections for a few seconds after the
 # controller reports ready (cd run 41977868131); apply is idempotent, so retry.
@@ -40,9 +42,9 @@ for attempt in 1 2 3 4 5 6; do
   [ "$attempt" = 6 ] && exit 1; echo "apply failed, retrying in 10 s"; sleep 10
 done
 
-kubectl wait -n rahbar --for=condition=complete job/indexer --timeout="${INDEX_TIMEOUT:-900s}" || {
-  kubectl get pods -n rahbar; kubectl logs -n rahbar job/indexer --all-containers --tail=50; exit 1; }
-kubectl logs -n rahbar job/indexer --tail=5
+kubectl wait -n rahbar --for=condition=complete job/ingest --timeout="${INDEX_TIMEOUT:-900s}" || {
+  kubectl get pods -n rahbar; kubectl logs -n rahbar job/ingest --all-containers --tail=50; exit 1; }
+kubectl logs -n rahbar job/ingest --tail=5
 kubectl rollout status -n rahbar deployment/api --timeout=300s
 kubectl rollout status -n rahbar deployment/ui --timeout=120s
 kubectl get pods,endpoints -n rahbar

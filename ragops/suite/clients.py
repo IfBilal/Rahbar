@@ -6,6 +6,7 @@ hidden here: a failure is a failure the result file must show (06 section 11).
 
 from __future__ import annotations
 
+import os
 import time
 from typing import Any, Protocol
 
@@ -70,7 +71,8 @@ class OllamaJudge:
 class HttpApi:
     def __init__(self, url: str, timeout: float = 900.0) -> None:
         self.url = url.rstrip("/")
-        self.http = httpx.Client(timeout=timeout)
+        token = os.environ.get("EVAL_TOKEN", "")        # the API's shared secret for /api/retrieve and X-Eval-*
+        self.http = httpx.Client(timeout=timeout, headers={"X-Eval-Token": token} if token else {})
 
     def retrieve(self, question: str, k: int) -> dict[str, Any]:
         t0 = time.perf_counter()

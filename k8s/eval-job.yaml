@@ -39,6 +39,8 @@ spec:
             - {name: HOME, value: /tmp}
             - name: OLLAMA_URL
               valueFrom: {configMapKeyRef: {name: rahbar-config, key: OLLAMA_URL}}
+            - name: EVAL_TOKEN
+              valueFrom: {secretKeyRef: {name: ragops-eval-token, key: token}}
             - {name: GATE_CONFIG, value: /config/gate.yaml}
             - {name: RESULTS_DIR, value: /results}
           resources:

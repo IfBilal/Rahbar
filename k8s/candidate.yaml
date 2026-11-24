@@ -50,6 +50,8 @@ spec:
             - {name: RELEVANCE_FLOOR, value: "0.60"}     # replaced by the calibrated value (docs/a3-evidence)
             - {name: TOP_K, value: "5"}
             - {name: REDIS_URL, value: ""}                # cache off
+            - name: EVAL_TOKEN                                   # shared secret for /api/retrieve and X-Eval-* (runtime Secret)
+              valueFrom: {secretKeyRef: {name: ragops-eval-token, key: token}}
             - name: POD_NAME
               valueFrom: {fieldRef: {fieldPath: metadata.name}}
           startupProbe:
