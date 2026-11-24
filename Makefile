@@ -13,7 +13,7 @@ INGRESS_IP ?= $(shell minikube ip 2>/dev/null)
 HOST ?= rahbar.local
 
 .DEFAULT_GOAL := help
-.PHONY: help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check manifests ollama-host system-test
+.PHONY: eval-suite eval-gate help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check manifests ollama-host system-test
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -94,3 +94,9 @@ ollama-host: ## serve Ollama on the minikube gateway so pods reach host.minikube
 
 system-test: ## live cluster checks against a running stack: ingress, abstention, policy, pin
 	RAHBAR_SYSTEM=1 INGRESS_IP=$(INGRESS_IP) $(BIN)/pytest -q tests/system -rA
+
+eval-suite: ## run the Part B suite as a Job against the live API: make eval-suite LABEL=baseline
+	scripts/ragops/eval.sh suite $(LABEL)
+
+eval-gate: ## run suite + release gate against the candidate: make eval-gate LABEL=cand-mxbai
+	scripts/ragops/eval.sh suite+gate $(LABEL) --target http://api-candidate:8000
