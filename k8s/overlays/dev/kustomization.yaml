@@ -8,3 +8,4 @@ images:
   - {name: rahbar-api, newTag: dev}
   - {name: rahbar-ui, newTag: dev}
   - {name: rahbar-indexer, newTag: dev}
+  - {name: rahbar-ragops, newTag: dev}

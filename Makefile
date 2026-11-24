@@ -13,7 +13,7 @@ INGRESS_IP ?= $(shell minikube ip 2>/dev/null)
 HOST ?= rahbar.local
 
 .DEFAULT_GOAL := help
-.PHONY: help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check manifests ollama-host system-test
+.PHONY: eval-suite eval-gate help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check manifests ollama-host system-test
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -44,15 +44,18 @@ cluster: ## start minikube with Calico, then enable metrics-server and ingress
 	minikube addons enable metrics-server
 	minikube addons enable ingress
 
-images: ## build the three images and load them into minikube (needs yours: Dockerfiles)
+images: ## build the four images (api, indexer, ui, ragops) and load them into minikube
 	docker build -t rahbar-api:$(TAG) api
 	docker build -t rahbar-indexer:$(TAG) -f indexer/Dockerfile .
 	docker build -t rahbar-ui:$(TAG) ui
+	docker build -t rahbar-ragops:$(TAG) -f ragops/Dockerfile .
 	minikube image load rahbar-api:$(TAG)
 	minikube image load rahbar-indexer:$(TAG)
 	minikube image load rahbar-ui:$(TAG)
+	minikube image load rahbar-ragops:$(TAG)
 
-apply: ## apply the dev overlay (needs yours: manifests)
+apply: ## create the eval token Secret if needed, then apply the dev overlay
+	scripts/ragops/eval-token.sh
 	kubectl apply -k k8s/overlays/dev
 
 secret: ## create the LLM key Secret from the LLM_API_KEY variable; never from a file
@@ -91,3 +94,9 @@ ollama-host: ## serve Ollama on the minikube gateway so pods reach host.minikube
 
 system-test: ## live cluster checks against a running stack: ingress, abstention, policy, pin
 	RAHBAR_SYSTEM=1 INGRESS_IP=$(INGRESS_IP) $(BIN)/pytest -q tests/system -rA
+
+eval-suite: ## run the Part B suite as a Job against the live API: make eval-suite LABEL=baseline
+	scripts/ragops/eval.sh suite $(LABEL)
+
+eval-gate: ## run suite + release gate against the candidate: make eval-gate LABEL=cand-mxbai
+	scripts/ragops/eval.sh suite+gate $(LABEL) --target http://api-candidate:8000

@@ -87,20 +87,24 @@ jobs:
             echo "== $overlay"
             kustomize build "k8s/overlays/$overlay" | kubeconform -strict -summary
           done
+          # The standalone manifests (A3): the evaluation and coverage Jobs, the candidate and the loader pod.
+          echo "== k8s/*.yaml"
+          kubeconform -strict -summary k8s/eval-job.yaml k8s/candidate.yaml k8s/loader-pod.yaml k8s/coverage-job.yaml
 
   build:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v4
-      - name: build api, ui and indexer (never pushed from CI)
+      - name: build api, ui, indexer and ragops (never pushed from CI)
         run: |
           docker buildx build --load -t rahbar-api:ci api
           docker buildx build --load -t rahbar-ui:ci ui
           docker buildx build --load -t rahbar-indexer:ci -f indexer/Dockerfile .
+          docker buildx build --load -t rahbar-ragops:ci -f ragops/Dockerfile .
           docker image ls rahbar-*
       - name: save images for the scan and e2e jobs
-        run: docker save rahbar-api:ci rahbar-ui:ci rahbar-indexer:ci | gzip -1 > images.tar.gz
+        run: docker save rahbar-api:ci rahbar-ui:ci rahbar-indexer:ci rahbar-ragops:ci | gzip -1 > images.tar.gz
       - uses: actions/upload-artifact@v7
         with:
           name: images
@@ -116,7 +120,7 @@ jobs:
       - run: gunzip -c images.tar.gz | docker load
       - name: Trivy - fail on HIGH or CRITICAL findings that have a fix
         run: |
-          for image in api ui indexer; do
+          for image in api ui indexer ragops; do
             echo "== rahbar-$image:ci"
             docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" \
               image --quiet --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "rahbar-$image:ci"

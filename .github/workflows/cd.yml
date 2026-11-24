@@ -74,6 +74,13 @@ jobs:
           file: indexer/Dockerfile
           push: true
           tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/rahbar-indexer:${{ github.sha }}
+      - name: ragops (evaluation, gate, coverage and trace tools)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ragops/Dockerfile
+          push: true
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/rahbar-ragops:${{ github.sha }}
 
   deploy:
     needs: build-push                 # deploys exactly the images this run published
@@ -101,7 +108,8 @@ jobs:
         run: |
           cd k8s/overlays/prod
           kustomize edit set image "rahbar-api=$REPO/rahbar-api:$GITHUB_SHA" \
-            "rahbar-ui=$REPO/rahbar-ui:$GITHUB_SHA" "rahbar-indexer=$REPO/rahbar-indexer:$GITHUB_SHA"
+            "rahbar-ui=$REPO/rahbar-ui:$GITHUB_SHA" "rahbar-indexer=$REPO/rahbar-indexer:$GITHUB_SHA" \
+            "rahbar-ragops=$REPO/rahbar-ragops:$GITHUB_SHA"
           # the component deploys the real model (ollama-host); fail fast if that ever changes
           grep -q 'path: /data/LLM_PROVIDER, value: "ollama-host"' ../../components/ephemeral-cluster/kustomization.yaml
           kustomize edit add component ../../components/ephemeral-cluster
@@ -136,5 +144,5 @@ jobs:
         if: failure()
         run: |
           kubectl get pods,jobs,endpoints -n rahbar || true
-          kubectl logs -n rahbar job/indexer --all-containers --tail=40 || true
+          kubectl logs -n rahbar job/ingest --all-containers --tail=40 || true
           kubectl logs -n rahbar deployment/api --tail=40 || true

@@ -1,0 +1,65 @@
+# A3 additions to the A2 default-deny. Every A2 denial stays: ui -> chroma and anything -> redis
+# except the API are still closed. Nothing here lets the evaluation Job reach Chroma or Redis
+# (docs/a3-ragops/10 section 7); the tests in tests/test_manifests.py check it.
+#   eval -> api, api-candidate :8000      eval -> Ollama :11434 (the judge and the module level)
+#   api-candidate: ingress from eval only; egress to chroma and Ollama, never Redis
+#   loader: no ingress, no egress (kubectl cp goes through the API server, not the pod network)
+#   coverage: egress to Ollama only
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: eval-policy, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: ragops-eval}
+  policyTypes: [Ingress, Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app: api}
+        - podSelector:
+            matchLabels: {app: api-candidate}
+      ports: [{protocol: TCP, port: 8000}]
+    - to:
+        - ipBlock: {cidr: 192.168.49.1/32}    # host.minikube.internal; overlays may patch it
+      ports: [{protocol: TCP, port: 11434}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: candidate-policy, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: api-candidate}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app: ragops-eval}
+      ports: [{protocol: TCP, port: 8000}]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app: chroma}
+      ports: [{protocol: TCP, port: 8000}]
+    - to:
+        - ipBlock: {cidr: 192.168.49.1/32}
+      ports: [{protocol: TCP, port: 11434}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: loader-isolation, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: ragops-loader}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: coverage-policy, namespace: rahbar}
+spec:
+  podSelector:
+    matchLabels: {app: ragops-coverage}
+  policyTypes: [Ingress, Egress]
+  egress:
+    - to:
+        - ipBlock: {cidr: 192.168.49.1/32}
+      ports: [{protocol: TCP, port: 11434}]

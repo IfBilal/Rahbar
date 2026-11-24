@@ -1,0 +1,4 @@
+nomic-embed-text nomic-embed-text:latest 0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f
+mxbai-embed-large mxbai-embed-large:latest 468836162de7f81e041c43663fedbbba921dcea9b9fefea135685a39b2d83dd8
+all-minilm all-minilm:latest 1b226e2802dbb772b5fc32a58f103ca1804ef7501331012de126ab22f67475ef
+llama3.2:3b llama3.2:3b a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72

@@ -18,6 +18,8 @@ COPY indexer/requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt && pip uninstall -y pip setuptools
 
 COPY indexer/pipeline ./pipeline
+# The Job's entry point: pipeline.run, with exit 1 (quarantined documents) mapped to 0.
+COPY --chmod=755 indexer/job_entry.sh ./job_entry.sh
 # corpus/fetch.py + sources.yaml + MANIFEST.md: the Job's init container downloads the
 # corpus at start-up (third-party PDFs are never baked into a public image).
 COPY corpus/fetch.py corpus/sources.yaml corpus/MANIFEST.md ./corpus/

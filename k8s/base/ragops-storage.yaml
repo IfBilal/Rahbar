@@ -1,0 +1,26 @@
+# RAGOps volumes (A3 part F1). On single-node minikube a ReadWriteOnce claim means "one node",
+# so several pods (the API replicas, the ingest Job, the loader pod) may mount the same claim.
+# On a multi-node cluster these would need ReadWriteMany or a log-shipping sidecar (k8s/README.md).
+#   ragops-data     lake, inbox, archive, quarantine, ledger, reports   rw: ingest + loader, ro: eval
+#   ragops-traces   one JSONL file per API pod, plus the stored prompts  rw: api, loader, ro: eval
+#   ragops-results  suite result files, decisions, baselines            rw: eval, loader
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: ragops-data, namespace: rahbar, labels: {app: ragops}}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 2Gi}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: ragops-traces, namespace: rahbar, labels: {app: ragops}}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 1Gi}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: ragops-results, namespace: rahbar, labels: {app: ragops}}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 512Mi}}

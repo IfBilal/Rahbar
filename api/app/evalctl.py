@@ -7,6 +7,7 @@ EVAL_HEADERS_ENABLED=true, so ordinary traffic can never switch the cache off.
 
 from __future__ import annotations
 
+import hmac
 from contextvars import ContextVar
 from dataclasses import dataclass
 
@@ -33,8 +34,15 @@ eval_var: ContextVar[EvalControls | None] = ContextVar("eval_controls", default=
 TEMPERATURE_MAX = 0.3
 
 
+def authorised(request: Request, settings: Settings) -> bool:
+    """True when no token is configured, or the request carries the matching X-Eval-Token."""
+    if not settings.eval_token:
+        return True
+    return hmac.compare_digest(request.headers.get("X-Eval-Token", ""), settings.eval_token)
+
+
 def parse(request: Request, settings: Settings) -> EvalControls:
-    if not settings.eval_headers_enabled:
+    if not settings.eval_headers_enabled or not authorised(request, settings):
         return EvalControls()
     h = request.headers
 
@@ -48,4 +56,9 @@ def parse(request: Request, settings: Settings) -> EvalControls:
         bypass_cache=h.get("X-Eval-Bypass-Cache", "").lower() == "true",
         seed=num("X-Eval-Seed", int),            # type: ignore[arg-type]
         temperature=None if temp is None else min(max(float(temp), 0.0), TEMPERATURE_MAX),
-        run=h.get("X-Eval-Run"), label=h.get("X-Eval-Label"))
+        run=_short(h.get("X-Eval-Run")), label=_short(h.get("X-Eval-Label")))
+
+
+def _short(value: str | None) -> str | None:
+    """Run ids and labels only end up in traces: cap them so a header cannot bloat a record."""
+    return value[:64] if value else value

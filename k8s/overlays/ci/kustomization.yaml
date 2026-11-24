@@ -11,13 +11,50 @@ images:
   - {name: rahbar-api, newTag: ci}
   - {name: rahbar-ui, newTag: ci}
   - {name: rahbar-indexer, newTag: ci}
+  - {name: rahbar-ragops, newTag: ci}
 patches:
   - target: {kind: ConfigMap, name: rahbar-config}
     patch: |-
       - {op: replace, path: /data/CORPUS_DIR, value: /app/eval/fixtures}
-  - target: {kind: Job, name: indexer}
+  # The CI stack indexes the three fixture documents baked into the image instead of the real
+  # corpus: one init container copies them into the inbox (no download, no seed catalog needed).
+  - target: {kind: Job, name: ingest}
     patch: |-
-      - {op: remove, path: /spec/template/spec/initContainers}
-  - target: {kind: CronJob, name: reindex}
+      - op: replace
+        path: /spec/template/spec/initContainers
+        value:
+          - name: fixtures-to-inbox
+            image: rahbar-indexer
+            imagePullPolicy: IfNotPresent
+            command: ["sh", "-c", "mkdir -p /data/inbox && cp /app/eval/fixtures/academic-rules-2023.md /app/eval/fixtures/academic-rules-2026.md /app/eval/fixtures/fees-2026.md /data/inbox/"]
+            resources:
+              requests: {cpu: 50m, memory: 64Mi}
+              limits: {cpu: 500m, memory: 256Mi}
+            volumeMounts:
+              - {name: data, mountPath: /data}
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+  - target: {kind: CronJob, name: ingest}
     patch: |-
-      - {op: remove, path: /spec/jobTemplate/spec/template/spec/initContainers}
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/initContainers
+        value:
+          - name: fixtures-to-inbox
+            image: rahbar-indexer
+            imagePullPolicy: IfNotPresent
+            command: ["sh", "-c", "mkdir -p /data/inbox && cp /app/eval/fixtures/academic-rules-2023.md /app/eval/fixtures/academic-rules-2026.md /app/eval/fixtures/fees-2026.md /data/inbox/"]
+            resources:
+              requests: {cpu: 50m, memory: 64Mi}
+              limits: {cpu: 500m, memory: 256Mi}
+            volumeMounts:
+              - {name: data, mountPath: /data}
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL

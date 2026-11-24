@@ -1,0 +1,54 @@
+# The loader pod (A3 10 section 8): the way files get into and out of the volumes, and the
+# in-cluster tool shell. It runs the ragops image with `sleep infinity` (the image has tar, so
+# `kubectl cp` works) and mounts all three volumes read-write. It has no network at all
+# (NetworkPolicy loader-isolation): kubectl cp goes through the API server, not the pod network.
+#   kubectl apply -f k8s/loader-pod.yaml && kubectl wait --for=condition=Ready pod/ragops-loader -n rahbar
+#   kubectl cp corpus/batch-b/. rahbar/ragops-loader:/data/inbox/      # drop documents into the inbox
+#   kubectl cp rahbar/ragops-loader:/results/. eval/results/           # pull result files to commit
+#   kubectl exec -n rahbar ragops-loader -- python -m ragops.trace.show <trace_id> --traces /traces --lake /data
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ragops-loader
+  namespace: rahbar
+  labels: {app: ragops-loader}
+spec:
+  serviceAccountName: ragops-loader
+  automountServiceAccountToken: false
+  enableServiceLinks: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+    seccompProfile: {type: RuntimeDefault}
+  containers:
+    - name: loader
+      image: rahbar-ragops:dev
+      imagePullPolicy: IfNotPresent
+      command: ["sleep", "infinity"]
+      env:
+        - {name: HOME, value: /tmp}
+      resources:
+        requests: {cpu: 10m, memory: 32Mi}
+        limits: {cpu: 200m, memory: 256Mi}
+      volumeMounts:
+        - {name: data, mountPath: /data}
+        - {name: traces, mountPath: /traces}
+        - {name: results, mountPath: /results}
+        - {name: tmp, mountPath: /tmp}
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+  volumes:
+    - name: data
+      persistentVolumeClaim: {claimName: ragops-data}
+    - name: traces
+      persistentVolumeClaim: {claimName: ragops-traces}
+    - name: results
+      persistentVolumeClaim: {claimName: ragops-results}
+    - name: tmp
+      emptyDir: {}

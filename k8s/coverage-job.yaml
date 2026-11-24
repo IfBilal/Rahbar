@@ -1,0 +1,56 @@
+# Part E coverage check as a Job: how many live queries have a similar golden question. Exits
+# non-zero when the share is below the configured minimum (E4). It embeds with Ollama only.
+#   kubectl delete job coverage -n rahbar --ignore-not-found; kubectl apply -f k8s/coverage-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: coverage
+  namespace: rahbar
+  labels: {app: ragops-coverage}
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels: {app: ragops-coverage}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: ragops-eval
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: coverage
+          image: rahbar-ragops:dev
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - >-
+              python -m ragops.coverage.coverage check --ollama "$OLLAMA_URL"
+              --out /results/$(date -u +%Y%m%dT%H%M%SZ)_coverage.json
+          env:
+            - {name: HOME, value: /tmp}
+            - name: OLLAMA_URL
+              valueFrom: {configMapKeyRef: {name: rahbar-config, key: OLLAMA_URL}}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 384Mi}
+          volumeMounts:
+            - {name: results, mountPath: /results}
+            - {name: tmp, mountPath: /tmp}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: results
+          persistentVolumeClaim: {claimName: ragops-results}
+        - name: tmp
+          emptyDir: {}

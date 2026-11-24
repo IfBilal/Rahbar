@@ -357,8 +357,13 @@ def cosine(a: list[float], b: list[float]) -> float:
     return sum(x * y for x, y in zip(a, b)) / (na * nb) if na and nb else -1.0
 
 
-def windows(pages: list[str], count: int = 8, size: int = 400) -> list[str]:
-    """Up to `count` text windows: the first `size` words plus evenly spaced others."""
+def windows(pages: list[str], count: int = 8, size: int = 250) -> list[str]:
+    """Up to `count` text windows: the first `size` words plus evenly spaced others.
+
+    `size` is in whitespace words, and a word is often several tokens: numbers, table cells and
+    OCR noise tokenize at 3-5 tokens each. 400 words overflowed nomic-embed-text's 2048-token context
+    on the real corpus (Ollama answered 400 'input length exceeds the context length', first cluster
+    run, 24 Nov); 250 stays inside it, below the 300-word chunks that always fitted."""
     words = " ".join(pages).split()
     if not words:
         return []
@@ -368,10 +373,34 @@ def windows(pages: list[str], count: int = 8, size: int = 400) -> list[str]:
     return [" ".join(words[s:s + size]) for s in dict.fromkeys(starts)]
 
 
+def _embed_windows(wins: list[str], embed: Embedder) -> list[list[float]]:
+    """Embed the windows; if the model refuses one as too long, halve that window and retry (up to
+    4 times). Only the document vector tolerates this: it is an approximation used to find
+    near-duplicates. Chunk embeddings never shorten text, they fail the run."""
+    try:
+        return embed(wins)
+    except Exception:
+        out: list[list[float]] = []
+        for w in wins:
+            text = w
+            for _ in range(5):
+                try:
+                    out.append(embed([text])[0])
+                    break
+                except Exception:
+                    words = text.split()
+                    if len(words) < 8:
+                        raise
+                    text = " ".join(words[: len(words) // 2])
+            else:
+                raise RuntimeError("document window could not be embedded even when shortened")
+        return out
+
+
 def build_docvec(pages: list[str], embed: Embedder) -> dict[str, Any]:
     """Document vector = mean of the embeddings of up to 8 windows, plus a shingle sketch."""
     wins = windows(pages)
-    vecs = embed(wins) if wins else []
+    vecs = _embed_windows(wins, embed) if wins else []
     mean = [sum(col) / len(vecs) for col in zip(*vecs)] if vecs else []
     return {"vector": mean, "sketch": sketch(" ".join(pages)), "windows": len(wins)}
 

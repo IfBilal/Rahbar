@@ -143,6 +143,37 @@ def test_retrieve_is_a_404_unless_enabled(monkeypatch, tmp_path) -> None:
         assert c.post("/api/retrieve", json={"question": "anything", "k": 2}).status_code == 404
 
 
+def _with_token(app, token: str = "s3cret") -> None:
+    app.state.settings = type(app.state.settings)(**{**app.state.settings.__dict__, "eval_token": token})
+
+
+def test_with_a_token_set_retrieve_and_eval_headers_need_it(app_client) -> None:
+    """The Ingress routes /api to this pod, so the evaluation switches must not work for the public."""
+    client, app, tdir = app_client
+    from app.services.cache import SemanticCache
+    app.state.cache = SemanticCache(FakeRedis(), 0.95, 100, 60)
+    _with_token(app)
+    body = {"question": "attendance rule", "k": 2}
+    assert client.post("/api/retrieve", json=body).status_code == 404                      # no token
+    assert client.post("/api/retrieve", json=body, headers={"X-Eval-Token": "wrong"}).status_code == 404
+    assert client.post("/api/retrieve", json=body, headers={"X-Eval-Token": "s3cret"}).status_code == 200
+    q = {"question": "What is the attendance rule?"}
+    client.post("/api/ask", json=q)
+    # a public request cannot switch the cache off or label a run, even with the headers enabled
+    r = client.post("/api/ask", json=q, headers={"X-Eval-Bypass-Cache": "true", "X-Eval-Run": "evil"})
+    assert r.json()["cached"] is True and traces(tdir)[-1]["eval"] is None
+    ok = client.post("/api/ask", json=q, headers={"X-Eval-Token": "s3cret", "X-Eval-Bypass-Cache": "true"})
+    assert ok.json()["cached"] is False
+
+
+def test_eval_run_and_label_are_capped(app_client) -> None:
+    client, _, tdir = app_client
+    client.post("/api/ask", json={"question": "What is the attendance rule?"},
+                headers={"X-Eval-Run": "r" * 500, "X-Eval-Label": "l" * 500})
+    ev = traces(tdir)[-1]["eval"]
+    assert len(ev["run_id"]) == 64 and len(ev["label"]) == 64
+
+
 def test_trace_rotation(tmp_path) -> None:
     from app import trace
     from app.config import Settings

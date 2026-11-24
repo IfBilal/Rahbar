@@ -12,6 +12,10 @@ COPY ragops/requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt && pip uninstall -y pip setuptools
 
 COPY ragops ./ragops
+COPY --chmod=755 ragops/job_entry.sh ./job_entry.sh
+# The frozen golden set, the pairs and the live queries travel in the image, so a result's
+# golden hash names exactly what the Job ran (docs/a3-ragops/06 section 3).
+COPY eval/*.jsonl ./eval/
 # The trace tool rebuilds prompts with the API's own prompt and rail code (docs/a3-ragops/08 §6),
 # so those two import-light modules ship in this image once they exist:
 #   COPY api/app/services/prompt.py api/app/services/rails.py ./api_services/

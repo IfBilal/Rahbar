@@ -1,0 +1,23 @@
+# BuildKit uses this file when building with  -f ragops/Dockerfile  from the repo root.
+.git
+**/__pycache__
+**/*.pyc
+.venv
+venv
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+corpus
+docs
+k8s
+api
+ui
+indexer
+scripts
+tests
+**/tests
+eval/results
+eval/fixtures
+eval/*.py
+eval/*.yaml
+eval/*.json

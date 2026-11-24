@@ -14,6 +14,12 @@ spec:
     - host: rahbar.local
       http:
         paths:
+          # The evaluation endpoint is for the in-cluster Job only: from outside, /api/retrieve
+          # goes to the UI (a 404/405), never to the API. The API also demands X-Eval-Token.
+          - path: /api/retrieve
+            pathType: Exact
+            backend:
+              service: {name: ui, port: {number: 8080}}
           - path: /api
             pathType: Prefix
             backend:

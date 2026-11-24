@@ -47,8 +47,13 @@ WORKLOADS = ("Deployment", "StatefulSet", "Job", "CronJob")
 def test_every_required_object_exists(objs) -> None:
     for kind, name in [("Namespace", "rahbar"), ("Deployment", "api"), ("Deployment", "ui"),
                        ("StatefulSet", "chroma"), ("Deployment", "redis"),
-                       ("PersistentVolumeClaim", "redis-data"), ("Job", "indexer"),
-                       ("CronJob", "reindex"), ("Ingress", "rahbar"),
+                       ("PersistentVolumeClaim", "redis-data"), ("Job", "ingest"),
+                       ("CronJob", "ingest"), ("Ingress", "rahbar"),
+                       ("PersistentVolumeClaim", "ragops-data"),
+                       ("PersistentVolumeClaim", "ragops-traces"),
+                       ("PersistentVolumeClaim", "ragops-results"),
+                       ("ConfigMap", "ragops-config"), ("ConfigMap", "ragops-gate"),
+                       ("ConfigMap", "ragops-eval-target"),
                        ("ConfigMap", "rahbar-config"), ("NetworkPolicy", "default-deny-all"),
                        ("HorizontalPodAutoscaler", "api")]:
         one(objs, kind, name)
@@ -109,7 +114,7 @@ def test_every_container_is_hardened(objs) -> None:
 
 def test_dedicated_service_accounts_without_tokens(objs) -> None:
     sas = {o["metadata"]["name"]: o for o in objs if o["kind"] == "ServiceAccount"}
-    assert {"api", "ui", "indexer", "chroma", "redis"} <= set(sas)
+    assert {"api", "ui", "indexer", "chroma", "redis", "ragops-eval", "ragops-loader"} <= set(sas)
     assert all(sa["automountServiceAccountToken"] is False for sa in sas.values())
 
 
@@ -133,21 +138,37 @@ def test_data_tier_services_are_cluster_internal(objs) -> None:
         assert o["spec"]["type"] == "ClusterIP", o["metadata"]["name"]
 
 
-def test_indexer_job_and_cronjob_share_image_and_args(objs) -> None:
-    job, cron = one(objs, "Job", "indexer"), one(objs, "CronJob", "reindex")
+def test_ingest_job_and_cronjob_share_image_and_args(objs) -> None:
+    job, cron = one(objs, "Job", "ingest"), one(objs, "CronJob", "ingest")
     assert job["spec"]["template"]["spec"]["restartPolicy"] == "OnFailure"
     assert job["spec"]["backoffLimit"] >= 1
-    assert cron["spec"]["concurrencyPolicy"] == "Forbid"
+    assert cron["spec"]["concurrencyPolicy"] == "Forbid"          # never two writers at once
     a, b = pod_spec(job), pod_spec(cron)
     for key in ("containers", "initContainers"):
         assert [(c["image"], c.get("args"), c.get("command")) for c in a.get(key, [])] == \
                [(c["image"], c.get("args"), c.get("command")) for c in b.get(key, [])]
+    assert a["containers"][0]["args"] == ["sync"]
+
+
+def test_the_a2_indexer_job_and_reindex_cronjob_are_retired(objs) -> None:
+    """One definition of the writer: the A3 ingest Job and CronJob replace them."""
+    assert not [o for o in objs if (o["kind"], o["metadata"]["name"]) in
+                {("Job", "indexer"), ("CronJob", "reindex")}]
+
+
+def test_ingest_writes_the_data_lake_volume_and_nothing_else_mounts_it_rw(objs) -> None:
+    ing = pod_spec(one(objs, "Job", "ingest"))
+    assert {"name": "data", "persistentVolumeClaim": {"claimName": "ragops-data"}} in ing["volumes"]
+    api = pod_spec(one(objs, "Deployment", "api"))
+    assert not [v for v in api["volumes"] if v.get("persistentVolumeClaim", {}).get("claimName")
+                == "ragops-data"], "the API must not mount the data lake"
 
 
 def test_ingress_routes_api_and_ui_on_one_host(objs) -> None:
     rule = one(objs, "Ingress", "rahbar")["spec"]["rules"][0]
     paths = {p["path"]: p["backend"]["service"]["name"] for p in rule["http"]["paths"]}
-    assert paths == {"/api": "api", "/": "ui"} and rule["host"] == "rahbar.local"
+    # /api/retrieve (the evaluation endpoint) is sent to the UI: it is not public (see below)
+    assert paths == {"/api/retrieve": "ui", "/api": "api", "/": "ui"} and rule["host"] == "rahbar.local"
 
 
 def test_configmap_carries_every_tunable_and_the_pin(objs) -> None:
@@ -158,11 +179,40 @@ def test_configmap_carries_every_tunable_and_the_pin(objs) -> None:
     assert 0 <= float(data["TEMPERATURE"]) <= 0.3
 
 
-def test_api_and_indexer_read_the_pin_from_the_same_configmap(objs) -> None:
-    for o in (one(objs, "Deployment", "api"), one(objs, "Job", "indexer")):
-        c = pod_spec(o)["containers"][0]
-        assert {"configMapRef": {"name": "rahbar-config"}} in c["envFrom"]
-        assert not any(e["name"] == "EMBED_MODEL" for e in c.get("env", []))
+RELEASE_KEYS = ("RELEASE_ID", "CHROMA_COLLECTION", "EMBED_MODEL", "EMBED_VERSION",
+                "RELEVANCE_FLOOR", "TOP_K")
+
+
+def test_api_release_identity_is_in_the_pod_template_and_agrees_with_the_configmap(objs) -> None:
+    """A3 F3: `kubectl rollout undo` only restores what is in the pod template, so the release
+    keys are explicit env entries (they override envFrom). The ingest Job reads the same
+    values from the ConfigMap, so the two copies must agree or the writer and reader drift."""
+    api = pod_spec(one(objs, "Deployment", "api"))["containers"][0]
+    env = {e["name"]: e.get("value") for e in api["env"]}
+    for key in RELEASE_KEYS:
+        assert env.get(key), key
+    data = one(objs, "ConfigMap", "rahbar-config")["data"]
+    for key in ("CHROMA_COLLECTION", "EMBED_MODEL", "TOP_K", "RELEVANCE_FLOOR"):
+        assert env[key] == data[key], f"{key}: pod template {env[key]!r} vs ConfigMap {data[key]!r}"
+    assert {"configMapRef": {"name": "rahbar-config"}} in api["envFrom"]
+    ingest = pod_spec(one(objs, "Job", "ingest"))["containers"][0]
+    assert {"configMapRef": {"name": "rahbar-config"}} in ingest["envFrom"]
+    assert not any(e["name"] == "EMBED_MODEL" for e in ingest.get("env", []))   # one pin for the writer
+    assert api["env"][-1]["valueFrom"]["fieldRef"]["fieldPath"] == "metadata.name"   # POD_NAME
+
+
+def test_api_writes_traces_to_a_volume_and_has_the_evaluation_switches(objs) -> None:
+    api = pod_spec(one(objs, "Deployment", "api"))
+    assert {"configMapRef": {"name": "ragops-config"}} in api["containers"][0]["envFrom"]
+    assert {"name": "traces", "persistentVolumeClaim": {"claimName": "ragops-traces"}} in api["volumes"]
+    assert {"name": "traces", "mountPath": "/traces"} in api["containers"][0]["volumeMounts"]
+    cfg = one(objs, "ConfigMap", "ragops-config")["data"]
+    assert cfg["TRACE_DIR"] == "/traces" and cfg["EVAL_ENDPOINTS_ENABLED"] == "true"
+
+
+def test_the_gate_configmap_is_the_committed_gate_file(objs) -> None:
+    cm = one(objs, "ConfigMap", "ragops-gate")["data"]["gate.yaml"]
+    assert yaml.safe_load(cm) == yaml.safe_load((ROOT / "ragops" / "config" / "gate.yaml").read_text())
 
 
 def test_hpa_scales_api_from_three_to_eight(objs) -> None:
@@ -242,3 +292,88 @@ def test_incluster_ollama_has_a_patient_startup_probe_and_a_weights_volume() -> 
     assert data["OLLAMA_URL"] == "http://ollama:11434" and data["LLM_PROVIDER"] == "ollama-incluster"
     assert _allows_ingress(objs, "ollama", "api", 11434)
     assert not _allows_ingress(objs, "ollama", "ui", 11434)
+
+
+# ---------------------------------------------------------------- A3 standalone manifests (k8s/*.yaml)
+def standalone(name: str) -> list[dict]:
+    return [d for d in yaml.safe_load_all((ROOT / "k8s" / name).read_text()) if d]
+
+
+def test_eval_job_fails_with_the_gate_and_mounts_the_lake_read_only() -> None:
+    job = standalone("eval-job.yaml")[0]
+    assert job["metadata"]["name"] == "eval" and job["spec"]["backoffLimit"] == 0
+    spec = job["spec"]["template"]["spec"]
+    assert spec["restartPolicy"] == "Never"           # a failed gate must not retry into a pass
+    c = spec["containers"][0]
+    mounts = {m["name"]: m for m in c["volumeMounts"]}
+    assert mounts["data"]["readOnly"] is True and mounts["traces"]["readOnly"] is True
+    assert mounts["gate"]["mountPath"] == "/config"
+    assert {"name": "gate", "configMap": {"name": "ragops-gate"}} in spec["volumes"]
+    assert c["command"] == ["/app/job_entry.sh"]
+    assert not c["image"].endswith(":latest") and ":" in c["image"]
+    assert "ttlSecondsAfterFinished" not in job["spec"]           # logs must outlive the screenshot
+
+
+def test_candidate_is_isolated_from_live_traffic() -> None:
+    dep, svc = standalone("candidate.yaml")
+    assert dep["metadata"]["name"] == "api-candidate" and svc["metadata"]["name"] == "api-candidate"
+    assert dep["spec"]["selector"]["matchLabels"] == {"app": "api-candidate"}
+    assert dep["spec"]["strategy"]["rollingUpdate"] == {"maxSurge": 1, "maxUnavailable": 0}
+    env = {e["name"]: e.get("value") for e in dep["spec"]["template"]["spec"]["containers"][0]["env"]}
+    assert env["REDIS_URL"] == ""                      # cache off: no cached answer hides a regression
+    assert env["CHROMA_COLLECTION"] != "rahbar" and env["RELEASE_ID"] != "R1-nomic"
+    assert svc["spec"]["selector"] == {"app": "api-candidate"} and svc["spec"]["type"] == "ClusterIP"
+
+
+def test_loader_pod_has_no_network_and_all_three_volumes() -> None:
+    pod = standalone("loader-pod.yaml")[0]
+    claims = {v["persistentVolumeClaim"]["claimName"] for v in pod["spec"]["volumes"]
+              if "persistentVolumeClaim" in v}
+    assert claims == {"ragops-data", "ragops-traces", "ragops-results"}
+    iso = one(render("dev"), "NetworkPolicy", "loader-isolation")["spec"]
+    assert iso["podSelector"]["matchLabels"] == {"app": "ragops-loader"}
+    assert "ingress" not in iso and "egress" not in iso      # deny: kubectl cp does not need the network
+
+
+def test_every_standalone_pod_is_hardened_and_pinned() -> None:
+    for name in ("eval-job.yaml", "candidate.yaml", "loader-pod.yaml", "coverage-job.yaml"):
+        for o in standalone(name):
+            if o["kind"] == "Service":
+                continue
+            spec = o["spec"] if o["kind"] == "Pod" else o["spec"]["template"]["spec"]
+            assert spec["securityContext"]["runAsNonRoot"] is True, name
+            assert spec["enableServiceLinks"] is False and spec["automountServiceAccountToken"] is False
+            for c in spec["containers"]:
+                assert c["securityContext"]["readOnlyRootFilesystem"] is True, name
+                assert {"cpu", "memory"} <= set(c["resources"]["requests"]) and \
+                    {"cpu", "memory"} <= set(c["resources"]["limits"]), name
+                assert ":" in c["image"] and not c["image"].endswith(":latest"), name
+
+
+def test_the_evaluation_job_can_reach_the_api_and_ollama_but_never_chroma_or_redis(objs) -> None:
+    assert _allows_ingress(objs, "api", "ragops-eval", 8000)
+    assert _allows_ingress(objs, "api-candidate", "ragops-eval", 8000)
+    assert not _allows_ingress(objs, "chroma", "ragops-eval", 8000)      # read-only against Chroma, by network
+    assert not _allows_ingress(objs, "redis", "ragops-eval", 6379)
+    assert _allows_ingress(objs, "chroma", "api-candidate", 8000)         # the candidate reads its own collection
+    assert not _allows_ingress(objs, "redis", "api-candidate", 6379)      # and has no cache
+    ev = one(objs, "NetworkPolicy", "eval-policy")["spec"]
+    targets = {(t.get("podSelector", {}).get("matchLabels", {}).get("app") or t["ipBlock"]["cidr"], p["port"])
+               for r in ev["egress"] for t in r["to"] for p in r["ports"]}
+    assert targets == {("api", 8000), ("api-candidate", 8000), ("192.168.49.1/32", 11434)}
+
+
+def test_the_evaluation_endpoint_is_guarded_by_a_runtime_secret_and_not_routed_publicly(objs) -> None:
+    """The Ingress routes /api to the API, so /api/retrieve and X-Eval-* need a token that is
+    generated at run time (scripts/ragops/eval-token.sh) and read from a Secret, never from Git."""
+    ref = {"secretKeyRef": {"name": "ragops-eval-token", "key": "token"}}
+    api = pod_spec(one(objs, "Deployment", "api"))["containers"][0]
+    assert {"name": "EVAL_TOKEN", "valueFrom": ref} in api["env"]
+    for name in ("candidate.yaml", "eval-job.yaml"):
+        o = standalone(name)[0]
+        spec = o["spec"]["template"]["spec"]
+        assert {"name": "EVAL_TOKEN", "valueFrom": ref} in spec["containers"][0]["env"], name
+    rule = one(objs, "Ingress", "rahbar")["spec"]["rules"][0]["http"]["paths"]
+    retrieve = next(p for p in rule if p["path"] == "/api/retrieve")
+    assert retrieve["pathType"] == "Exact" and retrieve["backend"]["service"]["name"] == "ui"
+    assert not [o for o in objs if o["kind"] == "Secret"]

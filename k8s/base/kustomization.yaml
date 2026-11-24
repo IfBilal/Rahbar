@@ -15,8 +15,12 @@ resources:
   - redis.yaml
   - api.yaml
   - ui.yaml
-  - indexer-job.yaml
-  - reindex-cronjob.yaml
+  - ragops-storage.yaml
+  - ragops-config.yaml
+  - ragops-gate.yaml
+  - ingest-job.yaml
+  - ingest-cronjob.yaml
   - ingress.yaml
   - networkpolicy.yaml
+  - ragops-networkpolicy.yaml
   - hpa.yaml

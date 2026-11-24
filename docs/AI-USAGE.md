@@ -69,3 +69,28 @@ measured and reviewed by us; we can explain every line of it.
 - Every tuned number (chunk size, relevance floor, cache threshold, resource limits) comes
   from a measurement committed under `docs/evidence/`.
 - What counts as passing. The CI gate thresholds are the case study's, unchanged.
+
+
+# Assignment 03 (RAGOps): AI usage
+
+Same rule as before: specific attribution. Commit messages carry no AI trailer; the disclosure is here and in
+the report's AI statement. Status of each claim is stated as it is, including what is still to be done by us.
+
+| Tool | What it wrote or shaped | Status |
+| --- | --- | --- |
+| An AI chat assistant and **Claude Code** (Bilal's laptop, 22-24 Nov) | The plan in `docs/a3-ragops/`; the verification and incremental-ingestion pipeline (`indexer/pipeline/`); the suite, gate, coverage and trace tools (`ragops/`); API traces and `/api/retrieve`; first drafts of golden questions g020-g030, the pairs and the live queries. | Unit-tested only until it ran on the cluster; the PDF overruled the plan where they differed. |
+| **Claude Code** (Taimoor's laptop, 24 Nov onward) | The Kubernetes objects, the Job and release scripts, the CI changes, the eval-token guard, the data review, the screenshot renderer, the evidence runs and the report draft. | Every command was run on our minikube and its raw output kept under `docs/a3-evidence/`. |
+
+## What the AI got wrong or left incomplete, and what changed
+
+1. **`/api/retrieve` and the `X-Eval-*` headers were reachable through the Ingress** in the first manifests
+   (found by an automated security review). They now need a run-time shared secret (`X-Eval-Token`, Secret
+   `ragops-eval-token`) and the Ingress sends `/api/retrieve` to the UI.
+2. **`release.sh` built kubectl commands as strings and `eval`ed values from the candidate YAML.** Rewritten
+   with argument arrays and a strict character check.
+3. **The hand-off assumed a GPU laptop.** Ours has none (`docs/a3-evidence/host.md`), so latency thresholds are
+   derived on this machine and are not comparable with any other.
+4. **Data review.** Claude Code read the cited page of every golden question and changed three pairs and three
+   live queries (`docs/a3-evidence/data-review.md`). The 11 synthetic questions are marked "checked by Claude
+   Code, to be spot-checked by Taimoor". **That spot-check by a team member is still to be done and recorded
+   by us; until it is, we must not describe those questions as reviewed by hand by the group.**

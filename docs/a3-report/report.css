@@ -1,0 +1,12 @@
+@page { size: A4; margin: 14mm 13mm 14mm 13mm; @bottom-center { content: counter(page) " / " counter(pages); font-size: 8pt; color: #666; } }
+body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 8.6pt; line-height: 1.3; color: #111; }
+h1 { font-size: 15pt; margin: 0 0 3pt 0; } h2 { font-size: 10.5pt; margin: 8pt 0 3pt 0; border-bottom: 1px solid #999; padding-bottom: 1pt; }
+h3 { font-size: 9.2pt; margin: 6pt 0 2pt 0; }
+p { margin: 2pt 0 4pt 0; } ul, ol { margin: 2pt 0 4pt 0; padding-left: 14pt; } li { margin: 0; }
+table { border-collapse: collapse; width: 100%; margin: 3pt 0 5pt 0; font-size: 7.6pt; page-break-inside: auto; }
+th, td { border: 0.6px solid #888; padding: 1.5pt 3pt; vertical-align: top; } th { background: #e8ebf0; text-align: left; }
+tr { page-break-inside: avoid; }
+code { font-family: "DejaVu Sans Mono", monospace; font-size: 7.4pt; background: #f1f1f1; padding: 0 1pt; }
+pre { font-family: "DejaVu Sans Mono", monospace; font-size: 7pt; background: #f4f4f4; padding: 3pt; white-space: pre-wrap; margin: 2pt 0 4pt 0; }
+img { max-width: 100%; } figure { margin: 3pt 0; } figcaption { font-size: 7.5pt; color: #444; }
+.appendix { page-break-before: always; } .appendix img { width: 100%; border: 0.6px solid #888; margin-bottom: 4pt; } .appendix h3 { margin-top: 8pt; }
