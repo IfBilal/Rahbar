@@ -37,7 +37,19 @@ def test_uncased_model_input_is_lowercased() -> None:
     from pipeline.embed import prepare_document
     assert prepare_document("nomic-embed-text", "Rector's List, BS") == \
         "search_document: rector's list, bs"
-    assert prepare_document("mxbai-embed-large", "Rector") == "Rector"
+    # the candidates have their own profiles (A3 07 section 3.1): no document prefix, lowercased
+    assert prepare_document("mxbai-embed-large", "Rector") == "rector"
+    assert prepare_document("all-minilm", "Rector") == "rector"
+    assert prepare_document("some-unknown-model", "Rector") == "Rector"      # no profile: untouched
+
+
+def test_the_query_side_gets_each_models_own_instruction() -> None:
+    """mxbai-embed-large is trained with a query instruction; judging it without one is unfair."""
+    from pipeline.embed import embed_profile
+    assert embed_profile("mxbai-embed-large")["query_prefix"] == \
+        "Represent this sentence for searching relevant passages: "
+    assert embed_profile("nomic-embed-text:latest")["query_prefix"] == "search_query: "
+    assert embed_profile("all-minilm")["query_prefix"] == ""
 
 
 def test_prefix_only_for_models_that_use_one() -> None:

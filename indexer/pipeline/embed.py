@@ -13,11 +13,34 @@ BATCH = 32
 ATTEMPTS = 3
 
 
+# How text is prepared for each embedding model (docs/a3-ragops/07 section 3.1). The same table is
+# kept in the three places that prepare text, because they ship in separate images:
+# api/app/retrieval/embedder.py, indexer/pipeline/embed.py and ragops/suite/prep.py.
+# tests/test_boundaries.py fails if they differ, so the writer, the reader and the suite cannot drift.
+#   doc_prefix / query_prefix: the task instruction the model was trained with
+#   lowercase: the model has an uncased vocabulary and Ollama 0.17 does not lowercase for it
+EMBED_PROFILES: dict[str, dict[str, object]] = {
+    "nomic-embed-text": {"doc_prefix": "search_document: ", "query_prefix": "search_query: ",
+                         "lowercase": True},
+    "mxbai-embed-large": {"doc_prefix": "",
+                          "query_prefix": "Represent this sentence for searching relevant passages: ",
+                          "lowercase": True},
+    "all-minilm": {"doc_prefix": "", "query_prefix": "", "lowercase": True},
+}
+NO_PROFILE: dict[str, object] = {"doc_prefix": "", "query_prefix": "", "lowercase": False}
+
+
+def embed_profile(model: str) -> dict[str, object]:
+    for name, profile in EMBED_PROFILES.items():
+        if model.startswith(name):
+            return profile
+    return NO_PROFILE
+
+
 def document_prefix(model: str) -> str:
-    """nomic-embed-text is trained with task prefixes: documents get 'search_document: ',
-    queries 'search_query: ' (api/app/retrieval/embedder.py). Part of the pin: both sides
-    derive the prefix from the same EMBED_MODEL, so they cannot disagree."""
-    return "search_document: " if model.startswith("nomic-embed-text") else ""
+    """The task prefix for documents, from the model's profile. Queries get theirs from the same
+    table (api/app/retrieval/embedder.py), so both sides derive it from the same EMBED_MODEL."""
+    return str(embed_profile(model)["doc_prefix"])
 
 
 def prepare_document(model: str, text: str) -> str:
@@ -28,9 +51,8 @@ def prepare_document(model: str, text: str) -> str:
     'Islamabad' and 'Lahore', 'BS' and 'MS' embedded identically (cosine 1.0000,
     docs/evidence/cache-threshold.txt). Lowercasing is what the reference tokenizer does;
     the API does exactly the same to queries (prepare_query), so the pin still holds."""
-    if model.startswith("nomic-embed-text"):
-        return document_prefix(model) + text.lower()
-    return text
+    profile = embed_profile(model)
+    return document_prefix(model) + (text.lower() if profile["lowercase"] else text)
 
 
 def embed(texts: list[str], settings: IndexerSettings,
