@@ -1,0 +1,3 @@
+$ scripts/ragops/job.sh build-index -- build-index --collection rahbar-cand-minilm --embed-model all-minilm
+job.batch/ingest-build-index-1125052238 created
+job/ingest-build-index-1125052238
