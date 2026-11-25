@@ -9,7 +9,7 @@ embed_version: "468836162de7"                # fill from the Ollama digest at bu
 chunk_size: 300
 chunk_overlap: 40
 top_k: 5
-relevance_floor: 0.0            # PROVISIONAL, replaced by scripts/ragops/calibrate_floor.py (07 section 2.3)
+relevance_floor: 0.50           # calibrated: docs/a3-evidence/C/C0-floor-mxbai.txt (lowest best-gold score 0.5403)
 cache_threshold: null            # the candidate runs with the cache off
 prompt_version: same
 expected: pass
