@@ -1,0 +1,20 @@
+$ bash -c kubectl get job eval -n rahbar; echo; kubectl logs -n rahbar job/eval | cut -c1-200
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           7m10s      48m
+
+RAGOps suite  label=demo  2026-11-25T15:56:48Z  git=f3afd60  embed=nomic-embed-text  collection=ok: rahbar (532 chunks)  corpus=A (ledger 0f1f81...)
+LEVEL      METRIC                           VALUE              N
+component  recall@3 / recall@5              1.000 / 1.000     3
+component  MRR / nDCG@5                     1.000 / 1.000     3
+component  noisy recall@5 (delta)           1.000 (0.000) 3
+endpoint   faithfulness (judge / proxy)     - / 1.000     3
+endpoint   abstention correctness           -                  0
+endpoint   false abstention rate            0.000              3
+endpoint   citation validity                1.000              3
+endpoint   latency p50 / p95 (s)            124.4 / 191.0     3
+skipped 10 question(s): g027 (requires batch ['B'] not ingested), g028 (requires batch ['B'] not ingested), g029 (requires batch ['B'] not ingested), g030 (requires batch ['B'] not ingested), g031 (re
+RESULT=/results/20261125T155648Z_demo.json
+result file: /results/20261125T155648Z_demo.json
+RESULT=SUITE_DONE file=/results/20261125T155648Z_demo.json
+
+[exit 0 at 2026-11-25T16:45:23 UTC]
