@@ -56,9 +56,13 @@ def summarise(rows: list[dict[str, Any]]) -> dict[str, Any]:
     top1 = [float(c[0]["score"]) for r in rows
             for c in [((r.get("retrieval") or {}).get("candidates") or [])] if c]
 
+    def q4(vals: list[float], q: float) -> float | None:
+        x = percentile(vals, q)
+        return None if x is None else round(x, 4)          # similarities need 4 decimals, latencies 1
+
     def dist(vals: list[float]) -> dict[str, float | int | None]:
-        return {"n": len(vals), "min": p(vals, 0), "p10": p(vals, 10), "p50": p(vals, 50),
-                "p90": p(vals, 90), "max": p(vals, 100)} if vals else {"n": 0}
+        return {"n": len(vals), "min": q4(vals, 0), "p10": q4(vals, 10), "p50": q4(vals, 50),
+                "p90": q4(vals, 90), "max": q4(vals, 100)} if vals else {"n": 0}
     rails = Counter(f"{g['rail']}:{g['action']}" for r in rows for g in (r.get("guardrails") or []))
     return {"requests": n, "by_route": dict(Counter(r["route"] for r in rows)),
             "by_status": dict(status),
@@ -66,7 +70,7 @@ def summarise(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "fallback_rate": round(status.get("fallback", 0) / n, 4) if n else None,
             "cache_hit_rate": round(sum(1 for r in rows if (r.get("cache") or {}).get("hit")) / n, 4)
             if n else None,
-            "top1_similarity": {k: (round(v, 4) if isinstance(v, float) else v) for k, v in dist(top1).items()},
+            "top1_similarity": dist(top1),
             "latency_ms": {k: {"p50": p(v, 50), "p95": p(v, 95)} for k, v in sorted(stages.items())},
             "releases": dict(Counter(r.get("release_id") for r in rows)),
             "collections": dict(Counter((r.get("collection") or {}).get("name") for r in rows)),
