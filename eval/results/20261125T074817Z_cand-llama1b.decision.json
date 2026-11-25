@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "overall": "fail",
-  "evaluated_at": "2026-11-25T11:45:04Z",
-  "git_sha": "",
+  "evaluated_at": "2026-11-25T11:47:27Z",
+  "git_sha": "28e5884",
   "config_hash": "54d2a85d1212e787",
   "gate_config_version": 1,
   "baseline": {

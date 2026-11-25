@@ -10,4 +10,4 @@ p95_latency         153.0400    87.7900  PASS     endpoint.latency_p95_s 87.79 v
 GATE FAILED
 RESULT=GATE_FAIL decision=/results/20261125T074817Z_cand-llama1b.decision.json
 
-[exit 1 at 2026-11-25T11:45:09 UTC]
+[exit 1 at 2026-11-25T11:47:31 UTC]
