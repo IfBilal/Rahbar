@@ -1,0 +1,266 @@
+{
+  "schema": 1,
+  "run_at": "2026-11-25T10:15:00Z",
+  "golden_hash": "2cabdf74ca990ab2",
+  "live_hash": "7cbf3031c3145220",
+  "embed_model": "nomic-embed-text",
+  "similarity_threshold": 0.6448,
+  "min_share": 0.85,
+  "n_live": 42,
+  "covered": 25,
+  "share": 0.5952,
+  "share_in_domain": 0.75,
+  "share_out_of_domain": 0.2857,
+  "verdict": "GAP",
+  "sensitivity": {
+    "-0.05": 0.8095,
+    "+0.05": 0.4048
+  },
+  "tfidf_cross_check": {
+    "share": 0.0238
+  },
+  "uncovered": [
+    {
+      "id": "l036",
+      "query": "is there a late evening bus",
+      "best_golden_id": "g019",
+      "best_similarity": 0.5315,
+      "domain": "out"
+    },
+    {
+      "id": "l039",
+      "query": "is financial aid available if my parents cant pay",
+      "best_golden_id": "g022",
+      "best_similarity": 0.5439,
+      "domain": "out"
+    },
+    {
+      "id": "l030",
+      "query": "how many members needed to register a society",
+      "best_golden_id": "g008",
+      "best_similarity": 0.5602,
+      "domain": "out"
+    },
+    {
+      "id": "l028",
+      "query": "who gets a medal for top position",
+      "best_golden_id": "g004",
+      "best_similarity": 0.5603,
+      "domain": "in"
+    },
+    {
+      "id": "l041",
+      "query": "what is on the cafeteria menu today",
+      "best_golden_id": "g021",
+      "best_similarity": 0.5658,
+      "domain": "out"
+    },
+    {
+      "id": "l031",
+      "query": "can clubs use classrooms for events",
+      "best_golden_id": "g016",
+      "best_similarity": 0.5732,
+      "domain": "out"
+    },
+    {
+      "id": "l027",
+      "query": "what is the F grade vs FA",
+      "best_golden_id": "g015",
+      "best_similarity": 0.5834,
+      "domain": "in"
+    },
+    {
+      "id": "l037",
+      "query": "are there scholarships for need based students",
+      "best_golden_id": "g022",
+      "best_similarity": 0.5931,
+      "domain": "out"
+    },
+    {
+      "id": "l018",
+      "query": "how many credit hours is one lab",
+      "best_golden_id": "g029",
+      "best_similarity": 0.5965,
+      "domain": "in"
+    },
+    {
+      "id": "l033",
+      "query": "what time does the university bus leave the main gate",
+      "best_golden_id": "g018",
+      "best_similarity": 0.6083,
+      "domain": "out"
+    },
+    {
+      "id": "l024",
+      "query": "is there a retake exam policy",
+      "best_golden_id": "g012",
+      "best_similarity": 0.609,
+      "domain": "in"
+    },
+    {
+      "id": "l040",
+      "query": "is there a swimming pool membership fee",
+      "best_golden_id": "g017",
+      "best_similarity": 0.6142,
+      "domain": "out"
+    },
+    {
+      "id": "l023",
+      "query": "what happens if i miss the final exam",
+      "best_golden_id": "g002",
+      "best_similarity": 0.6214,
+      "domain": "in"
+    },
+    {
+      "id": "l020",
+      "query": "what is cum laude cgpa",
+      "best_golden_id": "g001",
+      "best_similarity": 0.6226,
+      "domain": "in"
+    },
+    {
+      "id": "l017",
+      "query": "what is the penalty for plagiarism in a project",
+      "best_golden_id": "g005",
+      "best_similarity": 0.6383,
+      "domain": "in"
+    },
+    {
+      "id": "l029",
+      "query": "whats the process to start a new student club",
+      "best_golden_id": "g022",
+      "best_similarity": 0.6421,
+      "domain": "out"
+    },
+    {
+      "id": "l042",
+      "query": "how do i get my degree attested by the foreign office",
+      "best_golden_id": "g022",
+      "best_similarity": 0.6428,
+      "domain": "out"
+    }
+  ],
+  "topics": [
+    {
+      "name": "bus / late / evening",
+      "queries": [
+        "l036",
+        "l033"
+      ],
+      "single": false,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "financial / aid / available",
+      "queries": [
+        "l039",
+        "l037"
+      ],
+      "single": false,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "clubs / use / classrooms",
+      "queries": [
+        "l031",
+        "l029"
+      ],
+      "single": false,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "exam / retake / policy",
+      "queries": [
+        "l024",
+        "l023"
+      ],
+      "single": false,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "many / members / needed",
+      "queries": [
+        "l030"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "who / gets / medal",
+      "queries": [
+        "l028"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "cafeteria / menu / today",
+      "queries": [
+        "l041"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "grade",
+      "queries": [
+        "l027"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "many / credit / hours",
+      "queries": [
+        "l018"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "swimming / pool / membership",
+      "queries": [
+        "l040"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "cum / laude / cgpa",
+      "queries": [
+        "l020"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "penalty / plagiarism / project",
+      "queries": [
+        "l017"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "get / degree / attested",
+      "queries": [
+        "l042"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    }
+  ]
+}

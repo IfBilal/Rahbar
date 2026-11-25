@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "status": "incomplete",
+  "run_id": "suite-20261125T071614Z-1",
+  "label": "cand-minilm-module",
+  "started_at": "2026-11-25T07:16:16Z",
+  "error": "embedding service failed: Client error '400 Bad Request' for url 'http://host.minikube.internal:11434/api/embed'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
+  "git_sha": "04b3468",
+  "levels": {},
+  "target": {},
+  "batches": [
+    "A"
+  ],
+  "corpus_digest": "0f1f810c9ed48047476fac9d06a5825f56aebe3c73ff1950b4a6281d073f8331",
+  "per_question": [],
+  "skipped": [],
+  "notes": "embedding service failed: Client error '400 Bad Request' for url 'http://host.minikube.internal:11434/api/embed'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+}

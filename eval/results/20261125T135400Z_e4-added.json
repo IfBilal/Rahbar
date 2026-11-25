@@ -1,0 +1,880 @@
+{
+  "schema": 1,
+  "status": "complete",
+  "run_id": "suite-20261125T135400Z-1",
+  "label": "e4-added",
+  "started_at": "2026-11-25T13:54:00Z",
+  "finished_at": "2026-11-25T15:12:36Z",
+  "git_sha": "ce7f657",
+  "images": {
+    "api": "",
+    "ragops": ""
+  },
+  "config_hash": "27392c78f79b42df",
+  "golden_hash": "2b5a9cb039364bb6",
+  "pairs_hash": "e7c844e97c48ee7a",
+  "corpus_digest": "5d3f5a06a879719ae2ade54c6fd123cca311b5a0cc2ef3452faf37ed75abd636",
+  "batches": [
+    "A",
+    "B"
+  ],
+  "seed": 20261122,
+  "seeds": {
+    "typo": 20261123,
+    "judge": 7,
+    "e2e": 20261122,
+    "sample": 20261124
+  },
+  "profile": "full",
+  "profile_hash": "cada4e7909c171f6",
+  "target": {
+    "url": "http://api:8000",
+    "release_id": "R1-nomic",
+    "collection": "ok: rahbar (558 chunks)",
+    "revision": "r0009",
+    "embed_model": "nomic-embed-text",
+    "embed_version": "0a109f422b47",
+    "app_version": "dev"
+  },
+  "levels": {
+    "module": {
+      "paraphrase_mean_cos": 0.8233,
+      "unrelated_mean_cos": 0.4966,
+      "gap": 0.3267,
+      "pair_accuracy": 0.985,
+      "unrelated_by_difficulty": {
+        "easy": 0.4426,
+        "hard": 0.5506
+      },
+      "embed_ms_mean": 1744.8441,
+      "embed_ms_p95": 5514.4672,
+      "vector_bytes": 3072,
+      "determinism_max_abs_diff": 0.0,
+      "determinism_min_cos": 1.0,
+      "n_paraphrase": 20,
+      "n_unrelated": 20
+    },
+    "component": {
+      "n": 13,
+      "clean": {
+        "recall@3": 0.7692,
+        "recall@5": 0.8462,
+        "mrr": 0.7115,
+        "ndcg@5": 0.7456,
+        "precision@5": 0.1692,
+        "retrieval_ms_mean": 318.6514,
+        "retrieval_ms_p95": 459.8759
+      },
+      "noisy": {
+        "recall@3": 0.7692,
+        "recall@5": 0.7692,
+        "mrr": 0.6795,
+        "ndcg@5": 0.7024,
+        "typo_rate": 0.06
+      },
+      "delta_noisy": {
+        "recall@5": -0.077,
+        "mrr": -0.032,
+        "ndcg@5": -0.0432
+      },
+      "by_category": {
+        "answerable": {
+          "n": 13,
+          "recall@5": 0.8462
+        },
+        "hard": {
+          "n": 0,
+          "recall@5": null,
+          "by_kind": {}
+        }
+      },
+      "top1_similarity": {
+        "min": 0.6963,
+        "p10": 0.7083,
+        "p50": 0.7513,
+        "p90": 0.8482,
+        "max": 0.8482,
+        "unanswerable_p50": 0.5926
+      }
+    },
+    "endpoint": {
+      "n": 15,
+      "n_answerable": 13,
+      "n_unanswerable": 2,
+      "faithfulness": 1.0,
+      "faithfulness_partial": 0.0,
+      "faithfulness_unsupported": 0.0,
+      "faithfulness_proxy": 0.9792,
+      "abstention_correctness": 1.0,
+      "false_abstention_rate": 0.0769,
+      "citation_validity": 1.0,
+      "citations_checked": 14,
+      "answered_without_citation": 0,
+      "citation_gold_hit": 0.6667,
+      "latency_p50_s": 163.55,
+      "latency_p95_s": 736.05,
+      "fallback_rate": 0.0,
+      "injection_obeyed": [],
+      "tokens_in_mean": null,
+      "tokens_out_mean": null,
+      "judge": {
+        "model": "llama3.2:3b",
+        "unparseable": 0,
+        "judged": 12
+      }
+    }
+  },
+  "per_question": [
+    {
+      "id": "g031",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "student-clubs-guidelines.pdf",
+          "page": 1,
+          "score": 0.7526,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 22,
+          "score": 0.6598,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 4,
+          "score": 0.6591,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "faculty-entrepreneurship-policy-2026.md",
+          "page": 1,
+          "score": 0.642,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 10,
+          "score": 0.6364,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "How many students are needed to satrt a new club?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "4077f942d2a24d6ca61cd7fca824ce8e",
+      "category": "answerable",
+      "seconds": 236.06,
+      "cached": false,
+      "answer": "To start a new club, a group of at least ten enrolled students are required [student-clubs-guidelines.pdf / (untitled)].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g032",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 79,
+          "score": 0.6963,
+          "hit": false
+        },
+        {
+          "rank": 2,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 53,
+          "score": 0.6886,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 82,
+          "score": 0.688,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 79,
+          "score": 0.6866,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "student-clubs-guidelines.pdf",
+          "page": 1,
+          "score": 0.6838,
+          "hit": false
+        }
+      ],
+      "recall@3": 0.0,
+      "recall@5": 0.0,
+      "rr": 0.0,
+      "ndcg@5": 0.0,
+      "noisy_query": "What is the lateat time an event of a club can run on campus?",
+      "noisy_recall@5": 0.0,
+      "trace_id": "01a767b54f8a4c309d08abc2b1914d28",
+      "category": "answerable",
+      "seconds": 245.72,
+      "cached": false,
+      "answer": "The documents do not cover this question.",
+      "answered_from_context": false,
+      "citations": 0,
+      "citation_validity": null
+    },
+    {
+      "id": "g033",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "transport-routes-2026.html",
+          "page": 1,
+          "score": 0.7513,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "fee-structure-page.html",
+          "page": 1,
+          "score": 0.7067,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "campus-parking-policy.md",
+          "page": 1,
+          "score": 0.6938,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "transport-routes-2026.html",
+          "page": 1,
+          "score": 0.662,
+          "hit": true
+        },
+        {
+          "rank": 5,
+          "doc": "fee-structure-page.html",
+          "page": 1,
+          "score": 0.6379,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "How much does the university bus cost for one semesster?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "8fcc9e0a73c14419b417090a2e18437d",
+      "category": "answerable",
+      "seconds": 115.6,
+      "cached": false,
+      "answer": "The bus fee for one semester is eight thousand rupees [transport-routes-2026.html / Transport Routes 2026 > Fees]. A student who stops using the service must return the bus card to the transport office to receive a refund of the unused months [transport-routes-2026.html / Transport Routes 2026 > Fees]. This refund is not related to the bus fee itself, but rather to the unused months of service. [t",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 0.75,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g034",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "transport-routes-2026.html",
+          "page": 1,
+          "score": 0.7501,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "transport-routes-2026.html",
+          "page": 1,
+          "score": 0.5199,
+          "hit": true
+        },
+        {
+          "rank": 3,
+          "doc": "transport-routes-2026.html",
+          "page": 1,
+          "score": 0.5166,
+          "hit": true
+        },
+        {
+          "rank": 4,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 24,
+          "score": 0.5136,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 20,
+          "score": 0.5118,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "When does the Riiverside Park rouute leave in the morning?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "5e32ff57bb5a431097020f7dd37c110b",
+      "category": "answerable",
+      "seconds": 93.31,
+      "cached": false,
+      "answer": "The Riverside Park route leaves at 7:00 in the morning [transport-routes-2026.html / Transport Routes 2026 > Routes and timings].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g035",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "scholarship-faq.md",
+          "page": 1,
+          "score": 0.8482,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 2,
+          "score": 0.7324,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "annual-report-2019-20.pdf",
+          "page": 31,
+          "score": 0.7316,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 77,
+          "score": 0.7316,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "scholarship-faq.md",
+          "page": 1,
+          "score": 0.7279,
+          "hit": true
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "What grde average must a scholraship holder maintain?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "6399e068fb9640fb898e0196bc85b0c2",
+      "category": "answerable",
+      "seconds": 165.04,
+      "cached": false,
+      "answer": "A scholarship holder must maintain a cumulative grade point average of at least two point five to keep the scholarship [scholarship-faq.md / Scholarship Frequently Asked Questions > 3. How can a student keep the scholarship?].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g036",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "student-handbook-jun-2026.pdf",
+          "page": 19,
+          "score": 0.7211,
+          "hit": false
+        },
+        {
+          "rank": 2,
+          "doc": "annual-report-2019-20.pdf",
+          "page": 31,
+          "score": 0.7195,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 77,
+          "score": 0.7195,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "scholarship-faq.md",
+          "page": 1,
+          "score": 0.7153,
+          "hit": true
+        },
+        {
+          "rank": 5,
+          "doc": "scholarship-faq.md",
+          "page": 1,
+          "score": 0.6647,
+          "hit": true
+        }
+      ],
+      "recall@3": 0.0,
+      "recall@5": 1.0,
+      "rr": 0.25,
+      "ndcg@5": 0.43067655807339306,
+      "noisy_query": "Which stufents recceive a merit sfholarship without applying?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "23b07cfb2d704885b35611732f539cb0",
+      "category": "answerable",
+      "seconds": 163.55,
+      "cached": false,
+      "answer": "Students who receive a merit scholarship without applying are those who are the Top Three position holders of each Examination Board in the year of admission, and also those who are the Top Three position holders in the NU admission merit list of each campus [student-handbook-jun-2026.pdf / II - FINANCIAL RULES > Merit Scholarship for Bachelor students].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g037",
+      "category": "unanswerable",
+      "seconds": 121.21,
+      "trace_id": "6c3fa21df7be4654bcf042daed64454a",
+      "cached": false,
+      "answer": "The documents do not cover this question. The evidence passages only describe student facilities, outreach activities, and annual reports, but do not mention what is served in the cafeteria for lunch.",
+      "answered_from_context": false
+    },
+    {
+      "id": "g038",
+      "category": "unanswerable",
+      "seconds": 0.19,
+      "trace_id": "72d91e3ec98848fcb415dc1e41d85e32",
+      "cached": false,
+      "answer": "The documents I have do not cover this question, so I cannot answer it from them. Please check with the relevant university office.",
+      "answered_from_context": false
+    },
+    {
+      "id": "g039",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 31,
+          "score": 0.8011,
+          "hit": false
+        },
+        {
+          "rank": 2,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 30,
+          "score": 0.7535,
+          "hit": true
+        },
+        {
+          "rank": 3,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 20,
+          "score": 0.7404,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 26,
+          "score": 0.7224,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "annual-report-2023-24.pdf",
+          "page": 56,
+          "score": 0.7159,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 0.5,
+      "ndcg@5": 0.6309297535714575,
+      "noisy_query": "Whhich medaos are givwn to the top three position holders of a deegree program at graduation?",
+      "noisy_recall@5": 0.0,
+      "trace_id": "bb9c9a36b4494310853329d694dee936",
+      "category": "answerable",
+      "seconds": 142.11,
+      "cached": false,
+      "answer": "The Agha Hasan Abedi Gold Medal is awarded to the First position holder, the Mahboob ul Haq Silver Medal is awarded to the Second position holder, and the Akhlaque Hussain Bronze Medal is awarded to the Third position holder of each degree program at graduation [academic-rules-handbook-jun-2026.pdf / 7. Awards and the Honor System > Top three position holders in bachelor\u2019s degree programs].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g040",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 11,
+          "score": 0.7258,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "grading-page.html",
+          "page": 1,
+          "score": 0.7113,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 1,
+          "score": 0.7075,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "grading-page.html",
+          "page": 1,
+          "score": 0.7061,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 1,
+          "score": 0.7005,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "What does the grade FA mean in the garding scale?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "93195d030d484bc09f134101ec55d41f",
+      "category": "answerable",
+      "seconds": 145.73,
+      "cached": false,
+      "answer": "The grade FA stands for Fail due to shortage of attendance, as stated in the Academic Undergraduate Rules and Regulations 2026, section 2.2, [academic-rules-handbook-jun-2026.pdf / 2. Grading and GPA Calculations > Interpretation of Letter Grades].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g041",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 1,
+          "score": 0.8482,
+          "hit": false
+        },
+        {
+          "rank": 2,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 7,
+          "score": 0.8293,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "student-handbook-jun-2026.pdf",
+          "page": 38,
+          "score": 0.6575,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 14,
+          "score": 0.6472,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 4,
+          "score": 0.6405,
+          "hit": false
+        }
+      ],
+      "recall@3": 0.0,
+      "recall@5": 0.0,
+      "rr": 0.0,
+      "ndcg@5": 0.0,
+      "noisy_query": "How many crdeit hours is a laboratory courrse normlaly assigned?",
+      "noisy_recall@5": 0.0,
+      "trace_id": "37f0b347368942a48839a58160076b02",
+      "category": "answerable",
+      "seconds": 159.21,
+      "cached": false,
+      "answer": "A laboratory course is normally assigned 1 credit hour, which is equivalent to 3 hours of laboratory or practical work per week throughout the semester.[academic-rules-handbook-jun-2026.pdf / 1. Introduction > Credit Hour]",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g042",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "student-handbook-jun-2026.pdf",
+          "page": 46,
+          "score": 0.8217,
+          "hit": false
+        },
+        {
+          "rank": 2,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 37,
+          "score": 0.8142,
+          "hit": true
+        },
+        {
+          "rank": 3,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 4,
+          "score": 0.7702,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "student-handbook-jun-2026.pdf",
+          "page": 47,
+          "score": 0.7625,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 39,
+          "score": 0.7613,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 0.5,
+      "ndcg@5": 0.6309297535714575,
+      "noisy_query": "In wuich situaitons can a student apply to sit a retke examination?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "c2c2eb2b270c4660ac71c5c12bb13b5a",
+      "category": "answerable",
+      "seconds": 736.05,
+      "cached": false,
+      "answer": "A student can apply to sit a retake examination in the following situations: Marriage, Severe Illness, Death, High Fever / Diarrhea Asthma, Severe Injury, ISSB Examination / Iqama Renewal, and Any religious festival/ event with fixed dates. [student-handbook-jun-2026.pdf / XI. Policy on Retake Examination] [academic-rules-handbook-jun-2026.pdf / 9. Policy on Retake Examination] [prospectus-2026-ac",
+      "answered_from_context": true,
+      "citations": 3,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g043",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 25,
+          "score": 0.762,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "student-handbook-jun-2026.pdf",
+          "page": 29,
+          "score": 0.732,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "student-handbook-jun-2026.pdf",
+          "page": 30,
+          "score": 0.7291,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 39,
+          "score": 0.7009,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 3,
+          "score": 0.6939,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "Can an exam be held late if a student could not attend beacuse of an emergecny?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "cdf2a08a667742b781e454696ace2587",
+      "category": "answerable",
+      "seconds": 253.9,
+      "cached": false,
+      "answer": "An exam can be held late if a student could not attend because of an emergency, as per the recommendation of the HoD and approval of the Director, only in cases of unavoidable emergencies/situations, as stated in Section 5.13 of the Academic Assessment policy [academic-rules-handbook-jun-2026.pdf / 5. Academic Assessment > Late conduct of Examination/ Missed Examination].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g044",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 30,
+          "score": 0.7234,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 2,
+          "score": 0.6997,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 24,
+          "score": 0.6972,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 1,
+          "score": 0.6945,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "grading-page.html",
+          "page": 1,
+          "score": 0.6835,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "Which CGPA range earns the Magja cum lqude remark on the degree?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "9355b26f353f43e5abed5c9f398c8f2e",
+      "category": "answerable",
+      "seconds": 212.44,
+      "cached": false,
+      "answer": "To earn the Magna cum laude remark on the degree, a student must have a CGPA between 3.75 and 3.89 [prospectus-2026-academic-rules-and-regulations.pdf / 13. Registration of Students under].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    },
+    {
+      "id": "g045",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 35,
+          "score": 0.7083,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 33,
+          "score": 0.706,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 5,
+          "score": 0.6869,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 3,
+          "score": 0.6852,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "student-handbook-jun-2026.pdf",
+          "page": 30,
+          "score": 0.6813,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "What can a teacher do if a student is fouund cheatting in a project dliverable?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "779dec6b4b0f4303b281dc77fc31d35d",
+      "category": "answerable",
+      "seconds": 200.3,
+      "cached": false,
+      "answer": "A teacher can award a 'zero' in a specific instrument of academic evaluation, such as a project deliverable, if evidence of academic dishonesty or cheating is found [academic-rules-handbook-jun-2026.pdf / 8. Academic Honesty > Penalties for Academic Dishonesty].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0,
+      "judge_label": "supported"
+    }
+  ],
+  "skipped": [
+    {
+      "id": "g008",
+      "reason": "retired by batch B"
+    }
+  ],
+  "notes": ""
+}
