@@ -1,0 +1,22 @@
+$ bash -c kubectl apply -f k8s/coverage-job.yaml >/dev/null; for i in $(seq 1 120); do s=$(kubectl get job coverage -n rahbar -o jsonpath="{.status.succeeded}/{.status.failed}"); case "$s" in 1/*|*/1) break;; esac; sleep 3; done; kubectl get job coverage -n rahbar; kubectl logs -n rahbar job/coverage; echo "job status (succeeded/failed): $s"
+NAME       STATUS     COMPLETIONS   DURATION   AGE
+coverage   Complete   1/1           30s        33s
+COVERAGE  model=nomic-embed-text  tau=0.6448  min_share=0.85
+live queries 42  covered 38  share 0.905  (in-domain 1.000, out-of-domain 0.714)
+sensitivity {'-0.05': 0.9762, '+0.05': 0.6905}  tf-idf cross-check share 0.024
+COVERAGE OK
+
+UNCOVERED (lowest similarity first):
+  l036   0.578  best=g034   is there a late evening bus
+  l039   0.608  best=g043   is financial aid available if my parents cant pay
+  l040   0.617  best=g038   is there a swimming pool membership fee
+  l042   0.643  best=g022   how do i get my degree attested by the foreign office
+
+TOPICS:
+  late / evening / bus           1 query  (single - check by hand)
+  financial / aid / available    1 query  (single - check by hand)
+  swimming / pool / membership   1 query  (single - check by hand)
+  get / degree / attested        1 query  (single - check by hand)
+job status (succeeded/failed): 1/
+
+[exit 0 at 2026-11-25T11:54:23 UTC]

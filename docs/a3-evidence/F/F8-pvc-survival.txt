@@ -1,0 +1,38 @@
+$ bash -c cd /home/dns/Desktop/scd-assignment2-se-b-24i3015-24i3166
+show() { kubectl exec -n rahbar ragops-loader -- sh -c "echo ledger: \$(ls -1 /data/ledger | tr \"\\n\" \" \"); echo ledger.json bytes: \$(wc -c < /data/ledger/ledger.json) sha: \$(sha256sum /data/ledger/ledger.json | cut -c1-16); echo quarantine runs: \$(ls /data/quarantine | wc -l), files: \$(find /data/quarantine -type f | wc -l); echo archive docs: \$(ls /data/archive | tr \"\\n\" \" \"); echo lake docs: \$(ls /data/lake/docs | wc -l); echo reports: \$(ls /data/reports/verification | wc -l) verification, \$(ls /data/reports/ingest | wc -l) ingest"; }
+kubectl get pvc -n rahbar
+echo; echo "### before: delete every pod that mounts the volume"; show
+kubectl delete pod ragops-loader -n rahbar --wait=true; kubectl delete pod -n rahbar -l app=api --wait=false >/dev/null; kubectl delete pod chroma-0 -n rahbar --wait=true
+kubectl apply -f k8s/loader-pod.yaml >/dev/null; kubectl wait --for=condition=Ready pod/ragops-loader -n rahbar --timeout=120s; kubectl wait --for=condition=Ready pod/chroma-0 -n rahbar --timeout=200s
+echo; echo "### after the pods were recreated"; show
+kubectl rollout status deployment/api -n rahbar --timeout=300s >/dev/null; sleep 3
+kubectl exec -n rahbar deploy/api -- python -c "import urllib.request,json;print(json.load(urllib.request.urlopen(\"http://localhost:8000/readyz\"))[\"checks\"][\"collection\"])"
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+data-chroma-0    Bound    pvc-8ead4e92-176d-4a0b-ab16-676631dd1bdb   2Gi        RWO            standard       <unset>                 19h
+ragops-data      Bound    pvc-eaaa6238-673e-4358-9924-9d76dba7bebf   2Gi        RWO            standard       <unset>                 18h
+ragops-results   Bound    pvc-1ede994b-f23c-4764-9884-4df29757a839   512Mi      RWO            standard       <unset>                 18h
+ragops-traces    Bound    pvc-6dd27eeb-6c18-45c5-a3ee-e6197e13207a   1Gi        RWO            standard       <unset>                 18h
+redis-data       Bound    pvc-bca09b45-1b8a-4b58-9231-db6322099f18   1Gi        RWO            standard       <unset>                 18h
+
+### before: delete every pod that mounts the volume
+ledger: ledger.json ledger.json.bak
+ledger.json bytes: 131749 sha: d3b504921cbbcb1b
+quarantine runs: 2, files: 14
+archive docs: academic-rules demo-notice faculty-entrepreneurship-and-technical-start-ups-policy
+lake docs: 14
+reports: 16 verification, 18 ingest
+pod "ragops-loader" deleted from rahbar namespace
+pod "chroma-0" deleted from rahbar namespace
+pod/ragops-loader condition met
+pod/chroma-0 condition met
+
+### after the pods were recreated
+ledger: ledger.json ledger.json.bak
+ledger.json bytes: 131749 sha: d3b504921cbbcb1b
+quarantine runs: 2, files: 14
+archive docs: academic-rules demo-notice faculty-entrepreneurship-and-technical-start-ups-policy
+lake docs: 14
+reports: 16 verification, 18 ingest
+ok: rahbar (558 chunks)
+
+[exit 0 at 2026-11-25T11:52:36 UTC]
