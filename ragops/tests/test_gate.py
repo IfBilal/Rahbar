@@ -85,9 +85,21 @@ def test_incomparable_runs_are_refused_not_compared() -> None:
         decide(result(), result(status="incomplete"), cfg())
 
 
-def test_the_shipped_config_refuses_to_run_until_the_two_thresholds_are_derived() -> None:
+def test_the_shipped_config_has_both_derived_thresholds_and_a_null_one_is_refused(tmp_path: Path) -> None:
+    """The two thresholds were derived from the baseline runs (24-25 Nov) and committed before any
+    candidate ran; a config with a threshold still null must make the gate refuse to run."""
+    shipped = yaml.safe_load((REPO / "ragops" / "config" / "gate.yaml").read_text())
+    values = {r["id"]: r["value"] for r in shipped["rules"]}
+    assert values["faithfulness_min"] == 0.89 and values["p95_latency"] == 225
+    assert "TO WRITE" not in str(shipped["justification"])
+    load_config(REPO / "ragops" / "config" / "gate.yaml")                      # loads
+    for rule in shipped["rules"]:
+        if rule["id"] == "p95_latency":
+            rule["value"] = None
+    unset = tmp_path / "unset.yaml"
+    unset.write_text(yaml.safe_dump(shipped))
     with pytest.raises(GateInputError, match="not set"):
-        load_config(REPO / "ragops" / "config" / "gate.yaml")
+        load_config(unset)
 
 
 def test_config_errors(tmp_path: Path) -> None:
@@ -146,5 +158,8 @@ def test_cli_exit_codes_and_decision_file(tmp_path: Path, capsys) -> None:
     assert dec["overall"] == "fail" and any(r["status"] == "fail" for r in dec["rules"])
     assert main(["--baseline", str(tmp_path / "missing.json"), "--candidate", str(files["good"]),
                  "--config", str(config)]) == 2
+    unset = tmp_path / "unset.yaml"
+    unset.write_text(yaml.safe_dump({**cfg(), "rules": [{**r, "value": None} if r["id"] == "faithfulness_min" else r
+                                                        for r in cfg()["rules"]]}))
     assert main(["--baseline", str(files["base"]), "--candidate", str(files["good"]),
-                 "--config", str(REPO / "ragops" / "config" / "gate.yaml")]) == 2
+                 "--config", str(unset)]) == 2

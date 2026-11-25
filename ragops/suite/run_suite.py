@@ -43,6 +43,18 @@ def git_sha() -> str:
         return ""
 
 
+def target_embed_model(api: Any) -> str:
+    """The embedding model of the system under test, from its /readyz. The module level must embed with
+    THAT model: reading EMBED_MODEL from the Job's environment measured nomic-embed-text for the
+    all-minilm candidate (found on the first candidate run: identical cosines). The environment is
+    only a fallback when the target does not say."""
+    try:
+        model = api.target_info().get("embed_model")
+    except InfrastructureError:
+        model = None
+    return str(model or os.environ.get("EMBED_MODEL", "nomic-embed-text"))
+
+
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     rows = []
     for line in Path(path).read_text(encoding="utf-8").splitlines():
@@ -189,11 +201,11 @@ def main(argv: list[str] | None = None) -> int:
         golden = load_golden(Path(cfg["paths"]["golden"]))
         pairs = load_jsonl(Path(cfg["paths"]["pairs"]))
         digest, ledger_batches, docs = corpus_state(args.ledger)
-        problems, _ = validate(golden, docs)
+        batches = {b.strip().upper() for b in (args.batches or ",".join(ledger_batches) or "A").split(",")}
+        problems, _ = validate(golden, docs, batches)
         if problems:
             print("golden set invalid:\n  " + "\n  ".join(problems), file=sys.stderr)
             return 2
-        batches = {b.strip().upper() for b in (args.batches or ",".join(ledger_batches) or "A").split(",")}
         levels = [lv.strip() for lv in (args.levels or ",".join(cfg["levels"])).split(",")]
         if args.profile != "full":
             print("note: reduced profile; the gate will not compare it with a full baseline",
@@ -202,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"usage/config error: {exc}", file=sys.stderr)
         return 2
     api = HttpApi(args.api or cfg["api"]["url"], timeout=float(cfg["e2e"]["timeout_s"]))
-    embedder = OllamaEmbedder(args.ollama, os.environ.get("EMBED_MODEL", "nomic-embed-text"))
+    embedder = OllamaEmbedder(args.ollama, target_embed_model(api))
     judge = None if args.no_judge else OllamaJudge(args.ollama, cfg["judge"]["model"],
                                                    float(cfg["judge"]["temperature"]))
     traces = TraceReader(args.traces)

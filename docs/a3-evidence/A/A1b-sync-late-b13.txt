@@ -1,0 +1,7 @@
+$ scripts/ragops/job.sh sync
+job.batch/ingest-sync-1125100949 created
+job/ingest-sync-1125100949
+{"chunks_deleted": 0, "chunks_embedded": 0, "chunks_reused": 0, "chunks_written": 0, "command": "sync", "docs_deleted": 0, "docs_new": 0, "docs_quarantined": 1, "docs_renamed": 0, "docs_seen": 16, "docs_superseded": 0, "docs_unchanged": 15, "docs_updated": 0, "exit": 1, "indexes": {"rahbar": {"chunks_deleted": 0, "chunks_embedded": 0, "chunks_written": 0, "revision": "r0002", "revision_bumped": false}, "rahbar-cand-minilm": {"chunks_deleted": 0, "chunks_embedded": 0, "chunks_written": 0, "revision": "r0002", "revision_bumped": false}}, "repairs": 0, "run_id": "ingest-20261125T100952Z-sb4x", "schema": 1, "seconds": 0.82, "type": "ingest_summary", "verification_embeddings": 1}
+{"logger":"rahbar.indexer","msg":"finished with quarantined documents: exit 1 mapped to 0"}
+
+[exit 0 at 2026-11-25T10:09:57 UTC]

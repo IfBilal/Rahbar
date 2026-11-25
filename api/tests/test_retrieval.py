@@ -181,3 +181,13 @@ def test_the_data_revision_comes_from_the_registry_when_it_has_one() -> None:
     settings = Settings(retriever="chroma", embed_model="nomic-embed-text")
     r = ChromaRetriever(settings, client=FakeClient(cols), embedder=FixedEmbedder(3))
     assert r.generation == "r0003" and r.index_info().generation == "r0003"
+
+
+def test_each_embedding_model_has_its_own_query_profile() -> None:
+    """A candidate embedding model must be judged with the instruction it was trained with."""
+    from app.retrieval.embedder import prepare_query
+    assert prepare_query("nomic-embed-text", "What is CGPA?") == "search_query: what is cgpa?"
+    assert prepare_query("mxbai-embed-large", "What is CGPA?") == \
+        "Represent this sentence for searching relevant passages: What is CGPA?"
+    assert prepare_query("all-minilm", "What is CGPA?") == "What is CGPA?"
+    assert prepare_query("unknown-model", "What is CGPA?") == "What is CGPA?"

@@ -1,0 +1,8 @@
+Does Ollama 0.17.6 lowercase for the candidate models? (A2 found it did not for nomic-embed-text)
+cosine of two DIFFERENT capitalised words; 1.0000 means both became the unknown token
+nomic-embed-text     as written: Rector/Dean=1.0000  Islamabad/Lahore=1.0000  BS/MS=1.0000
+                     lowercased: rector/dean=0.6625  islamabad/lahore=0.6944  bs/ms=0.4441
+mxbai-embed-large    as written: Rector/Dean=0.7149  Islamabad/Lahore=0.7366  BS/MS=0.6488
+                     lowercased: rector/dean=0.7149  islamabad/lahore=0.7366  bs/ms=0.6488
+all-minilm           as written: Rector/Dean=0.5831  Islamabad/Lahore=0.8001  BS/MS=0.2923
+                     lowercased: rector/dean=0.5831  islamabad/lahore=0.8001  bs/ms=0.2923

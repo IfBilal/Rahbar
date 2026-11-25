@@ -13,10 +13,10 @@ INGRESS_IP ?= $(shell minikube ip 2>/dev/null)
 HOST ?= rahbar.local
 
 .DEFAULT_GOAL := help
-.PHONY: eval-suite eval-gate help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check manifests ollama-host system-test
+.PHONY: eval-suite eval-gate eval-demo eval-gate-rerun help install test lint dev cluster images apply secret index ask fetch eval eval-fixtures check manifests ollama-host system-test
 
 help: ## list the targets
-	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-16s %s\n", $$1, $$2}'
 
 install: ## create .venv and install the api, indexer and tool dependencies
 	$(PY) -m venv $(VENV)
@@ -40,7 +40,7 @@ dev: ## run the API with stubs on http://localhost:8000, serving the chat UI too
 	cd api && SERVE_UI_DIR=../ui RETRIEVER=stub LLM_PROVIDER=stub $(BIN)/uvicorn app.main:app --reload --port 8000
 
 cluster: ## start minikube with Calico, then enable metrics-server and ingress
-	minikube start --driver=docker --cni=calico --memory=6144 --cpus=4
+	minikube start --driver=docker --cni=calico --memory=8192 --cpus=4
 	minikube addons enable metrics-server
 	minikube addons enable ingress
 
@@ -63,8 +63,8 @@ secret: ## create the LLM key Secret from the LLM_API_KEY variable; never from a
 	kubectl create secret generic rahbar-secret -n $(NS) \
 	  --from-literal=LLM_API_KEY="$$LLM_API_KEY" --dry-run=client -o yaml | kubectl apply -f -
 
-index: ## run the indexer once, from the CronJob's template (needs yours: CronJob reindex)
-	kubectl create job --from=cronjob/reindex reindex-$$(date +%s) -n $(NS)
+index: ## run the ingestion once, from the CronJob's template (cronjob/ingest)
+	kubectl create job --from=cronjob/ingest ingest-manual-$$(date +%s) -n $(NS)
 	@echo "watch it with: kubectl get jobs -n $(NS) -w"
 
 ask: ## ask through the Ingress: make ask Q="What CGPA puts a student on academic warning?"
@@ -100,3 +100,11 @@ eval-suite: ## run the Part B suite as a Job against the live API: make eval-sui
 
 eval-gate: ## run suite + release gate against the candidate: make eval-gate LABEL=cand-mxbai
 	scripts/ragops/eval.sh suite+gate $(LABEL) --target http://api-candidate:8000
+
+# 3 answers at ~100 s each (B1: p50 99.6 s) is 5-6.5 min; --no-judge removes the judge call; no gate (3 questions cannot be compared with a 20-question baseline)
+eval-demo: ## demo-sized suite Job (3 questions, component+endpoint, no judge, ~6 min); no gate
+	scripts/ragops/eval.sh suite demo --suite-args "--batches A --levels component,endpoint --limit 3 --no-judge"
+
+eval-gate-rerun: ## re-apply the gate to a stored result in seconds: make eval-gate-rerun RESULT=/results/<file>.json
+	@test -n "$(RESULT)" || { echo "usage: make eval-gate-rerun RESULT=/results/<timestamp>_<label>.json"; exit 2; }
+	scripts/ragops/eval.sh gate gate-rerun --candidate "$(RESULT)" --baseline /results/baselines/live.json

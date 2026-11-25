@@ -32,6 +32,13 @@ FALLBACKS = Counter("rahbar_fallbacks_total", "Safe canned responses served", ["
 TOKENS = Counter("rahbar_tokens_total", "LLM tokens", ["direction"])
 TOKENS_PER_REQUEST = Histogram("rahbar_tokens_per_request", "LLM tokens per request",
                                ["direction"], buckets=(50, 100, 250, 500, 1000, 2000, 4000, 8000))
+# Assignment 03 (D3): the distribution of the best retrieval similarity per request, and the number of
+# injection attempts the retrieval rail flagged. Both are also reported from the trace log by
+# ragops.trace.summary (the PDF accepts either).
+TOP1_SIMILARITY = Histogram("rahbar_top1_similarity", "Best retrieval similarity per request",
+                            buckets=(0.3, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95))
+INJECTION_FLAGGED = Counter("rahbar_injection_flagged_total",
+                            "Retrieved chunks the injection rail neutralised before the prompt")
 # Labelled series only appear after their first use; create them at 0 so a fresh pod's
 # /metrics already lists abstentions, fallbacks and tokens (4.8).
 for _reason in ("below_relevance_floor", "model_declined"):

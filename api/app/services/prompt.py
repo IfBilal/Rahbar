@@ -87,6 +87,8 @@ def _record_rails(passages: list[Passage]) -> None:
                             "doc_id": p.chunk_id.split("@", 1)[0] if "@" in p.chunk_id else None,
                             "doc_version": p.doc_version, "pattern": "instruction-like",
                             "span_chars": len(match.group()), "excerpt": match.group()[:80]})
+            from ..routes.metrics import INJECTION_FLAGGED    # local import: metrics must not import services
+            INJECTION_FLAGGED.inc()
 
 
 def evidence_block(passages: list[Passage]) -> str:

@@ -1,0 +1,4 @@
+$ kubectl logs -n rahbar job/ingest -c indexer --tail=6
+{"chunks_deleted": 0, "chunks_embedded": 532, "chunks_reused": 0, "chunks_written": 532, "command": "sync", "docs_deleted": 0, "docs_new": 9, "docs_quarantined": 0, "docs_renamed": 0, "docs_seen": 9, "docs_superseded": 1, "docs_unchanged": 0, "docs_updated": 0, "exit": 0, "indexes": {"rahbar": {"chunks_deleted": 0, "chunks_embedded": 532, "chunks_written": 532, "revision": "r0001", "revision_bumped": true}}, "repairs": 0, "run_id": "ingest-20261124T172408Z-vx5k", "schema": 1, "seconds": 561.35, "type": "ingest_summary", "verification_embeddings": 72}
+
+[exit 0 at 2026-11-24T17:33:42 UTC]

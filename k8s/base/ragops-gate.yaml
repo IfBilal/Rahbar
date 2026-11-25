@@ -9,9 +9,9 @@ data:
     # The release gate (docs/a3-ragops/07 section 5). In the cluster this file is the ConfigMap
     # `ragops-gate` (key gate.yaml), so a threshold changes without rebuilding any image.
     #
-    # TWO thresholds are deliberately UNSET (value: null) until you derive them from your own
-    # measurements and commit them BEFORE running the candidates (07 section 5.2). The gate
-    # refuses to run (exit 2) while any value is null, so this cannot be skipped by accident.
+    # The two thresholds that had to be derived (faithfulness_min, p95_latency) were derived from the two
+    # baseline runs of 24-25 Nov 2026 and committed BEFORE any candidate was run (07 section 5.2); the
+    # arithmetic is in `justification`. The gate refuses to run (exit 2) while any value is null.
     version: 1
     require_same: [golden_hash, corpus_digest, suite_schema, seed, profile_hash]
     on_missing_metric: fail          # a missing metric is a failure, never a pass
@@ -22,10 +22,10 @@ data:
       - {id: abstention,        level: endpoint,  metric: abstention_correctness,  type: not_lower_than_baseline, value: 0.0}
       # Carried over from Assignment 02: at least 95% of citations must match a retrieved passage.
       - {id: citation_validity, level: endpoint,  metric: citation_validity,       type: min_value,              value: 0.95}
-      # TO DERIVE: baseline faithfulness minus run-to-run variation (stochasticity test) minus margin.
-      - {id: faithfulness_min,  level: endpoint,  metric: faithfulness,            type: min_value,              value: null}
-      # TO DERIVE: a user-visible latency budget, not just 1.25 x the baseline p95.
-      - {id: p95_latency,       level: endpoint,  metric: latency_p95_s,           type: max_value,              value: null}
+      # Derived: baseline 0.9474 (18 of 19 judged answers supported), run-to-run variation 0.0000, one answer = 1/19.
+      - {id: faithfulness_min,  level: endpoint,  metric: faithfulness,            type: min_value,              value: 0.89}
+      # Derived: worst baseline p95 177.3 s x 1.25 headroom = 221.6 s, rounded up; the Ingress read timeout is 600 s.
+      - {id: p95_latency,       level: endpoint,  metric: latency_p95_s,           type: max_value,              value: 225}
     justification:
-      faithfulness_min: "TO WRITE: baseline X, runs vary by +-Y, so below X-Z is a real loss, not noise."
-      p95_latency: "TO WRITE: measured baseline p95, the Ingress/client timeout, and the arithmetic."
+      faithfulness_min: "Baseline faithfulness is 0.9474 (18 of 19 judged answers supported) in both runs; the stochasticity test shows run-to-run variation of 0.0000 (seeded, temperature 0), and one answer is worth 1/19 = 0.0526. We tolerate the loss of one more supported answer, 0.9474 - 0.0526 = 0.8947, and set the floor at 0.89: below it at least two more answers are unsupported, which is a real loss and not noise."
+      p95_latency: "Baseline p95 was 153.0 s in run 1 and 177.3 s in run 2 (this CPU-only laptop varies by 16 percent between runs). The budget is the worst baseline p95 with 25 percent headroom: 177.3 x 1.25 = 221.6, rounded up to 225 s. A user waits under four minutes, well inside the 600 s read timeout of the Ingress and the API's LLM timeout."

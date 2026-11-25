@@ -1,0 +1,24 @@
+$ kubectl exec -n rahbar ragops-loader -- python -m ragops.trace.show d08cce5a76644beeab76f8b4eaa149b6 --traces /traces --lake /data
+TRACE d08cce5a76644beeab76f8b4eaa149b6  2026-11-24T18:50:50.718Z  route=/api/ask  status=abstained
+query          : How does the last date for pulling out of a course differ between the 2023 rules and the 2026 handbook?
+release        : R1-nomic  pod=api-6c8bc44955-hgbzk  app=dev
+embedding      : nomic-embed-text 0a109f422b47
+collection     : rahbar @ r0001
+retrieved      :
+   1. academic-rules-handbook-jun-2026.pdf p22  academic-rules@2026-06#0028-4dcbdc1e  score=0.6926
+   2. academic-rules-handbook-jun-2026.pdf p22  academic-rules@2026-06#0027-3a34aced  score=0.6643
+   3. prospectus-2026-academic-rules-and-regulations.pdf p2  prospectus-academic-rules@2026#0011-ce61cc89  score=0.6593
+   4. student-handbook-jun-2026.pdf p29  student-handbook@2026-06#0039-de598592  score=0.6541
+   5. academic-rules-handbook-jun-2026.pdf p6  academic-rules@2026-06#0005-c6dbe988  score=0.6404
+guardrails     : 0 action(s)
+prompt         : 1ce583b0821c... chunks=['academic-rules@2026-06#0028-4dcbdc1e', 'academic-rules@2026-06#0027-3a34aced', 'prospectus-academic-rules@2026#0011-ce61cc89']
+model          : ollama-host llama3.2:3b {'temperature': 0.0, 'seed': 20261122, 'timeout_s': 600.0} attempts=1
+response       : abstained=True confidence=low citations=[]
+answer         : The last date for pulling out of a course differs between the 2023 rules and the 2026 handbook in that both passages A and B state the deadline to be the last day of the makeup week of every semester, but passage B does not mention the 2023 rules. Passage A does not mention the 2023 rules either.
+latency_ms     : {'total': 112021.1, 'retrieve': 117.5, 'generate': 111903.3}   cache: {'enabled': False, 'hit': False, 'similarity': None, 'scope': None}
+check          : prompt hash verified
+check          : academic-rules@2026-06#0028-4dcbdc1e: rebuilt from snapshot; text present in the prompt
+check          : academic-rules@2026-06#0027-3a34aced: rebuilt from snapshot; text present in the prompt
+check          : prospectus-academic-rules@2026#0011-ce61cc89: rebuilt from snapshot; text present in the prompt
+
+[exit 0 at 2026-11-25T10:15:33 UTC]

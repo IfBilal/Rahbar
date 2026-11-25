@@ -44,7 +44,9 @@ spec:
             - {name: GATE_CONFIG, value: /config/gate.yaml}
             - {name: RESULTS_DIR, value: /results}
           resources:
-            requests: {cpu: 250m, memory: 256Mi}
+            # A3 (top-eval-drift.txt): 36m / 30Mi peak, 20m / 23Mi steady while it waits on HTTP; limits kept
+            # because the sample did not include model work (docs/a3-evidence/F5-resources.md).
+            requests: {cpu: 50m, memory: 64Mi}
             limits: {cpu: "1", memory: 768Mi}
           volumeMounts:
             - {name: gate, mountPath: /config, readOnly: true}

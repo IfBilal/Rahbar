@@ -119,7 +119,7 @@ def test_the_committed_candidate_specs_change_exactly_one_thing() -> None:
     from ragops.gate.candidate import main as cmain
     repo = Path(__file__).resolve().parents[2]
     specs = [str(p) for p in sorted((repo / "ragops/config/candidates").glob("cand-*.yaml"))]
-    assert len(specs) == 2 and cmain(specs) == 0
+    assert len(specs) == 3 and cmain(specs) == 0     # minilm, mxbai, llama1b
 
 
 def test_a_candidate_that_changes_two_things_is_rejected() -> None:

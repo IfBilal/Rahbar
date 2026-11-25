@@ -91,6 +91,18 @@ the report's AI statement. Status of each claim is stated as it is, including wh
 3. **The hand-off assumed a GPU laptop.** Ours has none (`docs/a3-evidence/host.md`), so latency thresholds are
    derived on this machine and are not comparable with any other.
 4. **Data review.** Claude Code read the cited page of every golden question and changed three pairs and three
-   live queries (`docs/a3-evidence/data-review.md`). The 11 synthetic questions are marked "checked by Claude
-   Code, to be spot-checked by Taimoor". **That spot-check by a team member is still to be done and recorded
-   by us; until it is, we must not describe those questions as reviewed by hand by the group.**
+   live queries (`docs/a3-evidence/data-review.md`). The 11 synthetic questions were then read by Taimoor,
+   who found all 11 correct (`docs/a3-evidence/synthetic-spot-check.md`, recorded 25 Nov 2026). Bilal has not
+   reviewed them; the set was frozen unchanged, so the golden file still says "checked by Claude Code".
+5. **Independent review of the code (a second AI agent, read-only, 25 Nov).** It found, and we fixed with tests:
+   a crash in the ingest CLI that exited 1 and would have been mapped to success by the Job wrapper (exit 1 is only
+   for "quarantined"); a 500 from a non-ASCII `X-Eval-Token` header; `release.sh` accepting a decision that was not
+   tied to the evaluated collection and embedding version, a mistyped `--dryrun` that would have released for real,
+   an unquoted candidate name, and a Job timeout reported as success; manifest tests that an allow-all ingress rule
+   would have slipped past. See `docs/a3-evidence/F/F3-release-hardened-checks.txt`.
+6. **Our own demo script overwrote a real gate decision (25 Nov).** `scripts/ragops/gate-demo.sh` (the ConfigMap-edit
+   demo) re-ran the gate with relaxed thresholds against the rejected candidate's result, and the Job wrote its PASS to
+   `<result>.decision.json`, the file `release.sh` trusts: for a moment `cand-llama1b` would have been releasable. We
+   caught it from the output, re-ran the gate with the committed thresholds (FAIL again,
+   `docs/a3-evidence/C/C1-gate-fail-restored.txt`), and changed the Job entry script and the demo so demo decisions go to
+   `DECISION_OUT=/results/gate-demo.decision.json`.

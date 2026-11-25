@@ -80,12 +80,17 @@ def test_both_sides_prepare_text_identically_for_the_pinned_model() -> None:
     query = load(ROOT / "api/app/retrieval/embedder.py", "q_embedder")
     sys.path.insert(0, str(ROOT / "indexer"))
     doc = importlib.import_module("pipeline.embed")
-    for model in ("nomic-embed-text", "nomic-embed-text:latest", "mxbai-embed-large"):
+    suite = load(ROOT / "ragops/suite/prep.py", "suite_prep")
+    # one table, three copies (separate images): they must be identical, or writer and reader drift
+    assert query.EMBED_PROFILES == doc.EMBED_PROFILES == suite.EMBED_PROFILES
+    assert set(query.EMBED_PROFILES) == {"nomic-embed-text", "mxbai-embed-large", "all-minilm"}
+    for model in ("nomic-embed-text", "nomic-embed-text:latest", "mxbai-embed-large", "all-minilm"):
         for text in ("Rector's List of Honors", "BS fee per credit hour", "clause 1.21"):
             q = query.prepare_query(model, text)
             d = doc.prepare_document(model, text)
             # identical apart from the task prefix
             assert q.removeprefix(query.query_prefix(model)) == d.removeprefix(doc.document_prefix(model))
+            assert suite.prepare_query(model, text) == q
 
 
 # ---------------------------------------------------------------- Assignment 03 (docs/a3-ragops/14 section 10)

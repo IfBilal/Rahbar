@@ -60,19 +60,19 @@ make install                         # .venv with the api, indexer and test depe
 make test                            # 250+ tests, no cluster, no model, no network
 
 # 1. A cluster whose network plugin enforces NetworkPolicy (Calico), plus ingress and metrics
-make cluster        # minikube start --driver=docker --cni=calico --memory=6144 --cpus=4
+make cluster        # minikube start --driver=docker --cni=calico --memory=8192 --cpus=4
                     # minikube addons enable metrics-server ; minikube addons enable ingress
 
 # 2. The models, on the laptop (ollama-host mode). Ollama must listen where pods can reach it.
-ollama pull llama3.2:3b && ollama pull nomic-embed-text
-OLLAMA_HOST=0.0.0.0 ollama serve     # or, in another terminal: make ollama-host
+ollama pull llama3.2:3b && ollama pull nomic-embed-text   # Assignment 03 candidates also need: mxbai-embed-large all-minilm
+OLLAMA_HOST=0.0.0.0 ollama serve     # leave it running; use a second terminal for the rest (or: make ollama-host)
 
-# 3. Images: build api, ui and indexer locally and load them into minikube
+# 3. Images: build api, ui, indexer and ragops locally and load them into minikube
 make images                          # TAG=dev
 
 # 4. Apply (one command, see the order below), then wait for the index and the rollout
 kubectl apply -k k8s/overlays/dev
-kubectl wait --for=condition=complete job/indexer -n rahbar --timeout=40m
+kubectl wait --for=condition=complete job/ingest -n rahbar --timeout=40m
 kubectl rollout status deployment/api -n rahbar
 
 # 5. Ask through the Ingress
@@ -107,11 +107,13 @@ probes. Applied file by file, the equivalent order is:
 ```bash
 kubectl apply -f k8s/base/namespace.yaml
 kubectl apply -f k8s/base/serviceaccounts.yaml -f k8s/base/configmap.yaml
+scripts/ragops/eval-token.sh          # A3: the run-time Secret the API, the candidate and the eval Job read (pods wait for it)
 # hosted LLM only; never from a file:
 #   kubectl create secret generic rahbar-secret -n rahbar --from-literal=LLM_API_KEY="$LLM_API_KEY"
 kubectl apply -f k8s/base/networkpolicy.yaml -f k8s/base/services.yaml
+kubectl apply -f k8s/base/ragops-storage.yaml -f k8s/base/ragops-config.yaml -f k8s/base/ragops-gate.yaml -f k8s/base/ragops-networkpolicy.yaml
 kubectl apply -f k8s/base/chroma-statefulset.yaml -f k8s/base/redis.yaml
-kubectl apply -f k8s/base/indexer-job.yaml -f k8s/base/reindex-cronjob.yaml
+kubectl apply -f k8s/base/ingest-job.yaml -f k8s/base/ingest-cronjob.yaml
 kubectl apply -f k8s/base/api.yaml -f k8s/base/ui.yaml -f k8s/base/hpa.yaml -f k8s/base/ingress.yaml
 ```
 
@@ -122,8 +124,8 @@ kubectl apply -f k8s/base/api.yaml -f k8s/base/ui.yaml -f k8s/base/hpa.yaml -f k
 
 | Task | Command |
 | --- | --- |
-| Re-index now, no redeploy | `kubectl create job --from=cronjob/reindex manual-reindex-1 -n rahbar` (or `make index`) |
-| Change the Job's template | `kubectl delete job indexer -n rahbar` first: a Job's pod template is immutable |
+| Re-index now, no redeploy | `kubectl create job --from=cronjob/ingest ingest-manual-1 -n rahbar` (or `make index`) |
+| Change the Job's template | `kubectl delete job ingest -n rahbar` first: a Job's pod template is immutable |
 | Evaluate through the Ingress | `make eval` (writes `eval/results.json`, exits 1 if the gate fails) |
 | Smoke test | `python3 scripts/smoke.py --api http://$(minikube ip)` |
 | Live system checks | `make system-test` (pin, policy, abstention, pod deletion) |
@@ -159,7 +161,7 @@ indexer/    the Job's image: extract, clean, chunk, embed, store (Dockerfile, te
 ui/         chat page served by nginx                            (Dockerfile, nginx.conf)
 corpus/     fetch.py, sources.yaml, MANIFEST.md (no documents)
 eval/       golden.yaml (19 questions), run_eval.py, baseline.json, results.json, fixtures/
-k8s/        base/, overlays/{dev,prod,ci}/, components/ephemeral-cluster/
+k8s/        base/, overlays/{dev,prod,ci,incluster}/, components/, and the standalone eval-job, candidate, loader-pod, coverage-job
 tests/      architecture tests over rendered manifests and code boundaries; system/ live checks
 scripts/    check_submission.py, e2e-kind.sh, smoke.py, chunk-sweep.sh, cache_threshold.py
 docs/       CORPUS, PIPELINE, FAILURE-ANALYSIS, ENGINEERING-NOTES, AI-USAGE, ARCHITECTURE,
@@ -190,6 +192,44 @@ whose passages clear the relevance floor. The deploy now uses the real model. It
 `main` is protected: pull request, passing CI and one approval. Work happens on `dev`.
 One commit reached `main` before protection existed: `f0f080c`, the planning pack, pushed on
 the first day. Every change since then has gone through a reviewed pull request.
+
+## Assignment 03: RAGOps
+
+CS4032 Assignment 03 adds the RAGOps layer (reference paper: Xu et al., 2026) on top of RAHBAR: a verify-and-update
+data lifecycle, a three-level offline suite, a release gate, traces and metrics, a coverage check, and a controlled
+release, all on Kubernetes. Team: Taimoor Shaukat (24I-3015), Muhammad Bilal Tahir (24I-3166). Report:
+`docs/a3-report/report.pdf`. The fresh-cluster order and the object-by-object responsibilities are in
+[`k8s/README.md`](k8s/README.md); design and plan in [`docs/a3-ragops/`](docs/a3-ragops/README.md); raw outputs
+behind every number and screenshot in [`docs/a3-evidence/`](docs/a3-evidence/host.md).
+
+```bash
+make cluster                                   # see k8s/README.md (8 GB minikube, Calico)
+make ollama-host                               # runs in the foreground: leave it and use a second terminal
+make images && make apply
+kubectl apply -f k8s/loader-pod.yaml && kubectl wait --for=condition=Ready pod/ragops-loader -n rahbar --timeout=180s
+kubectl exec -n rahbar ragops-loader -- mkdir -p /results/baselines     # the gate reads its baseline from here
+kubectl cp eval/results/baseline-live.json rahbar/ragops-loader:/results/baselines/live.json
+kubectl -n rahbar wait --for=condition=complete job/ingest --timeout=3600s
+```
+
+| Part | Command | Output |
+| --- | --- | --- |
+| A ingest, verify, update | `scripts/ragops/job.sh sync` | the last log line is the run summary (`chunks_embedded`); `/data/reports/verification/<run>.md` and `.json` on the `ragops-data` volume |
+| A Batch B | `python corpus/batch-b/build.py --out /tmp/batch-b-out`, then `kubectl cp /tmp/batch-b-out/batch-b rahbar/ragops-loader:/data/inbox/` (the folder name `batch-b` tags the files as batch B), then `scripts/ragops/job.sh sync` | verification report with a pass or fail and a reason per check; quarantined files under `/data/quarantine/` |
+| A counts, restore, delete | `scripts/ragops/job.sh count -- count`, `... restore -- restore <doc>@<ver>`, `... delete -- delete <doc>` | chunk count per document id, orphans, archived and restored versions |
+| B suite | `make eval-suite LABEL=baseline` (or `scripts/ragops/eval.sh suite baseline --suite-args "--batches A --repeat 2"`) | `/results/<timestamp>_<label>.json` with a summary table; committed under `eval/results/` |
+| B stochasticity | `python -m ragops.suite.stochasticity run1.json run2.json` | per-metric difference between two runs |
+| C gate | `make eval-gate LABEL=cand-mxbai` (suite then gate); thresholds in `ragops/config/gate.yaml`, served as ConfigMap `ragops-gate` | `<timestamp>_<label>.decision.json`; the Job fails when the gate fails |
+| C candidate and release | `scripts/ragops/job.sh build-index -- build-index --collection rahbar-cand-mxbai --embed-model mxbai-embed-large`, `scripts/ragops/candidate.sh cand-mxbai`, `scripts/ragops/release.sh cand-mxbai`, undo with `kubectl rollout undo deployment/api -n rahbar` | `kubectl rollout status` output; the next trace shows the collection and embedding version |
+| D traces | `kubectl exec -n rahbar ragops-loader -- python -m ragops.trace.show <trace_id> --traces /traces --lake /data`; summary: `... python -m ragops.trace.summary --traces /traces` | the exact context and prompt behind an answer; metrics over a window |
+| D metrics | `kubectl port-forward -n rahbar deploy/api 8000:8000`, `curl localhost:8000/metrics` | Prometheus text |
+| E coverage | `kubectl delete job coverage -n rahbar --ignore-not-found && kubectl apply -f k8s/coverage-job.yaml` | `<timestamp>_coverage.json`; exit 1 below the threshold |
+| F | `kubectl get all,pvc,configmap,cronjob,job -n rahbar` | see `k8s/README.md` |
+
+`eval/golden.jsonl` (frozen in the commit `golden: freeze v1`), `eval/pairs.jsonl`, `eval/live_queries.jsonl`, the
+Batch B fixtures in `corpus/batch-b/` and the committed result files in `eval/results/` are the data behind the report.
+The evaluation endpoint `/api/retrieve` and the `X-Eval-*` headers need the run-time token created by
+`scripts/ragops/eval-token.sh`; they are not reachable through the Ingress.
 
 ## Documents
 

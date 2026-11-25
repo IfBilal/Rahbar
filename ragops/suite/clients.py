@@ -39,17 +39,41 @@ class OllamaEmbedder:
     def __init__(self, url: str, model: str, timeout: float = 120.0) -> None:
         self.url, self.model = url.rstrip("/"), model
         self.http = httpx.Client(timeout=timeout)
+        self.shortened = 0          # texts a small-context model refused and that were halved to fit
+
+    def _post(self, texts: list[str]) -> list[list[float]]:
+        r = self.http.post(f"{self.url}/api/embed", json={"model": self.model, "input": texts})
+        r.raise_for_status()
+        return r.json().get("embeddings") or []  # type: ignore[no-any-return]
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         try:
-            r = self.http.post(f"{self.url}/api/embed", json={"model": self.model, "input": texts})
-            r.raise_for_status()
-            vectors = r.json().get("embeddings") or []
+            try:
+                vectors = self._post(texts)
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code != 400:
+                    raise
+                # a 512-token model refuses dense 300-word chunks (400, "input length exceeds the context
+                # length"); the candidate index was built the same way (indexer embed.py), so match it
+                vectors = [v for t in texts for v in [self._embed_shortened(t)]]
         except (httpx.HTTPError, ValueError) as exc:
             raise InfrastructureError(f"embedding service failed: {exc}") from exc
         if len(vectors) != len(texts):
             raise InfrastructureError(f"asked for {len(texts)} vectors, got {len(vectors)}")
         return [[float(x) for x in v] for v in vectors]
+
+
+    def _embed_shortened(self, text: str) -> list[float]:
+        words, cut = text.split(), False
+        while True:
+            try:
+                vec = self._post([" ".join(words)])[0]
+                self.shortened += int(cut)
+                return vec
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code != 400 or len(words) <= 8:
+                    raise
+                words, cut = words[: len(words) // 2], True
 
 
 class OllamaJudge:

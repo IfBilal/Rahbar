@@ -1,0 +1,10 @@
+```
+RAGOps suite  label=cand-minilm-module  2026-11-25T07:23:35Z  git=f207027  embed=all-minilm  collection=ok: rahbar-cand-minilm (532 chunks)  corpus=A (ledger 0f1f81...)
+LEVEL      METRIC                           VALUE              N
+module     paraphrase mean cosine           0.641              20
+module     unrelated mean cosine            0.116              20
+module     gap                              0.525
+module     embed ms/chunk (mean / p95)      58.4 / 112.8
+module     determinism max |d|              0.0e+00
+skipped 4 question(s): g027 (requires batch ['B'] not ingested), g028 (requires batch ['B'] not ingested), g029 (requires batch ['B'] not ingested), g030 (requires batch ['B'] not ingested)
+```

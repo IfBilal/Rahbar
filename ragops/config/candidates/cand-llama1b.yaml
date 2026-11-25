@@ -1,0 +1,18 @@
+# Candidate-bad, second attempt (docs/a3-ragops/07 section 2.2). The first, cand-minilm, was predicted to
+# fail and PASSED the gate (docs/a3-evidence/C/): a small embedding model is not necessarily a worse one.
+# This one is bad on purpose, as the assignment allows: a general-purpose 1B language model used as the
+# embedder (dimension 2048, no retrieval training). The ONE change: the embedding model.
+# Written BEFORE the run. The hypothesis is a hypothesis; the gate decides.
+name: cand-llama1b
+release_id: R4-llama1b
+change: embedding_model
+collection: rahbar-cand-llama1b
+embed_model: llama3.2:1b
+embed_version: "baf6a787fdff"
+chunk_size: 300
+chunk_overlap: 40
+top_k: 5
+relevance_floor: 0.50           # calibrated: docs/a3-evidence/C/C0-floor-llama1b.txt (lowest best-gold score 0.5509)
+cache_threshold: null
+prompt_version: same
+expected: fail

@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "overall": "fail",
+  "evaluated_at": "2026-11-25T09:45:33Z",
+  "git_sha": "",
+  "config_hash": "54d2a85d1212e787",
+  "gate_config_version": 1,
+  "baseline": {
+    "file": "live.json",
+    "label": "baseline",
+    "release_id": "R1-nomic"
+  },
+  "candidate": {
+    "file": "20261125T083132Z_cand-mxbai.json",
+    "label": "cand-mxbai",
+    "release_id": "R2-mxbai"
+  },
+  "rules": [
+    {
+      "id": "recall5_drop",
+      "metric": "component.recall@5",
+      "type": "max_drop_abs",
+      "limit": 0.02,
+      "baseline": 0.8,
+      "candidate": 0.85,
+      "delta": 0.05,
+      "status": "pass",
+      "message": "component.recall@5 0.85 is 0.0000 below baseline 0.8 (limit 0.02)"
+    },
+    {
+      "id": "abstention",
+      "metric": "endpoint.abstention_correctness",
+      "type": "not_lower_than_baseline",
+      "limit": 0.0,
+      "baseline": 1.0,
+      "candidate": 0.8333,
+      "delta": -0.1667,
+      "status": "fail",
+      "message": "endpoint.abstention_correctness 0.8333 vs baseline 1.0 (tolerance 0.0)"
+    },
+    {
+      "id": "citation_validity",
+      "metric": "endpoint.citation_validity",
+      "type": "min_value",
+      "limit": 0.95,
+      "baseline": 1.0,
+      "candidate": 1.0,
+      "delta": 0.0,
+      "status": "pass",
+      "message": "endpoint.citation_validity 1.0 vs minimum 0.95"
+    },
+    {
+      "id": "faithfulness_min",
+      "metric": "endpoint.faithfulness",
+      "type": "min_value",
+      "limit": 0.89,
+      "baseline": 0.9474,
+      "candidate": 0.9474,
+      "delta": 0.0,
+      "status": "pass",
+      "message": "endpoint.faithfulness 0.9474 vs minimum 0.89"
+    },
+    {
+      "id": "p95_latency",
+      "metric": "endpoint.latency_p95_s",
+      "type": "max_value",
+      "limit": 225.0,
+      "baseline": 153.04,
+      "candidate": 190.87,
+      "delta": 37.83,
+      "status": "pass",
+      "message": "endpoint.latency_p95_s 190.87 vs maximum 225.0"
+    }
+  ],
+  "incomparable": []
+}

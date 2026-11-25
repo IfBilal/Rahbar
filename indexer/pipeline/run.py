@@ -116,11 +116,12 @@ def _utc() -> str:
     return time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
 
 
-def make_embedder(settings: IndexerSettings):  # type: ignore[no-untyped-def]
+def make_embedder(settings: IndexerSettings, shorten: bool = False):  # type: ignore[no-untyped-def]
+    """`shorten` is for candidate indexes only (see embed.embed): the live index stays strict."""
     from .embed import embed
 
     def run_embed(texts: list[str]) -> list[list[float]]:
-        return embed(texts, settings)
+        return embed(texts, settings, shorten_on_overflow=shorten)
     return run_embed
 
 
@@ -143,7 +144,7 @@ def build_targets(settings: IndexerSettings, ledger, client):  # type: ignore[no
                                 chunk_size=int(info["chunk_size"]),
                                 chunk_overlap=int(info["chunk_overlap"]))
         targets.append(Target(ChromaIndex(client, name, s, info.get("embed_version", "")),
-                              make_embedder(s), s.embed_model, s.chunk_size, s.chunk_overlap,
+                              make_embedder(s, shorten=info.get("role") != "live"), s.embed_model, s.chunk_size, s.chunk_overlap,
                               info.get("embed_version", ""), info.get("role", "candidate")))
     return targets
 
@@ -273,10 +274,17 @@ def _build_index(args, settings, lake, ledger, targets, client, run_id):  # type
                             chunk_overlap=args.chunk_overlap if args.chunk_overlap is not None
                             else settings.chunk_overlap)
     version = os.environ.get("EMBED_VERSION_CANDIDATE", "")
-    target = Target(ChromaIndex(client, args.collection, s, version), make_embedder(s),
+    target = Target(ChromaIndex(client, args.collection, s, version), make_embedder(s, shorten=True),
                     s.embed_model, s.chunk_size, s.chunk_overlap, version, "candidate")
-    return ops.build_index(lake, ledger, target, targets[0], extract, settings.ocr_enabled, run_id,
-                           register=args.register)
+    from .embed import STATS
+    STATS["shortened"] = 0
+    summary = ops.build_index(lake, ledger, target, targets[0], extract, settings.ocr_enabled, run_id,
+                              register=args.register)
+    summary["chunks_shortened"] = STATS["shortened"]
+    if STATS["shortened"]:
+        log("candidate embedding model refused some chunks as too long; embedded from a halved text",
+            chunks_shortened=STATS["shortened"], model=args.embed_model)
+    return summary
 
 
 def _unregister(args, settings, ledger, client, run_id):  # type: ignore[no-untyped-def]
@@ -321,7 +329,17 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Exit 1 is reserved for 'finished, some documents quarantined' (job_entry.sh maps it to success), so an
+    uncaught exception anywhere here must never surface as 1 (a traceback exits 1 by default): it is 3."""
     args = _parser().parse_args(argv)
+    try:
+        return _main(args)
+    except Exception as exc:
+        log("fatal", error=f"{type(exc).__name__}: {str(exc)[:300]}")
+        return 3
+
+
+def _main(args: argparse.Namespace) -> int:
     settings = get_settings()
     if args.command:
         return run_command(args, settings)

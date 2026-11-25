@@ -22,7 +22,7 @@ data:
   GARBLED_MIN_WORD_RATIO: "0.35"
   TRUNCATION_FAIL_SCORE: "3"
 ---
-# What the eval Job tests and how. `make eval TARGET=live|candidate LABEL=...` rewrites it.
+# What the eval Job tests and how. `scripts/ragops/eval.sh` (via `make eval-suite`, `eval-gate`, `eval-demo`, `eval-gate-rerun`) rewrites it.
 apiVersion: v1
 kind: ConfigMap
 metadata: {name: ragops-eval-target, namespace: rahbar}

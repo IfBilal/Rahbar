@@ -1,0 +1,11 @@
+$ bash -c for p in $(kubectl get pods -n rahbar -l app=api -o name); do kubectl logs -n rahbar $p --tail=20000 | grep '36675b4de5fb48c0a22b5ac5d0fd36c9' | head -1 | python3 -c "
+import sys, json
+line = sys.stdin.read().strip()
+if line:
+    outer = json.loads(line); rec = json.loads(outer['msg'])
+    print('log line fields:', sorted(outer)); print('trace_id', rec['trace_id'], '| release', rec['release_id'], '| status', rec['status'], '| guardrails', [g['action'] for g in rec['guardrails']], '| latency_ms', rec['latency_ms'])
+"; done
+log line fields: ['level', 'logger', 'msg', 'request_id', 'ts']
+trace_id 36675b4de5fb48c0a22b5ac5d0fd36c9 | release R1-nomic | status ok | guardrails ['neutralised'] | latency_ms {'total': 87109.8, 'retrieve': 12.2, 'generate': 87097.1}
+
+[exit 0 at 2026-11-25T11:43:35 UTC]

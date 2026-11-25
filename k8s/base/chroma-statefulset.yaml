@@ -43,10 +43,11 @@ spec:
             periodSeconds: 20
             failureThreshold: 3
           resources:
-            # kubectl top: 2m / 32Mi for 532 vectors; the limit leaves room for HNSW growth
+            # kubectl top: 2m / 32Mi for 532 vectors (A3 top-ingest.txt), 8m / 99Mi peak, 2m / 97Mi steady
+            # during the evaluation (top-eval-drift.txt); the limit leaves room for HNSW growth
             requests:
-              cpu: 25m
-              memory: 64Mi
+              cpu: 10m
+              memory: 96Mi
             limits:
               cpu: 500m
               memory: 512Mi

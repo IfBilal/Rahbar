@@ -42,8 +42,24 @@ for attempt in 1 2 3 4 5 6; do
   [ "$attempt" = 6 ] && exit 1; echo "apply failed, retrying in 10 s"; sleep 10
 done
 
+# A failed Job's pods (and their logs) are deleted by Kubernetes, so poll while it runs and keep what we see:
+# the pods, their events, and every container's log, init containers included, by label rather than `job/...`
+# (which cannot read a pod that died in an init container).
+( while true; do
+    { echo "=== $(date -u +%T)"; kubectl get pods -n rahbar -l job-name=ingest -o wide --no-headers 2>&1
+      for pod in $(kubectl get pods -n rahbar -l job-name=ingest -o name 2>/dev/null); do
+        kubectl get "$pod" -n rahbar -o jsonpath='{range .status.initContainerStatuses[*]}init {.name}: {.state}{"\n"}{end}{range .status.containerStatuses[*]}main {.name}: {.state} last={.lastState}{"\n"}{end}' 2>&1
+        for c in $(kubectl get "$pod" -n rahbar -o jsonpath='{.spec.initContainers[*].name} {.spec.containers[*].name}' 2>/dev/null); do
+          echo "--- $pod/$c"; kubectl logs "$pod" -n rahbar -c "$c" --tail=60 2>&1; kubectl logs "$pod" -n rahbar -c "$c" --previous --tail=60 2>&1 | sed 's/^/[previous] /'
+        done
+      done; } >>/tmp/ingest-job.log 2>&1
+    sleep 4; done ) &
+LOGGER=$!
 kubectl wait -n rahbar --for=condition=complete job/ingest --timeout="${INDEX_TIMEOUT:-900s}" || {
-  kubectl get pods -n rahbar; kubectl logs -n rahbar job/ingest --all-containers --tail=50; exit 1; }
+  kill "$LOGGER" 2>/dev/null || true
+  kubectl get pods,jobs -n rahbar; kubectl describe job/ingest -n rahbar | tail -30
+  echo "---- what the ingest Job's pods did while they ran (deduplicated)"; awk '!seen[$0]++' /tmp/ingest-job.log | tail -200; exit 1; }
+kill "$LOGGER" 2>/dev/null || true
 kubectl logs -n rahbar job/ingest --tail=5
 kubectl rollout status -n rahbar deployment/api --timeout=300s
 kubectl rollout status -n rahbar deployment/ui --timeout=120s

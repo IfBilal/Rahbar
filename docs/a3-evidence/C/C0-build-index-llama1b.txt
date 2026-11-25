@@ -1,0 +1,7 @@
+$ scripts/ragops/job.sh build-index -- build-index --collection rahbar-cand-llama1b --embed-model llama3.2:1b
+job.batch/ingest-build-index-1125072356 created
+job/ingest-build-index-1125072356
+job.batch/ingest-build-index-1125072356 condition met
+{"chunks_embedded": 532, "chunks_shortened": 0, "chunks_written": 532, "collection": "rahbar-cand-llama1b", "command": "build-index", "exit": 0, "indexes": {"rahbar-cand-llama1b": {"revision": "r0001", "revision_bumped": true}}, "run_id": "ingest-20261125T072359Z-5kmb", "schema": 1, "seconds": 1405.7, "type": "ingest_summary"}
+
+[exit 0 at 2026-11-25T07:47:29 UTC]

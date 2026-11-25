@@ -94,3 +94,16 @@ def test_cli_and_hash(tmp_path: Path, capsys) -> None:
     bad.write_text(json.dumps(q(1)) + "\n")
     assert main(["--validate", str(bad)]) == 1
     assert main(["--validate", str(tmp_path / "nope.jsonl")]) == 2
+
+
+def test_a_batch_b_question_is_not_checked_against_a_ledger_that_has_only_batch_a() -> None:
+    """First cluster run: the suite refused to start because the Batch B questions cite documents
+    that cannot be in the ledger before Batch B is ingested. `select` skips them anyway."""
+    rows = full_set()
+    rows[-1]["gold"] = [{"doc": "library-borrowing-rules.md", "page": 1}]
+    rows[-1]["requires_batch"] = ["B"]
+    docs = {"rules.pdf": 20}
+    assert validate(rows, docs)[0]                                   # without batches: flagged (old behaviour)
+    assert validate(rows, docs, {"A"})[0] == []                      # Batch A only: not checked yet
+    problems = validate(rows, {**docs}, {"A", "B"})[0]               # after Batch B is ingested: checked again
+    assert any("library-borrowing-rules.md" in p and "not in the ledger" in p for p in problems)

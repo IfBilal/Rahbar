@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "overall": "fail",
+  "evaluated_at": "2026-11-25T11:47:27Z",
+  "git_sha": "28e5884",
+  "config_hash": "54d2a85d1212e787",
+  "gate_config_version": 1,
+  "baseline": {
+    "file": "live.json",
+    "label": "baseline",
+    "release_id": "R1-nomic"
+  },
+  "candidate": {
+    "file": "20261125T074817Z_cand-llama1b.json",
+    "label": "cand-llama1b",
+    "release_id": "R4-llama1b"
+  },
+  "rules": [
+    {
+      "id": "recall5_drop",
+      "metric": "component.recall@5",
+      "type": "max_drop_abs",
+      "limit": 0.02,
+      "baseline": 0.8,
+      "candidate": 0.6,
+      "delta": -0.2,
+      "status": "fail",
+      "message": "component.recall@5 0.6 is 0.2000 below baseline 0.8 (limit 0.02)"
+    },
+    {
+      "id": "abstention",
+      "metric": "endpoint.abstention_correctness",
+      "type": "not_lower_than_baseline",
+      "limit": 0.0,
+      "baseline": 1.0,
+      "candidate": 1.0,
+      "delta": 0.0,
+      "status": "pass",
+      "message": "endpoint.abstention_correctness 1.0 vs baseline 1.0 (tolerance 0.0)"
+    },
+    {
+      "id": "citation_validity",
+      "metric": "endpoint.citation_validity",
+      "type": "min_value",
+      "limit": 0.95,
+      "baseline": 1.0,
+      "candidate": 1.0,
+      "delta": 0.0,
+      "status": "pass",
+      "message": "endpoint.citation_validity 1.0 vs minimum 0.95"
+    },
+    {
+      "id": "faithfulness_min",
+      "metric": "endpoint.faithfulness",
+      "type": "min_value",
+      "limit": 0.89,
+      "baseline": 0.9474,
+      "candidate": 0.8571,
+      "delta": -0.0903,
+      "status": "fail",
+      "message": "endpoint.faithfulness 0.8571 vs minimum 0.89"
+    },
+    {
+      "id": "p95_latency",
+      "metric": "endpoint.latency_p95_s",
+      "type": "max_value",
+      "limit": 225.0,
+      "baseline": 153.04,
+      "candidate": 87.79,
+      "delta": -65.25,
+      "status": "pass",
+      "message": "endpoint.latency_p95_s 87.79 vs maximum 225.0"
+    }
+  ],
+  "incomparable": []
+}

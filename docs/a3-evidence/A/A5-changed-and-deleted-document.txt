@@ -1,0 +1,16 @@
+$ bash /tmp/a5.sh
+### 0. before
+   chroma_total 558 ledger_expected 558 orphans [] | demo-notice chunks: {} | all other documents: 558 chunks
+### 1. a NEW document arrives (inbox/demo/demo-notice.md)
+   {'docs_new': 1, 'docs_updated': 0, 'docs_deleted': 0, 'docs_unchanged': 15, 'chunks_embedded': 10, 'chunks_written': 10, 'chunks_deleted': 0, 'verification_embeddings': 8} revision r0007
+   chroma_total 563 ledger_expected 563 orphans [] | demo-notice chunks: {'demo-notice@2026-12': 5} | all other documents: 558 chunks
+### 2. the SAME document CHANGES (two sentences edited): only its own chunks are replaced
+   {'docs_new': 0, 'docs_updated': 1, 'docs_deleted': 0, 'docs_unchanged': 15, 'chunks_embedded': 10, 'chunks_written': 10, 'chunks_deleted': 10, 'verification_embeddings': 8} revision r0008
+   chroma_total 563 ledger_expected 563 orphans [] | demo-notice chunks: {'demo-notice@2026-12': 5} | all other documents: 558 chunks
+### 3. unchanged re-run: nothing is embedded
+   {'docs_new': 0, 'docs_updated': 0, 'docs_deleted': 0, 'docs_unchanged': 16, 'chunks_embedded': 0, 'chunks_written': 0, 'chunks_deleted': 0, 'verification_embeddings': 0} revision r0008
+### 4. the document is DELETED from the index (and removed from the inbox so it does not come back)
+   {'command': 'delete', 'deleted': ['demo-notice@2026-12'], 'chunks_deleted': 10, 'exit': 0}
+   chroma_total 558 ledger_expected 558 orphans [] | demo-notice chunks: {} | all other documents: 558 chunks
+
+[exit 0 at 2026-11-25T10:14:08 UTC]

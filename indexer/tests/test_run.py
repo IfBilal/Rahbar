@@ -68,3 +68,12 @@ def test_every_indexer_log_line_carries_the_run_id(capsys) -> None:
     run.log("indexer finished", chunks=3)
     lines = [json.loads(x) for x in capsys.readouterr().out.splitlines()]
     assert {x["request_id"] for x in lines} == {run.RUN_ID} and run.RUN_ID
+
+
+def test_an_uncaught_error_is_exit_3_never_exit_1(monkeypatch, capsys) -> None:
+    """Exit 1 means 'finished with quarantined documents' and job_entry.sh maps it to success; a crash (for
+    example an unwritable volume or bad settings) must never look like that."""
+    from pipeline import run
+    monkeypatch.setattr(run, "get_settings", lambda: (_ for _ in ()).throw(PermissionError("read-only volume")))
+    assert run.main(["sync"]) == 3
+    assert "read-only volume" in capsys.readouterr().out

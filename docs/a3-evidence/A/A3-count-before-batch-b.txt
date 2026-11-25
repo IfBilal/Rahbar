@@ -1,0 +1,7 @@
+$ scripts/ragops/job.sh count -- count
+job.batch/ingest-count-1125100708 created
+job/ingest-count-1125100708
+job.batch/ingest-count-1125100708 condition met
+{"indexes": {"rahbar": {"chroma_total": 532, "index": "rahbar", "ledger_expected_total": 532, "missing": [], "orphans": [], "per_doc": {"academic-rules@2023-08": 45, "academic-rules@2026-06": 66, "annual-report-2019-20@2019-20": 63, "annual-report-2023-24@2023-24": 211, "faculty-entrepreneurship-and-technical-start-ups-policy@2022-05": 23, "fee-structure@2026-27": 9, "grading@2026": 8, "prospectus-academic-rules@2026": 25, "student-handbook@2026-06": 82}}, "rahbar-cand-minilm": {"chroma_total": 532, "index": "rahbar-cand-minilm", "ledger_expected_total": 532, "missing": [], "orphans": [], "per_doc": {"academic-rules@2023-08": 45, "academic-rules@2026-06": 66, "annual-report-2019-20@2019-20": 63, "annual-report-2023-24@2023-24": 211, "faculty-entrepreneurship-and-technical-start-ups-policy@2022-05": 23, "fee-structure@2026-27": 9, "grading@2026": 8, "prospectus-academic-rules@2026": 25, "student-handbook@2026-06": 82}}}}
+
+[exit 0 at 2026-11-25T10:07:14 UTC]

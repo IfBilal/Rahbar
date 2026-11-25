@@ -1,0 +1,8 @@
+$ scripts/ragops/job.sh build-index -- build-index --collection rahbar-cand-minilm --embed-model all-minilm
+job.batch/ingest-build-index-1125052238 created
+job/ingest-build-index-1125052238
+job.batch/ingest-build-index-1125052238 condition met
+{"ts": "2026-11-25T05:33:18Z", "logger": "rahbar.indexer", "msg": "candidate embedding model refused some chunks as too long; embedded from a halved text", "request_id": "ingest-build-index-1125052238-l4zpb", "chunks_shortened": 74, "model": "all-minilm"}
+{"chunks_embedded": 532, "chunks_shortened": 74, "chunks_written": 532, "collection": "rahbar-cand-minilm", "command": "build-index", "exit": 0, "indexes": {"rahbar-cand-minilm": {"revision": "r0001", "revision_bumped": true}}, "run_id": "ingest-20261125T052240Z-4zpb", "schema": 1, "seconds": 637.11, "type": "ingest_summary"}
+
+[exit 0 at 2026-11-25T05:33:21 UTC]

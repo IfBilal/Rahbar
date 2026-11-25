@@ -68,7 +68,8 @@ spec:
             failureThreshold: 3
             timeoutSeconds: 3
           resources:
-            requests: {cpu: 100m, memory: 96Mi}
+            # Same image as the api, sized like it (docs/a3-evidence/F5-resources.md); idle sample 4m / 72Mi.
+            requests: {cpu: 100m, memory: 80Mi}
             limits: {cpu: 500m, memory: 256Mi}
           volumeMounts:
             - {name: tmp, mountPath: /tmp}

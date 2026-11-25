@@ -69,3 +69,32 @@ def test_summary_counts_and_percentiles(tmp_path, capsys) -> None:
     assert len(summary.load(traces, "2026-11-26T10:01:00Z", None)) == 2
     assert summary.main(["--traces", str(traces)]) == 0
     assert summary.main(["--traces", str(traces), "--route", "/nope"]) == 3
+
+
+def test_summary_reports_the_top1_similarity_distribution_and_filters_by_release(tmp_path) -> None:
+    """D3 asks for the top-1 retrieval similarity distribution; the first summary tool omitted it."""
+    traces, _, _ = make(tmp_path)
+    rows = summary.load(traces, None, None)
+    # give the three traces known top-1 scores
+    for r, score in zip(rows, (0.9, 0.7, 0.5)):
+        r["retrieval"] = {"candidates": [{"score": score}, {"score": 0.1}]}
+    t1 = summary.summarise(rows)["top1_similarity"]
+    assert t1["n"] == 3 and t1["min"] == 0.5 and t1["max"] == 0.9 and t1["p50"] == 0.7
+    release = rows[0].get("release_id")
+    assert len(summary.load(traces, None, None, release)) >= 1
+    assert summary.load(traces, None, None, "no-such-release") == []
+    assert summary.main(["--traces", str(traces)]) == 0       # the CLI runs end to end on these traces
+
+
+def test_show_prints_the_exact_prompt_and_context(tmp_path, capsys) -> None:
+    """D2: the tool must print the exact context and prompt that produced the answer, not only their hash."""
+    traces, lake, _ = make(tmp_path)
+    assert show.main(["t0", "--traces", str(traces), "--lake", str(lake)]) == 0
+    out = capsys.readouterr().out
+    assert "PROMPT (exactly what the model received" in out
+    assert "--- SYSTEM MESSAGE ---" in out and "--- USER MESSAGE ---" in out
+    assert "<evidence>Students need a CGPA of 2.00.</evidence>" in out          # the retrieved context, verbatim
+    assert show.main(["t0", "--traces", str(traces), "--no-prompt"]) == 0
+    assert "PROMPT (exactly" not in capsys.readouterr().out
+    assert show.main(["t0", "--traces", str(traces), "--json"]) == 0
+    assert "prompt_messages" in capsys.readouterr().out

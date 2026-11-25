@@ -11,9 +11,11 @@ set -uo pipefail
 here=$(cd "$(dirname "$0")/../.." && pwd)
 NS=${NS:-rahbar}
 name=${1:?usage: release.sh <candidate-name> [--dry-run]}
-dry=0; [ "${2:-}" = "--dry-run" ] && dry=1
+dry=0
 spec="$here/ragops/config/candidates/$name.yaml"
 refuse() { echo "REFUSED: $*" >&2; exit 1; }
+case "${2:-}" in "") ;; --dry-run) dry=1 ;; *) refuse "unknown argument '$2' (the only option is --dry-run)" ;; esac
+[[ "$name" =~ ^[A-Za-z0-9._-]+$ ]] || refuse "candidate name '$name' has characters outside [A-Za-z0-9._-]"
 [ -f "$spec" ] || refuse "no candidate spec $spec"
 
 # Values from the candidate spec end up in kubectl arguments: allow only a strict character set,
@@ -41,19 +43,27 @@ kubectl get pod ragops-loader -n "$NS" >/dev/null 2>&1 || {
 rx() { kubectl exec -n "$NS" ragops-loader -- "$@"; }
 
 # 1. a passing gate decision for exactly this candidate, newer than its result file
-latest_result=$(rx sh -c "ls -1t /results/*_${name}.json 2>/dev/null | head -1")
+latest_result=$(rx sh -c 'ls -1t /results/*_"$1".json 2>/dev/null | head -1' _ "$name")
 [ -n "$latest_result" ] || refuse "no result file for $name: run the suite first"
 decision="${latest_result%.json}.decision.json"
 rx test -f "$decision" || refuse "no gate decision for $latest_result: run the gate"
-verdict=$(rx cat "$decision" | python3 -c '
+# The decision is only as good as what it was made from: it must be for this exact candidate, for the result
+# of the system that is serving the candidate collection now (a collection rebuilt after the evaluation, or a
+# different embedding version, is a different system), and must compare the candidate with a DIFFERENT baseline.
+{ read -r overall; read -r rid; read -r cfile; read -r bfile; read -r rcoll; read -r rver; } < <(
+  { rx cat "$decision"; echo "@@@@"; rx cat "$latest_result"; } | python3 -c '
 import json, sys
-d = json.load(sys.stdin)
-print(d.get("overall"), d.get("candidate", {}).get("release_id"), d.get("candidate", {}).get("file"))')
-set -- $verdict
-overall=$1; rid=$2; cfile=$3
+dec, res = sys.stdin.read().split("@@@@", 1)
+d, r = json.loads(dec), json.loads(res)
+t = r.get("target", {})
+print(d.get("overall")); print(d.get("candidate", {}).get("release_id")); print(d.get("candidate", {}).get("file"))
+print(d.get("baseline", {}).get("file")); print(t.get("collection")); print(t.get("embed_version"))')
 [ "$overall" = "pass" ] || refuse "gate decision for $name is '$overall', not pass ($decision)"
 [ "$rid" = "$RELEASE_ID" ] || refuse "decision is for release '$rid', not '$RELEASE_ID'"
 [ "$(basename "$latest_result")" = "$(basename "$cfile")" ] || refuse "decision is stale: it was made for $cfile, newer result is $latest_result"
+[ "$(basename "$bfile")" != "$(basename "$cfile")" ] || refuse "the decision compared the candidate with itself ($bfile)"
+case "$rcoll" in *"$COLLECTION"*) ;; *) refuse "the evaluated result was for collection '$rcoll', not '$COLLECTION': re-run the suite" ;; esac
+[ "$rver" = "$EMBED_VERSION" ] || refuse "the evaluated result used embedding version '$rver', the spec says '$EMBED_VERSION': re-run the suite"
 
 # 2. the candidate is Ready and serves the candidate collection
 ready=$(kubectl get deploy api-candidate -n "$NS" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
@@ -62,7 +72,8 @@ cur=$(kubectl get deploy api-candidate -n "$NS" -o jsonpath='{range .spec.templa
 [ "$cur" = "$COLLECTION" ] || refuse "api-candidate serves '$cur', not '$COLLECTION'"
 
 # 3. no ingest Job is running (single writer; never release mid-update)
-active=$(kubectl get jobs -n "$NS" -o jsonpath='{range .items[?(@.status.active)]}{.metadata.name}{"\n"}{end}' | grep '^ingest' || true)
+jobs=$(kubectl get jobs -n "$NS" -o jsonpath='{range .items[?(@.status.active)]}{.metadata.name}{"\n"}{end}') || refuse "cannot list the Jobs: not releasing blind"
+active=$(printf '%s\n' "$jobs" | grep '^ingest' || true)
 [ -z "$active" ] || refuse "an ingest Job is running ($active)"
 
 sha=$(rx sha256sum "$decision" | cut -c1-12)
@@ -73,11 +84,13 @@ setenv=(kubectl -n "$NS" set env deployment/api "RELEASE_ID=$RELEASE_ID" "CHROMA
 status=(kubectl -n "$NS" rollout status deployment/api --timeout=900s)
 if [ "$dry" = 1 ]; then
   printf 'DRY RUN, gate passed (%s). Would run:\n' "$decision"
-  for c in annotate setenv status; do declare -n arr=$c; printf '  '; printf '%q ' "${arr[@]}"; printf '\n'; unset -n arr; done
+  for c in setenv annotate status; do declare -n arr=$c; printf '  '; printf '%q ' "${arr[@]}"; printf '\n'; unset -n arr; done
   exit 0
 fi
 echo "gate decision: $decision (pass); releasing $RELEASE_ID"
-for c in annotate setenv status; do
+# set env first (it creates the new revision), THEN annotate: the change-cause is copied to the ReplicaSet
+# that is current at that moment, so annotating first would relabel the revision being replaced
+for c in setenv annotate status; do
   declare -n arr=$c
   printf '+ '; printf '%q ' "${arr[@]}"; printf '\n'
   "${arr[@]}" || { echo "ROLLOUT FAILED at '$c' (not undone: kubectl rollout undo deployment/api -n $NS)" >&2; exit 2; }

@@ -5,7 +5,7 @@
 #
 #   scripts/ragops/job.sh sync                         # verify + update (same as the CronJob)
 #   scripts/ragops/job.sh restore -- restore academic-rules@2023-08
-#   scripts/ragops/job.sh count  -- count --json
+#   scripts/ragops/job.sh count  -- count [--doc-id ID]
 #   scripts/ragops/job.sh build-index -- build-index --collection rahbar-cand-mxbai --embed-model mxbai-embed-large
 # Environment: TAG (image tag, default dev), NS (default rahbar), WAIT=0 to skip waiting.
 set -euo pipefail
@@ -31,7 +31,13 @@ print(yaml.safe_dump(job))
 PY
 echo "job/$name"
 if [ "${WAIT:-1}" = "1" ]; then
-  kubectl wait --for=condition=complete "job/$name" -n "$NS" --timeout="${TIMEOUT:-3600s}" \
-    || { kubectl logs -n "$NS" "job/$name" --all-containers --tail=40; exit 1; }
+  # wait for Complete OR Failed (a plain --for=condition=complete would sit out the whole timeout on a failure)
+  done=0
+  for _ in $(seq 1 "${WAIT_STEPS:-1800}"); do
+    st=$(kubectl get "job/$name" -n "$NS" -o jsonpath='{.status.succeeded}/{.status.failed}' 2>/dev/null || true)
+    case "$st" in 1/*) done=1; break ;; */1) kubectl logs -n "$NS" "job/$name" --all-containers --tail=40; echo "job/$name FAILED" >&2; exit 1 ;; esac
+    sleep 2
+  done
+  [ "$done" = 1 ] || { echo "timed out waiting for job/$name" >&2; exit 1; }
   kubectl logs -n "$NS" "job/$name" -c indexer --tail=3
 fi

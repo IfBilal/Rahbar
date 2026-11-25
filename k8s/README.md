@@ -8,7 +8,7 @@ Ubuntu 24.04, Docker, minikube v1.39 (Calico), kubectl, kustomize, Ollama 0.17.
 ```bash
 make cluster                       # minikube --cni=calico --memory=8g --cpus=4, metrics-server, ingress
 ollama pull nomic-embed-text llama3.2:3b mxbai-embed-large all-minilm
-make ollama-host                   # Ollama on the minikube gateway, reachable as host.minikube.internal
+make ollama-host                   # Ollama on the minikube gateway; runs in the FOREGROUND: leave it, use a second terminal
 make images TAG=dev                # builds api, indexer, ui and ragops, loads them into minikube
 make apply                         # creates the eval-token Secret (random, at run time), applies k8s/overlays/dev
 kubectl -n rahbar wait --for=condition=complete job/ingest --timeout=3600s   # first ingestion: seed, verify, index
@@ -34,14 +34,14 @@ Job, then apply it again (the ingest Job in the base is the exception; it runs o
 | Part | Command | Object |
 | --- | --- | --- |
 | A ingest, verify, update | `scripts/ragops/job.sh sync` (or `kubectl create job --from=cronjob/ingest ingest-manual-1 -n rahbar`) | Job / CronJob `ingest` |
-| A report, count, restore, delete | `scripts/ragops/job.sh count -- count --json`, `... restore -- restore <doc>@<ver>`, `... delete -- delete <doc>` | Job `ingest-<action>-<ts>` |
+| A report, count, restore, delete | `scripts/ragops/job.sh count -- count`, `... restore -- restore <doc>@<ver>`, `... delete -- delete <doc>` | Job `ingest-<action>-<ts>` |
 | B suite | `make eval-suite LABEL=baseline` | Job `eval` (`MODE=suite`) |
 | C gate | `make eval-gate LABEL=cand-mxbai`; thresholds: `kubectl edit configmap ragops-gate -n rahbar` | Job `eval`, ConfigMap `ragops-gate` |
 | C/F3 release | `scripts/ragops/release.sh cand-mxbai`; undo: `kubectl rollout undo deployment/api -n rahbar` | Deployments `api`, `api-candidate` |
 | D traces | `kubectl exec -n rahbar ragops-loader -- python -m ragops.trace.show <trace_id> --traces /traces --lake /data`; `... ragops.trace.summary --traces /traces` | PVC `ragops-traces`, loader pod |
 | D metrics | `kubectl port-forward -n rahbar deploy/api 8000:8000` then `curl localhost:8000/metrics` | Service / port-forward |
 | E coverage | `kubectl apply -f k8s/coverage-job.yaml` | Job `coverage` |
-| Getting files in and out | `kubectl cp corpus/batch-b/. rahbar/ragops-loader:/data/inbox/`; `kubectl cp rahbar/ragops-loader:/results/. eval/results/` | loader pod |
+| Getting files in and out | `python corpus/batch-b/build.py --out /tmp/batch-b-out` then `kubectl cp /tmp/batch-b-out/batch-b rahbar/ragops-loader:/data/inbox/`; `kubectl cp rahbar/ragops-loader:/results/. eval/results/` | loader pod |
 
 ## Which object carries which responsibility
 
@@ -65,9 +65,17 @@ Job, then apply it again (the ingest Job in the base is the exception; it runs o
 * **Eval token.** `/api/retrieve` and the `X-Eval-*` headers need `X-Eval-Token`, read from the Secret `ragops-eval-token`, which `scripts/ragops/eval-token.sh` creates with a random value. The Ingress sends `/api/retrieve` to the UI.
 * **Ollama host.** If `host.minikube.internal` is not 192.168.49.1, change the `ipBlock` entries in `k8s/base/networkpolicy.yaml` and `k8s/base/ragops-networkpolicy.yaml`.
 
+## A release is not in Git
+
+`scripts/ragops/release.sh` changes the live Deployment with `kubectl set env`, because the release identity must
+live in the pod template for `kubectl rollout undo` to restore it. The manifests in Git still say `R1-nomic`, so
+re-running `kubectl apply -k k8s/overlays/dev` (or `make apply`) after a release **rolls the release back** to the
+committed values. To keep a release, commit the new values in `k8s/base/api.yaml` (and `rahbar-config`), through a pull
+request. The ingest Job and the API must agree on `EMBED_VERSION`; `tests/test_manifests.py` checks that.
+
 ## Limits
 
-Single node: `ReadWriteOnce` here means one node, so several pods share a claim; on a multi-node
+The in-cluster Ollama bonus overlay (`k8s/overlays/incluster`) patches the API and indexer policies only: the eval Job, the candidate and the coverage Job still point at the host Ollama there. Single node: `ReadWriteOnce` here means one node, so several pods share a claim; on a multi-node
 cluster the data and traces volumes would need `ReadWriteMany` or a log-shipping sidecar. Ollama
 runs on the host (no GPU on the measurement laptop, see `docs/a3-evidence/host.md`). No TLS, no
 authentication on Chroma (it is isolated by NetworkPolicy only), demo-scale resources.

@@ -1,0 +1,30 @@
+$ bash -c cd /home/dns/Desktop/scd-assignment2-se-b-24i3015-24i3166
+echo "### 1. a passing, fresh decision (dry run)"; scripts/ragops/release.sh cand-minilm --dry-run 2>&1 | cut -c1-170; echo "exit=$?"
+echo; echo "### 2. a mistyped option must not release"; scripts/ragops/release.sh cand-minilm --dryrun; echo "exit=$?"
+echo; echo "### 3. a name with odd characters"; scripts/ragops/release.sh "../x" ; echo "exit=$?"
+echo; echo "### 4. a failed gate"; scripts/ragops/release.sh cand-llama1b --dry-run; echo "exit=$?"
+echo; echo "### 5. a candidate with no result at all"; scripts/ragops/release.sh cand-mxbai --dry-run; echo "exit=$?"
+### 1. a passing, fresh decision (dry run)
+DRY RUN, gate passed (/results/20261125T054522Z_cand-minilm.decision.json). Would run:
+  kubectl -n rahbar set env deployment/api RELEASE_ID=R3-minilm CHROMA_COLLECTION=rahbar-cand-minilm EMBED_MODEL=all-minilm EMBED_VERSION=1b226e2802db RELEVANCE_FLOOR=0.2
+  kubectl -n rahbar annotate deployment/api kubernetes.io/change-cause=release\ R3-minilm\ \(gate\ decision\ a832a043e7f0\) --overwrite 
+  kubectl -n rahbar rollout status deployment/api --timeout=900s 
+exit=0
+
+### 2. a mistyped option must not release
+REFUSED: unknown argument '--dryrun' (the only option is --dry-run)
+exit=1
+
+### 3. a name with odd characters
+REFUSED: candidate name '../x' has characters outside [A-Za-z0-9._-]
+exit=1
+
+### 4. a failed gate
+REFUSED: gate decision for cand-llama1b is 'fail', not pass (/results/20261125T074817Z_cand-llama1b.decision.json)
+exit=1
+
+### 5. a candidate with no result at all
+REFUSED: gate decision for cand-mxbai is 'fail', not pass (/results/20261125T083132Z_cand-mxbai.decision.json)
+exit=1
+
+[exit 0 at 2026-11-25T10:31:06 UTC]

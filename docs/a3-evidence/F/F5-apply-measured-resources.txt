@@ -1,0 +1,65 @@
+$ bash -c cd /home/dns/Desktop/scd-assignment2-se-b-24i3015-24i3166; kubectl apply -k k8s/overlays/dev 2>&1 | grep -v unchanged | cut -c1-140; kubectl -n rahbar rollout status deployment/api --timeout=400s; kubectl -n rahbar rollout status statefulset/chroma --timeout=300s; kubectl -n rahbar rollout status deployment/redis --timeout=200s; kubectl get pods -n rahbar
+configmap/ragops-eval-target configured
+configmap/ragops-gate configured
+deployment.apps/api configured
+deployment.apps/redis configured
+statefulset.apps/chroma configured
+cronjob.batch/ingest configured
+job.batch/ingest created
+ingress.networking.k8s.io/rahbar created
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+partitioned roll out complete: 1 new pods have been updated...
+deployment "redis" successfully rolled out
+NAME                                  READY   STATUS        RESTARTS   AGE
+api-695f5bc65-4w5b4                   1/1     Running       0          21s
+api-695f5bc65-5mcb9                   1/1     Running       0          34s
+api-695f5bc65-6trn7                   1/1     Running       0          11s
+api-6c8bc44955-b7xgn                  1/1     Terminating   0          115m
+api-6c8bc44955-q9xd6                  1/1     Terminating   0          115m
+api-candidate-6cc5b7b76b-f9pwr        1/1     Running       0          123m
+chroma-0                              1/1     Running       0          32s
+coverage-mckwl                        0/1     Error         0          102s
+eval-wp6n8                            0/1     Completed     0          2m59s
+ingest-build-index-1125052238-l4zpb   0/1     Completed     0          6h28m
+ingest-build-index-1125053321-925jt   0/1     Completed     0          6h17m
+ingest-build-index-1125072356-v5kmb   0/1     Completed     0          4h26m
+ingest-count-1125100708-rp8xn         0/1     Completed     0          103m
+ingest-count-1125101008-x554r         0/1     Completed     0          100m
+ingest-count-1125101024-bkl86         0/1     Completed     0          100m
+ingest-count-1125101039-5mqlt         0/1     Completed     0          100m
+ingest-count-1125101243-7tlqw         0/1     Completed     0          98m
+ingest-count-1125101311-9dn2j         0/1     Completed     0          97m
+ingest-count-1125101337-ts7r5         0/1     Completed     0          97m
+ingest-count-1125101401-5z79n         0/1     Completed     0          96m
+ingest-delete-1125101353-p75dn        0/1     Completed     0          97m
+ingest-r6cwz                          0/1     Completed     0          33s
+ingest-restore-1125101015-25564       0/1     Completed     0          100m
+ingest-restore-1125101030-vcpw4       0/1     Completed     0          100m
+ingest-restore-1125101136-cgcs5       0/1     Completed     0          99m
+ingest-restore-1125101157-bsrwg       0/1     Completed     0          98m
+ingest-status-1125101055-r2bw9        0/1     Completed     0          100m
+ingest-status-1125101121-jwrk4        0/1     Completed     0          99m
+ingest-status-1125101142-vbn28        0/1     Completed     0          99m
+ingest-status-1125101204-9jsst        0/1     Completed     0          98m
+ingest-sync-1124173342-q8c89          0/1     Completed     0          18h
+ingest-sync-1125100818-dsgc8          0/1     Completed     0          102m
+ingest-sync-1125100949-msb4x          0/1     Completed     0          101m
+ingest-sync-1125101250-2gv8k          0/1     Completed     0          98m
+ingest-sync-1125101318-w6zc2          0/1     Completed     0          97m
+ingest-sync-1125101344-22h2v          0/1     Completed     0          97m
+ingest-unregister-1125095533-8g6xl    0/1     Completed     0          115m
+ingest-unregister-1125095540-gmvjk    0/1     Completed     0          115m
+ragops-loader                         1/1     Running       0          3m34s
+redis-fdbcf9975-px8fq                 1/1     Running       0          33s
+ui-b84f8ffd9-f5kt6                    1/1     Running       0          18h
+
+[exit 0 at 2026-11-25T11:50:55 UTC]

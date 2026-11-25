@@ -1,0 +1,25 @@
+$ kubectl exec -n rahbar ragops-loader -- cat /data/reports/verification/ingest-20261125T100821Z-sgc8.md
+# Verification report ingest-20261125T100821Z-sgc8
+
+embedding `nomic-embed-text` · documents 12 · unchanged 9
+
+| document | quality | complete | recency | unique | outcome | reason |
+| --- | --- | --- | --- | --- | --- | --- |
+| batch-b/Student_Handbook_Copy.pdf | PASS | PASS | PASS | FAIL | quarantined | U-EXACT-DUP: byte-identical to student-handbook@2026-06 (sh… |
+| batch-b/campus-parking-policy.md | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| batch-b/exam-schedule-policy-trunc.md | PASS | FAIL | PASS | PASS | quarantined | C-TRUNCATED: looks truncated (the last line ends with 'an' … |
+| batch-b/faculty-entrepreneurship-policy-2026.md | PASS | PASS | PASS | PASS | accepted | newer version detected: supersedes faculty-entrepreneurship… |
+| batch-b/grading-page-backup.html | PASS | FAIL | PASS | FAIL | quarantined | C-MISSING-DATE-VERSION: missing date or version |
+| batch-b/lab-safety-notice.pdf | FAIL | FAIL | PASS | PASS | quarantined | Q-EXTRACT-FAIL: extraction failed: PdfminerException: Unexp… |
+| batch-b/library-borrowing-rules.md | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| batch-b/library-lending-regulations.md | PASS | PASS | PASS | FAIL | quarantined | U-NEAR-DUP: near-duplicate of library-borrowing-rules@2026-… |
+| batch-b/scholarship-faq.md | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| batch-b/student-clubs-guidelines.pdf | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| batch-b/transport-routes-2026.html | PASS | PASS | PASS | PASS | accepted | all four checks passed |
+| batch-b/untitled-notes.txt | PASS | FAIL | PASS | PASS | quarantined | C-MISSING-TITLE: missing title, date or version |
+| faculty-entrepreneurship-and-technical-start-ups-policy@2022-05 (already indexed) | – | – | FAIL | – | archived | R-SUPERSEDED-BY: a newer version exists: faculty-entreprene… |
+
+**accepted 6 · quarantined 6 · archived 1 · unchanged 9**
+failures by check: quality 1 · completeness 4 · recency 1 · uniqueness 3
+
+[exit 0 at 2026-11-25T10:09:29 UTC]

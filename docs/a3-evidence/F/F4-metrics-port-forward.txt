@@ -1,0 +1,43 @@
+$ bash -c kubectl port-forward -n rahbar deploy/api 8010:8000 >/dev/null 2>&1 & PF=$!; sleep 4; curl -s localhost:8010/metrics | grep -E "^rahbar_" | grep -v "^#" | head -40; kill $PF
+rahbar_requests_total{path="/healthz",status="200"} 76.0
+rahbar_requests_total{path="/readyz",status="200"} 153.0
+rahbar_requests_total{path="/api/retrieve",status="200"} 3.0
+rahbar_requests_created{path="/healthz",status="200"} 1.7956005034929745e+09
+rahbar_requests_created{path="/readyz",status="200"} 1.7956005038592567e+09
+rahbar_requests_created{path="/api/retrieve",status="200"} 1.795601496322647e+09
+rahbar_request_seconds_bucket{le="0.05",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="0.1",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="0.25",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="0.5",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="1.0",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="2.0",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="5.0",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="10.0",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="30.0",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="60.0",path="/healthz"} 76.0
+rahbar_request_seconds_bucket{le="+Inf",path="/healthz"} 76.0
+rahbar_request_seconds_count{path="/healthz"} 76.0
+rahbar_request_seconds_sum{path="/healthz"} 0.06449641002109274
+rahbar_request_seconds_bucket{le="0.05",path="/readyz"} 152.0
+rahbar_request_seconds_bucket{le="0.1",path="/readyz"} 152.0
+rahbar_request_seconds_bucket{le="0.25",path="/readyz"} 153.0
+rahbar_request_seconds_bucket{le="0.5",path="/readyz"} 153.0
+rahbar_request_seconds_bucket{le="1.0",path="/readyz"} 153.0
+rahbar_request_seconds_bucket{le="2.0",path="/readyz"} 153.0
+rahbar_request_seconds_bucket{le="5.0",path="/readyz"} 153.0
+rahbar_request_seconds_bucket{le="10.0",path="/readyz"} 153.0
+rahbar_request_seconds_bucket{le="30.0",path="/readyz"} 153.0
+rahbar_request_seconds_bucket{le="60.0",path="/readyz"} 153.0
+rahbar_request_seconds_bucket{le="+Inf",path="/readyz"} 153.0
+rahbar_request_seconds_count{path="/readyz"} 153.0
+rahbar_request_seconds_sum{path="/readyz"} 1.1803714509951533
+rahbar_request_seconds_bucket{le="0.05",path="/api/retrieve"} 2.0
+rahbar_request_seconds_bucket{le="0.1",path="/api/retrieve"} 3.0
+rahbar_request_seconds_bucket{le="0.25",path="/api/retrieve"} 3.0
+rahbar_request_seconds_bucket{le="0.5",path="/api/retrieve"} 3.0
+rahbar_request_seconds_bucket{le="1.0",path="/api/retrieve"} 3.0
+rahbar_request_seconds_bucket{le="2.0",path="/api/retrieve"} 3.0
+rahbar_request_seconds_bucket{le="5.0",path="/api/retrieve"} 3.0
+rahbar_request_seconds_bucket{le="10.0",path="/api/retrieve"} 3.0
+
+[exit 0 at 2026-11-25T10:20:16 UTC]

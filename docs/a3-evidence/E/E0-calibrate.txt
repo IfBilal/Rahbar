@@ -1,0 +1,46 @@
+$ .venv/bin/python -m ragops.coverage.coverage calibrate --ollama http://192.168.49.1:11434
+{'tau': 0.5315, 'precision': 0.429, 'recall': 1.0, 'f1': 0.6, 'false_covered': 24}
+{'tau': 0.5439, 'precision': 0.439, 'recall': 1.0, 'f1': 0.61, 'false_covered': 23}
+{'tau': 0.5602, 'precision': 0.45, 'recall': 1.0, 'f1': 0.621, 'false_covered': 22}
+{'tau': 0.5603, 'precision': 0.462, 'recall': 1.0, 'f1': 0.632, 'false_covered': 21}
+{'tau': 0.5658, 'precision': 0.474, 'recall': 1.0, 'f1': 0.643, 'false_covered': 20}
+{'tau': 0.5732, 'precision': 0.486, 'recall': 1.0, 'f1': 0.655, 'false_covered': 19}
+{'tau': 0.5834, 'precision': 0.5, 'recall': 1.0, 'f1': 0.667, 'false_covered': 18}
+{'tau': 0.5931, 'precision': 0.514, 'recall': 1.0, 'f1': 0.679, 'false_covered': 17}
+{'tau': 0.5965, 'precision': 0.529, 'recall': 1.0, 'f1': 0.692, 'false_covered': 16}
+{'tau': 0.6083, 'precision': 0.545, 'recall': 1.0, 'f1': 0.706, 'false_covered': 15}
+{'tau': 0.609, 'precision': 0.562, 'recall': 1.0, 'f1': 0.72, 'false_covered': 14}
+{'tau': 0.6142, 'precision': 0.581, 'recall': 1.0, 'f1': 0.735, 'false_covered': 13}
+{'tau': 0.6214, 'precision': 0.6, 'recall': 1.0, 'f1': 0.75, 'false_covered': 12}
+{'tau': 0.6226, 'precision': 0.621, 'recall': 1.0, 'f1': 0.766, 'false_covered': 11}
+{'tau': 0.6383, 'precision': 0.643, 'recall': 1.0, 'f1': 0.783, 'false_covered': 10}
+{'tau': 0.6421, 'precision': 0.63, 'recall': 0.944, 'f1': 0.756, 'false_covered': 10}
+{'tau': 0.6428, 'precision': 0.654, 'recall': 0.944, 'f1': 0.773, 'false_covered': 9}
+{'tau': 0.6448, 'precision': 0.68, 'recall': 0.944, 'f1': 0.791, 'false_covered': 8}
+{'tau': 0.6579, 'precision': 0.667, 'recall': 0.889, 'f1': 0.762, 'false_covered': 8}
+{'tau': 0.6606, 'precision': 0.652, 'recall': 0.833, 'f1': 0.732, 'false_covered': 8}
+{'tau': 0.6678, 'precision': 0.636, 'recall': 0.778, 'f1': 0.7, 'false_covered': 8}
+{'tau': 0.6691, 'precision': 0.667, 'recall': 0.778, 'f1': 0.718, 'false_covered': 7}
+{'tau': 0.6742, 'precision': 0.65, 'recall': 0.722, 'f1': 0.684, 'false_covered': 7}
+{'tau': 0.6771, 'precision': 0.684, 'recall': 0.722, 'f1': 0.703, 'false_covered': 6}
+{'tau': 0.6859, 'precision': 0.722, 'recall': 0.722, 'f1': 0.722, 'false_covered': 5}
+{'tau': 0.6951, 'precision': 0.765, 'recall': 0.722, 'f1': 0.743, 'false_covered': 4}
+{'tau': 0.699, 'precision': 0.812, 'recall': 0.722, 'f1': 0.765, 'false_covered': 3}
+{'tau': 0.7067, 'precision': 0.8, 'recall': 0.667, 'f1': 0.727, 'false_covered': 3}
+{'tau': 0.7209, 'precision': 0.857, 'recall': 0.667, 'f1': 0.75, 'false_covered': 2}
+{'tau': 0.7495, 'precision': 0.846, 'recall': 0.611, 'f1': 0.71, 'false_covered': 2}
+{'tau': 0.7583, 'precision': 0.833, 'recall': 0.556, 'f1': 0.667, 'false_covered': 2}
+{'tau': 0.7593, 'precision': 0.818, 'recall': 0.5, 'f1': 0.621, 'false_covered': 2}
+{'tau': 0.7675, 'precision': 0.9, 'recall': 0.5, 'f1': 0.643, 'false_covered': 1}
+{'tau': 0.7821, 'precision': 0.889, 'recall': 0.444, 'f1': 0.593, 'false_covered': 1}
+{'tau': 0.7901, 'precision': 1.0, 'recall': 0.444, 'f1': 0.615, 'false_covered': 0}
+{'tau': 0.7981, 'precision': 1.0, 'recall': 0.389, 'f1': 0.56, 'false_covered': 0}
+{'tau': 0.8033, 'precision': 1.0, 'recall': 0.333, 'f1': 0.5, 'false_covered': 0}
+{'tau': 0.8043, 'precision': 1.0, 'recall': 0.278, 'f1': 0.435, 'false_covered': 0}
+{'tau': 0.8055, 'precision': 1.0, 'recall': 0.222, 'f1': 0.364, 'false_covered': 0}
+{'tau': 0.8393, 'precision': 1.0, 'recall': 0.167, 'f1': 0.286, 'false_covered': 0}
+{'tau': 0.8829, 'precision': 1.0, 'recall': 0.111, 'f1': 0.2, 'false_covered': 0}
+{'tau': 0.886, 'precision': 1.0, 'recall': 0.056, 'f1': 0.105, 'false_covered': 0}
+chosen tau = 0.6448  (n=42 labelled pairs)
+
+[exit 0 at 2026-11-25T09:09:18 UTC]

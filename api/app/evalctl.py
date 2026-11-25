@@ -38,7 +38,10 @@ def authorised(request: Request, settings: Settings) -> bool:
     """True when no token is configured, or the request carries the matching X-Eval-Token."""
     if not settings.eval_token:
         return True
-    return hmac.compare_digest(request.headers.get("X-Eval-Token", ""), settings.eval_token)
+    # bytes, not str: compare_digest raises TypeError for non-ASCII str, and a header can be any latin-1 text,
+    # so a public client could otherwise turn a wrong token into a 500
+    return hmac.compare_digest(request.headers.get("X-Eval-Token", "").encode("utf-8", "replace"),
+                               settings.eval_token.encode("utf-8"))
 
 
 def parse(request: Request, settings: Settings) -> EvalControls:

@@ -10,7 +10,7 @@
 #   BASELINE_RESULT   defaults to /results/baselines/live.json
 #   CANDIDATE_RESULT  only for MODE=gate
 #   SUITE_ARGS        extra run_suite arguments, e.g. "--batches A --repeat 2"
-#   GATE_CONFIG, RESULTS_DIR, OLLAMA_URL
+#   GATE_CONFIG, RESULTS_DIR, OLLAMA_URL, DECISION_OUT (optional: where to write the decision)
 set -u
 MODE=${MODE:-suite+gate}
 RESULTS_DIR=${RESULTS_DIR:-/results}
@@ -23,21 +23,24 @@ finish() { echo "RESULT=$1 ${2:-}"; exit "$3"; }
 
 CANDIDATE=${CANDIDATE_RESULT:-}
 if [ "$MODE" != "gate" ]; then
+  STARTED=$(mktemp)                       # only a result written AFTER this point may be gated
   # shellcheck disable=SC2086
   python -m ragops.suite.run_suite --api "$TARGET_URL" --ollama "${OLLAMA_URL:-}" --label "$LABEL" \
       --ledger /data/ledger/ledger.json --lake /data --traces /traces --out "$RESULTS_DIR" ${SUITE_ARGS:-}
   rc=$?
   if [ "$rc" -ne 0 ]; then finish INFRA_ERROR "suite_exit=$rc" "$rc"; fi
-  CANDIDATE=$(ls -1t "$RESULTS_DIR"/*_"$LABEL".json 2>/dev/null | head -1)
+  CANDIDATE=$(find "$RESULTS_DIR" -maxdepth 1 -name "*_$LABEL.json" -newer "$STARTED" 2>/dev/null | sort | tail -1)
   [ -n "$CANDIDATE" ] || finish INFRA_ERROR "no result file for label $LABEL" 3
   echo "result file: $CANDIDATE"
   [ "$MODE" = "suite" ] && finish SUITE_DONE "file=$CANDIDATE" 0
 fi
 
 [ -n "$CANDIDATE" ] || finish INFRA_ERROR "MODE=gate needs CANDIDATE_RESULT" 2
-DECISION="${CANDIDATE%.json}.decision.json"
+# DECISION_OUT lets a demo write its decision elsewhere: release.sh trusts <result>.decision.json, so a demo with
+# relaxed thresholds must never overwrite the real one
+DECISION="${DECISION_OUT:-${CANDIDATE%.json}.decision.json}"
 python -m ragops.gate.apply --baseline "$BASELINE_RESULT" --candidate "$CANDIDATE" \
-    --config "$GATE_CONFIG" --decision-out "$DECISION"
+    --config "$GATE_CONFIG" --decision-out "$DECISION" --git-sha "${GIT_SHA:-}"
 rc=$?
 case "$rc" in
   0) finish GATE_PASS "decision=$DECISION" 0 ;;

@@ -1,8 +1,10 @@
 # Query coverage (docs/a3-ragops/09 section 3). Calibrate similarity_threshold on hand-labelled
 # (live query, nearest golden question) pairs and write the evidence next to it.
-similarity_threshold: null       # TO CALIBRATE (09 section 3.2); the tool refuses to run while null
+similarity_threshold: 0.6448     # calibrated on 42 labelled pairs, maximum F1 (precision 0.68, recall 0.944):
+                                 # docs/a3-evidence/E/E0-calibrate.txt. Conservative alternative (no false
+                                 # "covered", precision 1.0, recall 0.444): 0.79. Model-specific: nomic-embed-text.
 min_share: 0.85                  # the paper's example (section 4.2.7): flag a gap below 85%
 embed_model: nomic-embed-text    # the model this threshold was calibrated for; a mismatch exits 2
 calibrated_on: eval/coverage-calibration.jsonl
 seed: 20261122
-cluster_similarity: 0.70
+cluster_similarity: 0.58          # tuned for readable topic groups of short queries (0.70 gave only singletons)

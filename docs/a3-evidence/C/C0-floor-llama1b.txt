@@ -1,0 +1,34 @@
+$ .venv/bin/python scripts/ragops/calibrate_floor.py --url http://localhost:8002 --batches A
+id     category      best gold score  top-1 score
+g001   answerable             0.6553  0.7038
+g002   answerable             0.6575  0.6575
+g003   answerable             0.6704  0.7535
+g004   answerable             0.7012  0.7111
+g005   answerable             0.7146  0.7188
+g006   answerable             0.5867  0.6258
+g007   answerable             0.6429  0.6429
+g008   answerable             0.6832  0.6899
+g009   answerable             0.5509  0.5509
+g010   answerable             0.5830  0.6357
+g011   answerable             0.7305  0.7378
+g012   answerable             0.7379  0.7379
+g013   answerable             0.7074  0.7074
+g014   answerable             0.7035  0.7199
+g015   answerable             0.6820  0.6820
+g016   answerable      NOT IN TOP-20  0.7599
+g017   unanswerable                -  0.6744
+g018   unanswerable                -  0.6908
+g019   unanswerable                -  0.5972
+g020   unanswerable                -  0.5501
+g021   unanswerable                -  0.6187
+g022   unanswerable                -  0.5862
+g023   hard                   0.7457  0.7457
+g024   hard                   0.6382  0.6618
+g025   hard            NOT IN TOP-20  0.7269
+g026   hard                   0.6943  0.6943
+
+answerable questions with gold in top-20: 18; lowest best-gold score 0.5509
+suggested RELEVANCE_FLOOR = 0.50  (largest multiple of 0.05 <= 0.5509 - 0.02)
+unanswerable questions: top-1 scores 0.5501..0.6908; 6 of 6 are at or above the floor (the model must abstain on those)
+
+[exit 0 at 2026-11-25T07:48:02 UTC]

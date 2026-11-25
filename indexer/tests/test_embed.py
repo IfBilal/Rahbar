@@ -37,7 +37,20 @@ def test_uncased_model_input_is_lowercased() -> None:
     from pipeline.embed import prepare_document
     assert prepare_document("nomic-embed-text", "Rector's List, BS") == \
         "search_document: rector's list, bs"
+    # the candidates have their own profiles (A3 07 section 3.1). Measured: they lowercase themselves
+    # (docs/a3-evidence/C/casing-check.txt), so the text goes through untouched
     assert prepare_document("mxbai-embed-large", "Rector") == "Rector"
+    assert prepare_document("all-minilm", "Rector") == "Rector"
+    assert prepare_document("some-unknown-model", "Rector") == "Rector"      # no profile: untouched
+
+
+def test_the_query_side_gets_each_models_own_instruction() -> None:
+    """mxbai-embed-large is trained with a query instruction; judging it without one is unfair."""
+    from pipeline.embed import embed_profile
+    assert embed_profile("mxbai-embed-large")["query_prefix"] == \
+        "Represent this sentence for searching relevant passages: "
+    assert embed_profile("nomic-embed-text:latest")["query_prefix"] == "search_query: "
+    assert embed_profile("all-minilm")["query_prefix"] == ""
 
 
 def test_prefix_only_for_models_that_use_one() -> None:
@@ -88,3 +101,41 @@ def test_bad_vectors_are_rejected(vectors, expected, match) -> None:
 
 def test_good_vectors_report_their_dimension() -> None:
     assert check_vectors([[0.0] * 768, [1.0] * 768], 2) == 768
+
+
+def test_a_candidate_index_halves_a_chunk_the_model_refuses_and_counts_it() -> None:
+    """all-minilm and mxbai have a 512-token context and refuse dense 300-word chunks with a 400. The
+    live index stays strict (the 400 propagates); a candidate build shortens that chunk and counts it."""
+    import httpx
+
+    from pipeline.config import IndexerSettings
+    settings = IndexerSettings(embed_model="all-minilm", chroma_host="x", chroma_port=1, collection="c",
+                               corpus_dir="/", chunk_size=300, chunk_overlap=40, ollama_url="http://o")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        import json
+        texts = json.loads(request.content)["input"]
+        if any(len(t.split()) > 40 for t in texts):
+            return httpx.Response(400, json={"error": "input length exceeds the context length"})
+        return httpx.Response(200, json={"embeddings": [[1.0, 0.0] for _ in texts]})
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    texts = ["short text", " ".join(f"w{i}" for i in range(300)), "another short one"]
+    emb.STATS["shortened"] = 0
+    with pytest.raises(httpx.HTTPStatusError):
+        emb.embed(texts, settings, client=client)                         # strict: the live index fails
+    vectors = emb.embed(texts, settings, client=client, shorten_on_overflow=True)
+    assert len(vectors) == 3 and emb.STATS["shortened"] == 1
+
+
+def test_a_400_is_not_retried(monkeypatch) -> None:
+    """A context-length refusal is deterministic; retrying it three times only slowed candidate builds."""
+    calls = {"n": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        return httpx.Response(400, json={"error": "input length exceeds the context length"})
+    monkeypatch.setattr(emb.time, "sleep", lambda s: (_ for _ in ()).throw(AssertionError("slept before retrying a 400")))
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    with pytest.raises(httpx.HTTPStatusError):
+        emb.embed(["x"], get_settings(), client=client)
+    assert calls["n"] == 1

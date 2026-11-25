@@ -241,3 +241,42 @@ def test_agreement_scores_hand_labels_against_the_judge(tmp_path: Path) -> None:
     out = agreement.score(result, labels)
     assert out["n"] == 4 and out["agreement"] == 0.75 and len(out["disagreements"]) == 1
     assert len(agreement.sample(result, 3, 7)) == 3
+
+
+def test_module_level_embeds_with_the_target_model_not_the_environment(monkeypatch) -> None:
+    """Regression (first candidate run): the module level embedded with EMBED_MODEL from the Job's
+    environment, so the all-minilm candidate was measured with nomic-embed-text."""
+    from ragops.suite.clients import InfrastructureError
+    from ragops.suite.run_suite import target_embed_model
+
+    class Api:
+        def __init__(self, info) -> None:
+            self.info = info
+
+        def target_info(self) -> dict:
+            if isinstance(self.info, Exception):
+                raise self.info
+            return self.info
+
+    monkeypatch.setenv("EMBED_MODEL", "nomic-embed-text")
+    assert target_embed_model(Api({"embed_model": "all-minilm"})) == "all-minilm"
+    assert target_embed_model(Api({"embed_model": None})) == "nomic-embed-text"            # target silent: fallback
+    assert target_embed_model(Api(InfrastructureError("down"))) == "nomic-embed-text"
+
+
+def test_the_suite_embedder_halves_a_text_a_small_context_model_refuses() -> None:
+    import json
+
+    import httpx
+
+    from ragops.suite.clients import OllamaEmbedder
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        texts = json.loads(request.content)["input"]
+        if any(len(t.split()) > 50 for t in texts):
+            return httpx.Response(400, json={"error": "input length exceeds the context length"})
+        return httpx.Response(200, json={"embeddings": [[1.0, 2.0] for _ in texts]})
+    e = OllamaEmbedder("http://x", "all-minilm")
+    e.http = httpx.Client(transport=httpx.MockTransport(handler))
+    out = e.embed(["short", " ".join(["w"] * 400)])
+    assert out == [[1.0, 2.0], [1.0, 2.0]] and e.shortened == 1

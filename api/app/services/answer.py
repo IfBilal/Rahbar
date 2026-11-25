@@ -160,6 +160,8 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
         return response
     turn["retrieval_ms"] = round((time.perf_counter() - started) * 1000, 1)
     m.RETRIEVAL.observe(time.perf_counter() - started)
+    if passages:
+        m.TOP1_SIMILARITY.observe(passages[0].score)
     note(passages=passages, retrieve_ms=turn["retrieval_ms"])
 
     # relevance floor: nothing relevant enough means an honest abstention, no model call
