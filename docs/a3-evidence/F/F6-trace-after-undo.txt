@@ -1,0 +1,24 @@
+$ kubectl exec -n rahbar ragops-loader -- python -m ragops.trace.show dea0d150422b41ec8a34226f6e24b8eb --traces /traces --lake /data
+TRACE dea0d150422b41ec8a34226f6e24b8eb  2026-11-25T09:54:36.433Z  route=/api/ask  status=ok
+query          : What minimum CGPA does a student need to avoid academic warning?
+release        : R3-minilm  pod=api-557cd64bd8-f89zh  app=dev
+embedding      : all-minilm 1b226e2802db
+collection     : rahbar-cand-minilm @ r0001
+retrieved      :
+   1. academic-rules-handbook-jun-2026.pdf p24  academic-rules@2026-06#0031-6f65994b  score=0.8686
+   2. grading-page.html p1  grading@2026#0005-d394c5eb  score=0.7548
+   3. prospectus-2026-academic-rules-and-regulations.pdf p2  prospectus-academic-rules@2026#0009-f65b4077  score=0.6515
+   4. prospectus-2026-academic-rules-and-regulations.pdf p2  prospectus-academic-rules@2026#0011-ce61cc89  score=0.6438
+   5. grading-page.html p1  grading@2026#0006-7e5ac2a9  score=0.6393
+guardrails     : 0 action(s)
+prompt         : 8bf0e2a8ea6e... chunks=['academic-rules@2026-06#0031-6f65994b', 'grading@2026#0005-d394c5eb', 'prospectus-academic-rules@2026#0009-f65b4077']
+model          : ollama-host llama3.2:3b {'temperature': 0.2, 'seed': None, 'timeout_s': 600.0} attempts=1
+response       : abstained=False confidence=high citations=[('academic-rules-handbook-jun-2026.pdf', 24)]
+answer         : A student needs to have a minimum CGPA of 2.00 to avoid academic warning for all undergraduate programs [academic-rules-handbook-jun-2026.pdf / 5. Academic Assessment > Academic Warning/Probation].
+latency_ms     : {'total': 94245.8, 'retrieve': 6.0, 'generate': 94214.3}   cache: {'enabled': True, 'hit': False, 'similarity': 0.3124, 'scope': 'r0001:all-minilm:030476b27b'}
+check          : prompt hash verified
+check          : academic-rules@2026-06#0031-6f65994b: rebuilt from snapshot; text present in the prompt
+check          : grading@2026#0005-d394c5eb: rebuilt from snapshot; text present in the prompt
+check          : prospectus-academic-rules@2026#0009-f65b4077: rebuilt from snapshot; text present in the prompt
+
+[exit 0 at 2026-11-25T09:54:39 UTC]

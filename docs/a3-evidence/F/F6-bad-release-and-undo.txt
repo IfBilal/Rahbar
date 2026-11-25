@@ -1,0 +1,34 @@
+$ bash /tmp/s3.sh
+probe running
+--- bad release: CHROMA_COLLECTION typo (pods can never become Ready)
+deployment.apps/api env updated
+deployment.apps/api annotated
+--- kubectl rollout status --timeout=75s
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+error: timed out waiting for the condition
+rollout status exit=1
+NAME                   READY   STATUS    RESTARTS   AGE
+api-557cd64bd8-f89zh   1/1     Running   0          5m13s
+api-557cd64bd8-h52st   1/1     Running   0          5m7s
+api-557cd64bd8-p2w7t   1/1     Running   0          5m10s
+api-56cc49f58f-kngzt   0/1     Running   0          75s
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME   ENDPOINTS                                                     AGE
+api    10.244.120.105:8000,10.244.120.106:8000,10.244.120.107:8000   17h
+--- kubectl rollout undo
+Warning: resource deployments/api was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/api rolled back
+deployment "api" successfully rolled out
+rollout status exit=0
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         initial deployment, release R1-nomic (collection rahbar, nomic-embed-text)
+3         release R5-bad-typo (collection name typo, deliberately broken for the rollback demo)
+4         release R3-minilm (gate decision a832a043e7f0)
+
+requests by status:
+    150 200
+first: 09:51:27 200
+last:  09:52:42 200
+
+[exit 0 at 2026-11-25T09:52:43 UTC]

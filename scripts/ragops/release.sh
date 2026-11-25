@@ -73,11 +73,13 @@ setenv=(kubectl -n "$NS" set env deployment/api "RELEASE_ID=$RELEASE_ID" "CHROMA
 status=(kubectl -n "$NS" rollout status deployment/api --timeout=900s)
 if [ "$dry" = 1 ]; then
   printf 'DRY RUN, gate passed (%s). Would run:\n' "$decision"
-  for c in annotate setenv status; do declare -n arr=$c; printf '  '; printf '%q ' "${arr[@]}"; printf '\n'; unset -n arr; done
+  for c in setenv annotate status; do declare -n arr=$c; printf '  '; printf '%q ' "${arr[@]}"; printf '\n'; unset -n arr; done
   exit 0
 fi
 echo "gate decision: $decision (pass); releasing $RELEASE_ID"
-for c in annotate setenv status; do
+# set env first (it creates the new revision), THEN annotate: the change-cause is copied to the ReplicaSet
+# that is current at that moment, so annotating first would relabel the revision being replaced
+for c in setenv annotate status; do
   declare -n arr=$c
   printf '+ '; printf '%q ' "${arr[@]}"; printf '\n'
   "${arr[@]}" || { echo "ROLLOUT FAILED at '$c' (not undone: kubectl rollout undo deployment/api -n $NS)" >&2; exit 2; }

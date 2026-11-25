@@ -1,0 +1,7 @@
+$ scripts/ragops/rollout-probe.sh stop
+requests by status:
+     47 200
+first: 09:47:20 200
+last:  09:47:43 200
+
+[exit 0 at 2026-11-25T09:47:44 UTC]

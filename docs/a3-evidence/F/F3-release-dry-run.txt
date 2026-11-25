@@ -1,0 +1,7 @@
+$ scripts/ragops/release.sh cand-minilm --dry-run
+DRY RUN, gate passed (/results/20261125T054522Z_cand-minilm.decision.json). Would run:
+  kubectl -n rahbar annotate deployment/api kubernetes.io/change-cause=release\ R3-minilm\ \(gate\ decision\ a832a043e7f0\) --overwrite 
+  kubectl -n rahbar set env deployment/api RELEASE_ID=R3-minilm CHROMA_COLLECTION=rahbar-cand-minilm EMBED_MODEL=all-minilm EMBED_VERSION=1b226e2802db RELEVANCE_FLOOR=0.25 TOP_K=5 
+  kubectl -n rahbar rollout status deployment/api --timeout=900s 
+
+[exit 0 at 2026-11-25T09:47:10 UTC]
