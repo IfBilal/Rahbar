@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.12" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RAHBAR RAGOps report</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <link rel="stylesheet" href="report.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">RAHBAR RAGOps report</h1>
+</header>
+<h1
+id="rahbar-ragops-operating-a-grounded-rag-pipeline-on-kubernetes">RAHBAR
++ RAGOps: operating a grounded RAG pipeline on Kubernetes</h1>
+<p><strong>CS4032 Assignment 03 (RAGOps), Fall 2026.</strong> Team:
+<strong>Taimoor Shaukat (24I-3015)</strong> and <strong>Muhammad Bilal
+Tahir (24I-3166)</strong>. Repository: <a
+href="https://github.com/IfBilal/Rahbar"
+class="uri">https://github.com/IfBilal/Rahbar</a> · submitted commit:
+<code>«MEASURE: git SHA»</code> · all numbers come from runs on one
+machine (a CPU-only laptop, <code>docs/a3-evidence/host.md</code>).</p>
+<p>We added the RAGOps layer of the reference paper (Xu et al., 2026) to
+our Assignment-02 pipeline RAHBAR (FAST-NUCES rules, answers with
+citations, abstains when the documents do not cover a question). It now
+has a verification and incremental-update lifecycle for the data
+(<strong>Batch A</strong>: nine public documents, 281 pages
+(<code>verify-calibration.md</code>); <strong>Batch B</strong>: thirteen
+fictional files with planted problems), a three-level offline test
+suite, a configurable release gate, traces and metrics for every query,
+a coverage check against live queries, and a controlled release on
+Kubernetes. Ingestion and evaluation are Jobs; data, traces and results
+are on PersistentVolumeClaims; thresholds are a ConfigMap.</p>
+<h2 id="table-1-the-stages-of-figure-3">1. Table 1: the stages of Figure
+3</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Figure-3 stage</th>
+<th>What our pipeline does</th>
+<th>File</th>
+<th>What is missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ingest</td>
+<td>An inbox on the <code>ragops-data</code> volume; adds, changes and
+removals are detected against a ledger; PDF, HTML, Markdown and text
+extraction with OCR for scans</td>
+<td><code>indexer/pipeline/catalog.py</code>, <code>extract.py</code>,
+<code>run.py</code></td>
+<td>No webhook or change-data-capture (the CronJob <code>ingest</code>
+runs weekly, <code>0 3 * * 0</code>, or on demand); formats beyond those
+four; two Batch-A PDFs have no text layer and rely on OCR</td>
+</tr>
+<tr>
+<td>Verify</td>
+<td>Four checks per document (quality, completeness, recency,
+uniqueness) with a reason code; failures go to quarantine; one report
+per run</td>
+<td><code>verify.py</code>, <code>report.py</code></td>
+<td>No consistency check across documents; malicious content is not
+detectable here (B08 passed all four checks,
+<code>A1-verification-report-batch-b.txt</code>)</td>
+</tr>
+<tr>
+<td>Update data lake</td>
+<td>Verified versions on the PVC, superseded versions archived and
+restorable, deletions recorded, a versioned ledger</td>
+<td><code>lake.py</code>, <code>ledger.py</code>,
+<code>ops.py</code></td>
+<td>No access-control metadata</td>
+</tr>
+<tr>
+<td>Update retrieval sources</td>
+<td>Chunk-level incremental update: 0 embeddings when nothing changed,
+changed document replaces only its chunks, deletion leaves no orphans,
+<code>superseded</code> flag in metadata, revision in a registry</td>
+<td><code>incremental.py</code>, <code>store.py</code>,
+<code>index.py</code></td>
+<td>A change of embedding model or chunking is a full rebuild of a new
+collection (532 chunks took 637 s for all-minilm, 675 s for mxbai, 1406
+s for llama3.2:1b; <code>C0-build-index-*.txt</code>)</td>
+</tr>
+<tr>
+<td>Offline testing</td>
+<td>Golden set (30) and a three-level suite (module, component,
+end-to-end), seeds, run twice, one command; gate over ConfigMap
+thresholds</td>
+<td><code>ragops/suite/</code>, <code>ragops/gate/</code></td>
+<td>Public benchmarks; a larger golden set (30; 26 usable before Batch
+B); a stronger judge than the 3B generator; judge-vs-human agreement not
+measured</td>
+</tr>
+<tr>
+<td>Live testing</td>
+<td>A candidate Deployment on its own collection, the same suite against
+it, a gated rolling release with <code>kubectl rollout undo</code>;
+traces and a summary over a time window</td>
+<td><code>k8s/candidate.yaml</code>,
+<code>scripts/ragops/release.sh</code>, <code>ragops/trace/</code></td>
+<td>No A/B traffic split (candidate is tested by the suite, not by
+users); no alerting; the retrieval-stage rail only neutralises text, it
+never excludes a chunk</td>
+</tr>
+<tr>
+<td>Check coverage</td>
+<td>Embedding similarity between live queries and golden questions;
+share against a calibrated threshold; uncovered topics; exit code</td>
+<td><code>ragops/coverage/coverage.py</code></td>
+<td>Retrieval-level and generation-level coverage; the threshold is tied
+to nomic-embed-text; the 42 calibration pairs were labelled by Claude
+Code and not yet spot-checked by a member</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-2-the-five-qualities">2. Table 2: the five qualities</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Quality</th>
+<th>What we measure</th>
+<th>Our threshold (config)</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Adaptability</td>
+<td>Chunks embedded when the corpus did not change, and when one
+document changed</td>
+<td>Unchanged run embeds 0 chunks; a changed document replaces only its
+own chunks (design limit, no config value)</td>
+<td><code>A2-unchanged-rerun.txt</code> (0),
+<code>A5-changed-and-deleted-document.txt</code></td>
+</tr>
+<tr>
+<td>Monitorability</td>
+<td>Five gate rules per candidate; coverage share of live queries;
+<code>/metrics</code></td>
+<td><code>gate.yaml</code>: recall@5 drop &lt;= 0.02, abstention &gt;=
+baseline, citation validity &gt;= 0.95, faithfulness &gt;= 0.89, p95
+&lt;= 225 s; <code>coverage.yaml</code>: tau 0.6448, min_share 0.85</td>
+<td><code>*.decision.json</code>, <code>E1-coverage-before.txt</code>,
+<code>F4-metrics-port-forward.txt</code></td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>One trace per <code>/api/ask</code>: release, embedding version,
+collection revision, ranked chunks, prompt hash, latencies; summary over
+a release</td>
+<td>No alert threshold (we have no alerting); the summary is read by
+hand</td>
+<td><code>D3-trace-summary.txt</code>,
+<code>D5-root-cause-g025-trace.txt</code></td>
+</tr>
+<tr>
+<td>Traceability</td>
+<td>A trace id rebuilds the prompt: hash check, every retrieved chunk
+found in the lake snapshot</td>
+<td>Pass required: “prompt hash verified” and all chunks “rebuilt from
+snapshot”</td>
+<td><code>D5-root-cause-g025-trace.txt</code>,
+<code>F6-trace-after-undo.txt</code></td>
+</tr>
+<tr>
+<td>Reliability</td>
+<td>Run-to-run difference of quality metrics (two baselines); non-200
+responses during a release</td>
+<td>Quality |delta| 0 expected (seeded, temperature 0); 0 non-200 during
+rollout (RollingUpdate <code>maxUnavailable: 0</code>)</td>
+<td><code>B2-stochasticity.txt</code> (0.0000),
+<code>F5-zero-downtime.txt</code> (47/47),
+<code>F6-bad-release-and-undo.txt</code> (150/150)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="results">3. Results</h2>
+<p>Everything ran on one CPU-only laptop, one heavy job at a time
+(<code>host.md</code>). Golden set: 30 questions (16 answerable, 6
+unanswerable, 8 hard; 19 human, 11 synthetic), frozen before any run
+(<code>golden: freeze v1</code>). The 11 synthetic ones (g020-g030) were
+checked against their pages by Claude Code (<code>data-review.md</code>)
+and then read by Taimoor only (<code>synthetic-spot-check.md</code>);
+<strong>Bilal has not reviewed them</strong>. g027-g030 need Batch B, so
+Parts B and C evaluate 26 questions (20 answerable or hard, 6
+unanswerable).</p>
+<h3 id="part-a-verify-and-update">Part A: verify and update</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Run</th>
+<th>New / quarantined / unchanged</th>
+<th>Chunks embedded</th>
+<th>Time</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Batch A first ingest</td>
+<td>9 / 0 / 0 (2023 rules archived)</td>
+<td>532</td>
+<td>561 s</td>
+<td><code>F2-ingest-first-run.txt</code></td>
+</tr>
+<tr>
+<td>Batch A unchanged re-run</td>
+<td>0 / 0 / 9</td>
+<td><strong>0</strong></td>
+<td>0.06 s</td>
+<td><code>A2-unchanged-rerun.txt</code></td>
+</tr>
+<tr>
+<td>Batch B (12 files)</td>
+<td>6 / 6 / 9, 1 archived</td>
+<td>52 (26 in <code>rahbar</code>, 26 in
+<code>rahbar-cand-minilm</code>)</td>
+<td>42 s</td>
+<td><code>A1-sync-batch-b.txt</code></td>
+</tr>
+<tr>
+<td>B13 delivered later</td>
+<td>0 / 1 / 15</td>
+<td>0</td>
+<td>0.8 s</td>
+<td><code>A1b-sync-late-b13.txt</code></td>
+</tr>
+<tr>
+<td>Restore 2022 version, then back</td>
+<td>revision r0004 to r0006, 558 chunks</td>
+<td><strong>0</strong> each step</td>
+<td>n/a</td>
+<td><code>A4-restore-rollback-demo.txt</code></td>
+</tr>
+<tr>
+<td>New demo document, then 2 sentences edited</td>
+<td>5 chunks; the edit replaces those 5</td>
+<td>10, then 10 (10 deleted); other 558 untouched</td>
+<td>n/a</td>
+<td><code>A5-changed-and-deleted-document.txt</code></td>
+</tr>
+<tr>
+<td>Demo document deleted</td>
+<td>10 removed; Chroma 558 = ledger 558, orphans none</td>
+<td>0</td>
+<td>n/a</td>
+<td><code>A5-changed-and-deleted-document.txt</code></td>
+</tr>
+</tbody>
+</table>
+<p>Batch B (<code>A1-verification-report-batch-b.txt</code>,
+<code>A1b-verification-report-b13.txt</code>): 6 quarantined, 6
+accepted, 1 archived, as <code>corpus/batch-b/README.md</code> predicted
+before the run. Failures by check: <strong>completeness 4, uniqueness 3,
+quality 1, recency 1</strong>.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Planted problem</th>
+<th>Observed</th>
+<th>Caught</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B01 <code>Student_Handbook_Copy.pdf</code></td>
+<td>exact duplicate</td>
+<td><code>U-EXACT-DUP</code>, quarantined</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>B02 <code>grading-page-backup.html</code></td>
+<td>exact duplicate</td>
+<td>uniqueness FAIL and completeness FAIL
+(<code>C-MISSING-DATE-VERSION</code>, the reason the report prints)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>B03 <code>library-lending-regulations.md</code></td>
+<td>near-duplicate of B09</td>
+<td><code>U-NEAR-DUP</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td>B04 <code>lab-safety-notice.pdf</code></td>
+<td>corrupt PDF</td>
+<td><code>Q-EXTRACT-FAIL</code> (completeness also FAIL)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>B05 <code>exam-schedule-policy-trunc.md</code></td>
+<td>truncated</td>
+<td><code>C-TRUNCATED</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td>B06 <code>untitled-notes.txt</code></td>
+<td>no title, date, version</td>
+<td><code>C-MISSING-TITLE</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td>B07 <code>faculty-entrepreneurship-policy-2026.md</code></td>
+<td>newer version</td>
+<td>accepted; 2022 version archived (<code>R-SUPERSEDED-BY</code>)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>B08 <code>campus-parking-policy.md</code></td>
+<td>injected instruction</td>
+<td>accepted, all four PASS</td>
+<td><strong>no</strong></td>
+</tr>
+<tr>
+<td>B09-B12</td>
+<td>clean new documents</td>
+<td>accepted</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>B13 <code>...policy-2019.md</code> (later run)</td>
+<td>older version arrives late</td>
+<td><code>R-NEWER-EXISTS</code>, quarantined</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>We expected completeness 3; it was 4 because B02, planted as a
+duplicate, also lacks a date. A bug found on the cluster: 400-word
+document-vector windows overflowed the embedding context on the real
+corpus; fixed to 250 words (commit <code>1e9d4d2</code>). Batch B went
+into the live index in Part A (<code>A1-sync-batch-b.txt</code>), after
+every Part B and C run, so E3 compares corpus A with corpus A plus
+B.</p>
+<h3 id="part-b-offline-suite-baseline-corpus-a-532-chunks">Part B:
+offline suite (baseline, corpus A, 532 chunks)</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Level</th>
+<th>Metric</th>
+<th>Run 1</th>
+<th>Run 2</th>
+<th>N</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>module</td>
+<td>paraphrase / unrelated mean cosine; gap</td>
+<td>0.823 / 0.497; 0.327</td>
+<td>same</td>
+<td>20 / 20</td>
+</tr>
+<tr>
+<td>module</td>
+<td>embed ms per chunk (mean / p95)</td>
+<td>525 / 1435</td>
+<td>882 / 2199</td>
+<td></td>
+</tr>
+<tr>
+<td>component</td>
+<td>recall@3 / recall@5</td>
+<td>0.775 / 0.800</td>
+<td>same</td>
+<td>20</td>
+</tr>
+<tr>
+<td>component</td>
+<td>MRR / nDCG@5</td>
+<td>0.725 / 0.727</td>
+<td>same</td>
+<td>20</td>
+</tr>
+<tr>
+<td>component</td>
+<td>recall@5 with typos (delta)</td>
+<td>0.750 (-0.050)</td>
+<td>same</td>
+<td>20</td>
+</tr>
+<tr>
+<td>endpoint</td>
+<td>faithfulness judge / proxy</td>
+<td>0.947 (18 of 19) / 1.000</td>
+<td>same</td>
+<td>20</td>
+</tr>
+<tr>
+<td>endpoint</td>
+<td>abstention correctness; false abstention</td>
+<td>1.000; 0.050</td>
+<td>same</td>
+<td>6; 20</td>
+</tr>
+<tr>
+<td>endpoint</td>
+<td>citation validity</td>
+<td>1.000</td>
+<td>same</td>
+<td>19</td>
+</tr>
+<tr>
+<td>endpoint</td>
+<td>latency p50 / p95 (s)</td>
+<td>99.6 / 153.0</td>
+<td>131.0 / 177.3</td>
+<td>26</td>
+</tr>
+</tbody>
+</table>
+<p>Source: <code>20261124T174636Z_baseline.md</code> (run 1),
+<code>20261125T034256Z_baseline.md</code> (run 2). Stochasticity
+(<code>B2-stochasticity.txt</code>): every quality metric is identical
+in both runs (|delta| 0.0000); only the six wall-clock rows differ. The
+two runs used different commits (<code>3f22101</code>,
+<code>26c05d9</code>). A first attempt at run 2 was stalled by a laptop
+suspend and discarded (<code>run2-stalled-by-suspend.md</code>).
+Judge-vs-human agreement: «MEASURE: hand labels, n, agreement,
+kappa».</p>
+<h3 id="part-c-change-and-release-gate">Part C: change and release
+gate</h3>
+<p>Thresholds were derived from the two baselines and committed before
+any candidate was built (commit <code>7c93420</code>, 10:04; the first
+candidate commit <code>6eda32c</code>, 10:45): faithfulness_min 0.89 =
+0.9474 - 1/19 (one more unsupported answer), rounded down; p95 225 s =
+worst baseline p95 177.3 x 1.25, rounded up (<code>gate.yaml</code>).
+Candidates and calibrated floors:
+<code>ragops/config/candidates/</code>, <code>C0-floor-*.txt</code>. The
+module level of <code>cand-minilm</code> below is from
+<code>C1-module-minilm-corrected.txt</code>; the module rows in
+<code>20261125T054522Z_cand-minilm.md</code> are invalid (the suite
+embedded with the wrong model; found and fixed, commit
+<code>9b6b47b</code>).</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric (gate limit)</th>
+<th>Baseline</th>
+<th>cand-minilm</th>
+<th>cand-llama1b</th>
+<th>cand-mxbai</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>recall@5 (&gt;= 0.78)</td>
+<td>0.800</td>
+<td>0.800 PASS</td>
+<td>0.600 <strong>FAIL</strong></td>
+<td>0.850 PASS</td>
+</tr>
+<tr>
+<td>abstention correctness (&gt;= 1.000)</td>
+<td>1.000</td>
+<td>1.000 PASS</td>
+<td>1.000 PASS</td>
+<td>0.833 <strong>FAIL</strong></td>
+</tr>
+<tr>
+<td>citation validity (&gt;= 0.95)</td>
+<td>1.000</td>
+<td>1.000 PASS</td>
+<td>1.000 PASS</td>
+<td>1.000 PASS</td>
+</tr>
+<tr>
+<td>faithfulness (&gt;= 0.89)</td>
+<td>0.947</td>
+<td>0.944 PASS</td>
+<td>0.857 <strong>FAIL</strong></td>
+<td>0.947 PASS</td>
+</tr>
+<tr>
+<td>p95 latency, s (&lt;= 225)</td>
+<td>153.0 / 177.3</td>
+<td>175.3 PASS</td>
+<td>87.8 PASS</td>
+<td>190.9 PASS</td>
+</tr>
+<tr>
+<td>not gated: recall@3; MRR</td>
+<td>0.775; 0.725</td>
+<td>0.775; 0.742</td>
+<td>0.450; 0.487</td>
+<td>0.825; 0.700</td>
+</tr>
+<tr>
+<td>not gated: false abstention; typo recall@5</td>
+<td>0.050; 0.750</td>
+<td>0.100; 0.725</td>
+<td>0.300; 0.475</td>
+<td>0.050; 0.775</td>
+</tr>
+<tr>
+<td>module gap; embed ms/chunk</td>
+<td>0.327; 525</td>
+<td>0.525; 58</td>
+<td>0.272; 2156</td>
+<td>0.406; 1052</td>
+</tr>
+<tr>
+<td>Our prediction before the run</td>
+<td>n/a</td>
+<td>fail</td>
+<td>fail</td>
+<td>pass</td>
+</tr>
+<tr>
+<td><strong>Gate, decision</strong></td>
+<td>n/a</td>
+<td><strong>PASS, RELEASE</strong></td>
+<td><strong>FAIL, REJECT</strong></td>
+<td><strong>FAIL, REJECT</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Sources: <code>20261125T054522Z_cand-minilm</code>,
+<code>...074817Z_cand-llama1b</code>, <code>...083132Z_cand-mxbai</code>
+(<code>.decision.json</code> and <code>.md</code>). Baseline latency is
+run 1 / run 2; the gate used run 1.</p>
+<p><strong>cand-minilm (all-minilm), RELEASE.</strong> All five rules
+pass; we had predicted a fail. recall@5 is unchanged, embedding is about
+9 times faster per chunk (58 vs 525 ms) and the module gap is the
+largest (0.525). Against that: false abstention doubled (0.05 to 0.10,
+one more of 20 questions refused; not gated), typo recall fell by 0.075,
+and 74 of 532 chunks were embedded from a halved text because the
+model’s context is short (<code>C0-build-index-minilm.txt</code>).
+Released as R3-minilm (<code>F5-release-rollout.txt</code>), then rolled
+back to R1-nomic to keep one variable for E3
+(<code>F6-return-to-baseline.txt</code>).</p>
+<p><strong>cand-llama1b (llama3.2:1b as embedder), REJECT.</strong>
+Built as the deliberately bad candidate: recall@5 0.80 to 0.60,
+faithfulness 0.857 &lt; 0.89. <code>release.sh</code> refused and the
+revision did not change (<code>F3-release-refused.txt</code>).</p>
+<p><strong>cand-mxbai (mxbai-embed-large), REJECT.</strong> Best recall
+(<span class="citation" data-cites="5">@5</span> 0.85, <span
+class="citation" data-cites="3">@3</span> 0.825), but abstention 0.833
+against 1.000: g022 (“student visa for Canada”) was answered, with a
+“cannot apply” text and a citation, instead of abstaining (its top-1
+score 0.5476 is above our floor 0.50, <code>C0-floor-mxbai.txt</code>).
+We had predicted a pass and did not tune the floor afterwards.</p>
+<h3 id="part-d-traces">Part D: traces</h3>
+<p>Trace <code>d08cce5a...</code> (g025, baseline run 1;
+<code>D5-root-cause-g025-trace.txt</code>): release R1-nomic,
+nomic-embed-text <code>0a109f422b47</code>, collection
+<code>rahbar</code> @ r0001, 5 ranked chunks (top score 0.6926), prompt
+hash <code>1ce583b0821c</code>, status abstained, total 112 021 ms
+(retrieve 117.5, generate 111 903); prompt hash and 3 chunks verified.
+Summary over 62 <code>/api/ask</code> traces of R1-nomic
+(<code>D3-trace-summary.txt</code>): ok 48, abstained 14 (0.2258;
+includes the unanswerable test questions); top-1 similarity min 0.5731,
+p10 0.6291, p50 0.7692, p90 0.8741, max 0.8906; latency p50 / p95: total
+110.9 / 173.6 s, retrieve 15.2 / 161.3 ms; cache hit 0.0; guardrail
+actions 0. D1 (full record): the capture command failed (exit 1, no
+JSON, <code>D1-trace-record.txt</code>); <code>trace.show</code> is the
+readable record. D4 (B08 neutralised at query time): «MEASURE: the
+parking-policy question and its rail action in the trace».</p>
+<p><strong>D5 root cause, abstained answer g025, from its trace
+only</strong> (<code>D5-root-cause.md</code>):</p>
+<ol type="1">
+<li><code>status=abstained</code>,
+<code>abstain_reason=model_declined</code>: retrieval worked, the model
+declined.</li>
+<li>All 5 candidates are 2026 documents; none is the 2023 rules.</li>
+<li>The trace filter is <code>superseded_filter: true</code>, no history
+flag: the archived 2023 version was excluded by metadata.</li>
+<li>The history switch did not fire: it triggers on words such as older,
+previous, earlier or “before 20xx”, and “the 2023 rules” has none.</li>
+<li>With only 2026 passages the model could not compare versions. Cause:
+version filter plus trigger vocabulary, not retrieval quality. Fix: also
+trigger on a year earlier than the current version.</li>
+</ol>
+<h3 id="part-e-coverage-and-drift">Part E: coverage and drift</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Calibration</td>
+<td>tau 0.6448 = best F1 on 42 pairs (precision 0.68, recall 0.944);
+labels by Claude Code, <strong>not yet spot-checked by a
+member</strong>; conservative tau 0.79: precision 1.0, recall 0.444</td>
+<td><code>E0-calibrate.txt</code>, <code>coverage.yaml</code></td>
+</tr>
+<tr>
+<td>min_share</td>
+<td>0.85, the paper’s example</td>
+<td><code>coverage.yaml</code></td>
+</tr>
+<tr>
+<td>Coverage before</td>
+<td>42 live queries, 25 covered, <strong>share 0.595</strong> (in-domain
+0.750, out-of-domain 0.286); COVERAGE GAP, Job <code>Failed</code></td>
+<td><code>E1-coverage-before.txt</code></td>
+</tr>
+<tr>
+<td>Sensitivity</td>
+<td>tau -0.05 gives 0.810, tau +0.05 gives 0.405; TF-IDF cross-check
+0.024</td>
+<td><code>E1-coverage-before.txt</code></td>
+</tr>
+<tr>
+<td>Uncovered</td>
+<td>17 queries in 13 topic groups; groups of 2: late evening bus,
+financial aid, clubs using classrooms, exam retake</td>
+<td><code>E1-coverage-before.txt</code></td>
+</tr>
+<tr>
+<td>E3 drift (corpus A against A plus B, common and new subsets)</td>
+<td>«MEASURE: E3 suite run on the live index with Batch B»</td>
+<td></td>
+</tr>
+<tr>
+<td>E4 new questions and coverage after</td>
+<td>«MEASURE: E4 questions added to the golden set and the coverage
+re-run»</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="part-f-kubernetes-release">Part F: Kubernetes release</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Step</th>
+<th>Result</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1 gate failed</td>
+<td><code>release.sh cand-llama1b</code> refused, exit 1, deployment
+revision still 1</td>
+<td><code>F3-release-refused.txt</code></td>
+</tr>
+<tr>
+<td>S2 gate passed</td>
+<td>R3-minilm rolled out (3 replicas, one at a time); <strong>47 of
+47</strong> probe requests 200 (09:47:20 to 09:47:43)</td>
+<td><code>F5-release-rollout.txt</code>,
+<code>F5-zero-downtime.txt</code></td>
+</tr>
+<tr>
+<td>S3 bad release</td>
+<td>collection name typo: the new pod never Ready,
+<code>rollout status</code> timed out (exit 1); the 3 old pods kept
+serving, <strong>150 of 150</strong> requests 200;
+<code>rollout undo</code> succeeded</td>
+<td><code>F6-bad-release-and-undo.txt</code></td>
+</tr>
+<tr>
+<td>Trace after undo</td>
+<td>release R3-minilm, all-minilm <code>1b226e2802db</code>, collection
+<code>rahbar-cand-minilm</code> @ r0001</td>
+<td><code>F6-trace-after-undo.txt</code></td>
+</tr>
+<tr>
+<td>Back to baseline</td>
+<td><code>rollout undo --to-revision=1</code>: R1-nomic,
+<code>0a109f422b47</code>, floor 0.60</td>
+<td><code>F6-return-to-baseline.txt</code></td>
+</tr>
+<tr>
+<td>Namespace; metrics</td>
+<td>PVCs <code>ragops-data</code>, <code>ragops-traces</code>,
+<code>ragops-results</code>, <code>data-chroma-0</code> Bound;
+<code>/metrics</code> by port-forward</td>
+<td><code>F1-namespace-overview.txt</code>,
+<code>F4-metrics-port-forward.txt</code></td>
+</tr>
+<tr>
+<td>Resource table (peak, request, limit)</td>
+<td>«MEASURE: kubectl top summary per Job and the final requests and
+limits»</td>
+<td></td>
+</tr>
+<tr>
+<td>Gate verdict changing after a ConfigMap edit</td>
+<td>«MEASURE: edit of ConfigMap ragops-gate and the Job re-run»</td>
+<td></td>
+</tr>
+<tr>
+<td>NetworkPolicy matrix</td>
+<td>«MEASURE: nc/wget matrix evidence»</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="short-answers">4. Short answers</h2>
+<p><strong>(a)</strong> Completeness caught the most (4: B02, B04, B05,
+B06), then uniqueness (3), quality (1), recency (1)
+(<code>A1-verification-report-batch-b.txt</code>). We did not catch
+<strong>B08</strong>, the injected instruction in a valid policy: it
+passed all four checks and was indexed. An ingest-time injection scan,
+source trust or human review would catch it; until then the retrieval
+rail is the only defence, and we have not yet shown it working (D4
+above).</p>
+<p><strong>(b)</strong> Yes, twice. <strong>mxbai</strong>: module gap
+0.406 (baseline 0.327) and recall@5 0.85 (baseline 0.80), yet endpoint
+abstention fell to 0.833 because g022 passed our floor and the model
+answered (<code>cand-mxbai.decision.json</code>).
+<strong>minilm</strong>: the best module gap (0.525 vs 0.327) and 9
+times faster embedding, but end-to-end quality did not improve: recall@5
+0.800 both, false abstention 0.05 to 0.10. Module-level separation did
+not predict abstention behaviour.</p>
+<p><strong>(c)</strong> We archived: the 2022 policy and the 2023 rules
+are flagged <code>superseded</code> and kept; restoring re-embeds 0
+chunks (<code>A4-restore-rollback-demo.txt</code>). We deleted only a
+throwaway demo document (<code>A5</code>, no orphans). Deleting an old
+version would remove the rollback (restore needs the archived chunks)
+and version questions. D5 shows what archiving costs: the question
+naming “the 2023 rules” was filtered to 2026 text and abstained. That
+deleting breaks old trace rebuilds (the tool reads the lake snapshot) is
+our reading of the code, not tested.</p>
+<p><strong>(d)</strong> Least trusted: <strong>judge
+faithfulness</strong> (a 3B model judging 3B answers; 18 of 19
+supported, one answer is 0.053; agreement with humans not measured) and
+the <strong>coverage share</strong>: it measures similarity of wording,
+counts 4 of 14 out-of-domain queries as covered, and moves 0.810 to
+0.405 for tau -0.05 to +0.05 (<code>E1-coverage-before.txt</code>).
+Latency is also noisy: baseline p95 153.0 vs 177.3 s on the same
+code.</p>
+<p><strong>(e)</strong> Hardest was live testing: the paper’s A/B or
+shadow traffic needs users. We replaced it with a candidate collection
+tested by the same suite plus a gated rolling release. Three-level
+testing on a CPU laptop took 42 to 75 minutes per candidate
+(<code>C1-gate-fail.txt</code>, <code>C1b-gate-fail-mxbai.txt</code>),
+so the component level uses <code>/api/retrieve</code> and typos instead
+of distractor documents. We have no consistency check (versions are
+archived, not reconciled), and the coverage threshold is a calibrated
+cosine, which the paper does not give.</p>
+<p><strong>(f)</strong> (<code>k8s/README.md</code>) <strong>Job and
+CronJob <code>ingest</code></strong> (<code>Forbid</code>) are the only
+writer to Chroma, backed by a lock file on the PVC, a NetworkPolicy that
+lets only the indexer and candidate reach Chroma, and a boundary test;
+Chroma itself has no authentication, so Kubernetes alone does not make
+the API read-only. <strong>PVC <code>ragops-data</code></strong> holds
+lake, archive and ledger (the eval Job mounts it read-only);
+<strong>StatefulSet <code>chroma</code></strong> holds the index;
+<strong>PVC <code>ragops-traces</code></strong> the traces;
+<strong>ConfigMap <code>ragops-gate</code></strong> the thresholds;
+<strong>Job <code>eval</code></strong> is the gate (exit code =
+verdict); <strong>Deployment <code>api-candidate</code></strong> is the
+isolated candidate; <strong>Deployment <code>api</code></strong> with
+RollingUpdate and <code>kubectl rollout undo</code> is release and
+rollback.</p>
+<h2 id="contribution-and-ai-statement">5. Contribution and AI
+statement</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Taimoor Shaukat (24I-3015, <code>T361</code>)</th>
+<th>Muhammad Bilal Tahir (24I-3166, <code>IfBilal</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Part A</td>
+<td>Cluster runs and evidence A0-A5; 8 commits to
+<code>indexer/pipeline</code> (e.g. window size)</td>
+<td>Pipeline core: ledger, lake, verification, incremental sync, Batch B
+fixtures (<code>ff30bfc</code>, <code>2dd29c8</code>)</td>
+</tr>
+<tr>
+<td>Part B</td>
+<td>Data review, golden freeze, baseline x2, review of 11 synthetic
+questions</td>
+<td>Suite code (<code>ragops/suite</code>), first drafts of the golden
+set</td>
+</tr>
+<tr>
+<td>Part C</td>
+<td>Gate thresholds, candidates, floors, runs, <code>release.sh</code>,
+module-level fix</td>
+<td>Gate code (<code>ragops/gate</code>)</td>
+</tr>
+<tr>
+<td>Part D</td>
+<td>Trace summary and <code>/metrics</code> additions, D3 and D5
+evidence</td>
+<td>API traces, <code>/api/retrieve</code>, trace tools</td>
+</tr>
+<tr>
+<td>Part E</td>
+<td>Calibration of tau, coverage Job and run</td>
+<td>Coverage code, pair and live-query drafts</td>
+</tr>
+<tr>
+<td>Part F</td>
+<td>Manifests, Jobs, scripts, CI changes, evidence capture (21 of 22
+<code>k8s/</code> commits)</td>
+<td>Planning documents <code>docs/a3-ragops/</code> (7 commits)</td>
+</tr>
+<tr>
+<td>Report</td>
+<td>Draft of this report</td>
+<td>Not yet reviewed</td>
+</tr>
+</tbody>
+</table>
+<p><code>git shortlog -sn --no-merges</code> (whole history, including
+Assignments 01 and 02): T361 140, IfBilal 43. The table follows commit
+authors; code in Bilal’s commits was written with AI assistance (see
+below). <strong>Not done or weak:</strong> Bilal has not reviewed PR #24
+or the synthetic questions; no GPU, so latencies are CPU-only; the trace
+lacks dense and reranked order, per-stage timings and
+<code>origin_trace_id</code> for cache hits, and the rail only
+neutralises; judge hand labels are not written.</p>
+<p><strong>AI statement.</strong> We used an AI chat assistant and
+Claude Code for the plan, the pipeline, suite, gate, coverage and trace
+code, the Kubernetes objects and scripts, the data review and the draft
+of this report (<code>docs/AI-USAGE.md</code>, Assignment 03 section).
+Every number here comes from our own runs on our minikube, with raw
+output in <code>docs/a3-evidence/</code>; the AI produced no metric,
+trace or screenshot. Our review is incomplete: the 42 coverage pairs
+were labelled by Claude Code, and only Taimoor read the synthetic
+questions.</p>
+<div class="appendix">
+
+</div>
+<h2 id="appendix-screenshots">Appendix: screenshots</h2>
+<p>Each image is rendered from the raw transcript named in its caption
+(the command line and exit code are in the image). Paths are under
+<code>docs/a3-evidence/</code>.</p>
+<figure>
+<img
+src="../a3-evidence/A/screenshots/A1-verification-report-batch-b.png"
+alt="A1 Verification report for Batch B. A/A1-verification-report-batch-b.txt" />
+<figcaption aria-hidden="true"><strong>A1</strong> Verification report
+for Batch B.
+<code>A/A1-verification-report-batch-b.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/A/screenshots/A1-sync-batch-b.png"
+alt="A1 The sync run that produced it. A/A1-sync-batch-b.txt" />
+<figcaption aria-hidden="true"><strong>A1</strong> The sync run that
+produced it. <code>A/A1-sync-batch-b.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/A/screenshots/A2-unchanged-rerun.png"
+alt="A2 Second ingestion, unchanged corpus, 0 chunks embedded. A/A2-unchanged-rerun.txt" />
+<figcaption aria-hidden="true"><strong>A2</strong> Second ingestion,
+unchanged corpus, 0 chunks embedded.
+<code>A/A2-unchanged-rerun.txt</code></figcaption>
+</figure>
+<p><strong>B1</strong> Evaluation summary with all three levels:
+«MEASURE: screenshot pending» (the summary text is
+<code>eval/results/20261124T174636Z_baseline.md</code>).</p>
+<figure>
+<img src="../a3-evidence/B/screenshots/B2-stochasticity.png"
+alt="B2 Stochasticity, run 1 against run 2. B/B2-stochasticity.txt" />
+<figcaption aria-hidden="true"><strong>B2</strong> Stochasticity, run 1
+against run 2. <code>B/B2-stochasticity.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/C/screenshots/C1-gate-fail.png"
+alt="C1 Gate failing (cand-llama1b); kubectl get job eval shows Failed, with the Job log (also our F3 evaluation Job log). C/C1-gate-fail.txt" />
+<figcaption aria-hidden="true"><strong>C1</strong> Gate failing
+(cand-llama1b); <code>kubectl get job eval</code> shows Failed, with the
+Job log (also our F3 evaluation Job log).
+<code>C/C1-gate-fail.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/C/screenshots/C1b-gate-fail-mxbai.png"
+alt="C1 Gate failing (cand-mxbai, abstention). C/C1b-gate-fail-mxbai.txt" />
+<figcaption aria-hidden="true"><strong>C1</strong> Gate failing
+(cand-mxbai, abstention).
+<code>C/C1b-gate-fail-mxbai.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/C/screenshots/C1-module-minilm-corrected.png"
+alt="C Corrected module level for cand-minilm. C/C1-module-minilm-corrected.txt" />
+<figcaption aria-hidden="true"><strong>C</strong> Corrected module level
+for cand-minilm.
+<code>C/C1-module-minilm-corrected.txt</code></figcaption>
+</figure>
+<p><strong>C2</strong> Gate passing (cand-minilm): «MEASURE: screenshot
+pending» (the decision is
+<code>eval/results/20261125T054522Z_cand-minilm.decision.json</code>;
+the release dry run that reads it is
+<code>F/F3-release-dry-run.txt</code>).</p>
+<p><strong>D1</strong> One full trace record: «MEASURE: screenshot
+pending» (the capture in <code>D/D1-trace-record.txt</code> failed with
+exit 1).</p>
+<figure>
+<img src="../a3-evidence/D/screenshots/D5-root-cause-g025-trace.png"
+alt="D2 Trace tool rebuilding the prompt for a trace id (g025). D/D5-root-cause-g025-trace.txt" />
+<figcaption aria-hidden="true"><strong>D2</strong> Trace tool rebuilding
+the prompt for a trace id (g025).
+<code>D/D5-root-cause-g025-trace.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/D/screenshots/D3-trace-summary.png"
+alt="D3 Trace summary. D/D3-trace-summary.txt" />
+<figcaption aria-hidden="true"><strong>D3</strong> Trace summary.
+<code>D/D3-trace-summary.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/E/screenshots/E1-coverage-before.png"
+alt="E1 Coverage before (COVERAGE GAP, Job Failed). E/E1-coverage-before.txt" />
+<figcaption aria-hidden="true"><strong>E1</strong> Coverage before
+(COVERAGE GAP, Job Failed).
+<code>E/E1-coverage-before.txt</code></figcaption>
+</figure>
+<p><strong>E2</strong> Coverage after adding the new questions:
+«MEASURE: screenshot pending»</p>
+<figure>
+<img src="../a3-evidence/F/screenshots/F1-namespace-overview-1.png"
+alt="F1 Namespace overview, part 1. F/F1-namespace-overview.txt" />
+<figcaption aria-hidden="true"><strong>F1</strong> Namespace overview,
+part 1. <code>F/F1-namespace-overview.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/F/screenshots/F1-namespace-overview-2.png"
+alt="F1 Namespace overview, part 2. F/F1-namespace-overview.txt" />
+<figcaption aria-hidden="true"><strong>F1</strong> Namespace overview,
+part 2. <code>F/F1-namespace-overview.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/F/screenshots/F2-ingest-first-run.png"
+alt="F2 Log of the completed ingestion Job. F/F2-ingest-first-run.txt" />
+<figcaption aria-hidden="true"><strong>F2</strong> Log of the completed
+ingestion Job. <code>F/F2-ingest-first-run.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/F/screenshots/F3-release-refused.png"
+alt="F3 Release refused by the gate (extra; the evaluation Job log is shown at C1). F/F3-release-refused.txt" />
+<figcaption aria-hidden="true"><strong>F3</strong> Release refused by
+the gate (extra; the evaluation Job log is shown at C1).
+<code>F/F3-release-refused.txt</code></figcaption>
+</figure>
+<p><strong>F4</strong> Gate result changing after a ConfigMap edit:
+«MEASURE: screenshot pending» (not the same as
+<code>F/F4-metrics-port-forward.txt</code>, which is
+<code>/metrics</code> through a port-forward).</p>
+<figure>
+<img src="../a3-evidence/F/screenshots/F5-release-rollout.png"
+alt="F5 kubectl rollout status during the gated release. F/F5-release-rollout.txt" />
+<figcaption aria-hidden="true"><strong>F5</strong>
+<code>kubectl rollout status</code> during the gated release.
+<code>F/F5-release-rollout.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/F/screenshots/F5-zero-downtime.png"
+alt="F5 Requests during the rolling release, 47 of 47 200. F/F5-zero-downtime.txt" />
+<figcaption aria-hidden="true"><strong>F5</strong> Requests during the
+rolling release, 47 of 47 200.
+<code>F/F5-zero-downtime.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/F/screenshots/F6-bad-release-and-undo.png"
+alt="F6 Bad release stuck, 150 of 150 requests 200, then kubectl rollout undo. F/F6-bad-release-and-undo.txt" />
+<figcaption aria-hidden="true"><strong>F6</strong> Bad release stuck,
+150 of 150 requests 200, then <code>kubectl rollout undo</code>.
+<code>F/F6-bad-release-and-undo.txt</code></figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/F/screenshots/F6-trace-after-undo.png"
+alt="F6 Trace after the undo: previous collection and embedding version. F/F6-trace-after-undo.txt" />
+<figcaption aria-hidden="true"><strong>F6</strong> Trace after the undo:
+previous collection and embedding version.
+<code>F/F6-trace-after-undo.txt</code></figcaption>
+</figure>
+</body>
+</html>
