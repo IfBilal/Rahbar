@@ -91,6 +91,6 @@ the report's AI statement. Status of each claim is stated as it is, including wh
 3. **The hand-off assumed a GPU laptop.** Ours has none (`docs/a3-evidence/host.md`), so latency thresholds are
    derived on this machine and are not comparable with any other.
 4. **Data review.** Claude Code read the cited page of every golden question and changed three pairs and three
-   live queries (`docs/a3-evidence/data-review.md`). The 11 synthetic questions are marked "checked by Claude
-   Code, to be spot-checked by Taimoor". **That spot-check by a team member is still to be done and recorded
-   by us; until it is, we must not describe those questions as reviewed by hand by the group.**
+   live queries (`docs/a3-evidence/data-review.md`). The 11 synthetic questions were then read by Taimoor,
+   who found all 11 correct (`docs/a3-evidence/synthetic-spot-check.md`, recorded 25 Nov 2026). Bilal has not
+   reviewed them; the set was frozen unchanged, so the golden file still says "checked by Claude Code".
