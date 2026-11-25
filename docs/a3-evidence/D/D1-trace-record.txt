@@ -1,0 +1,4 @@
+$ bash -c kubectl logs -n rahbar pod/api-6c8bc44955-b7xgn --tail=2000 | grep '"type": *"trace"' | grep '/api/ask' | tail -1 | python3 -m json.tool
+Expecting value: line 1 column 1 (char 0)
+
+[exit 1 at 2026-11-25T10:19:35 UTC]

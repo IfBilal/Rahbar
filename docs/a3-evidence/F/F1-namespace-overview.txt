@@ -1,0 +1,125 @@
+$ kubectl get all,pvc,configmap,cronjob,job -n rahbar
+NAME                                      READY   STATUS      RESTARTS   AGE
+pod/api-6c8bc44955-b7xgn                  1/1     Running     0          25m
+pod/api-6c8bc44955-q9xd6                  1/1     Running     0          25m
+pod/api-6c8bc44955-s6qc6                  1/1     Running     0          25m
+pod/api-candidate-6cc5b7b76b-f9pwr        1/1     Running     0          33m
+pod/chroma-0                              1/1     Running     0          17h
+pod/coverage-4jl7j                        0/1     Error       0          5m24s
+pod/eval-856z6                            1/1     Running     0          5m3s
+pod/ingest-build-index-1125052238-l4zpb   0/1     Completed   0          4h57m
+pod/ingest-build-index-1125053321-925jt   0/1     Completed   0          4h46m
+pod/ingest-build-index-1125072356-v5kmb   0/1     Completed   0          176m
+pod/ingest-count-1125100708-rp8xn         0/1     Completed   0          13m
+pod/ingest-count-1125101008-x554r         0/1     Completed   0          10m
+pod/ingest-count-1125101024-bkl86         0/1     Completed   0          9m52s
+pod/ingest-count-1125101039-5mqlt         0/1     Completed   0          9m37s
+pod/ingest-count-1125101243-7tlqw         0/1     Completed   0          7m33s
+pod/ingest-count-1125101311-9dn2j         0/1     Completed   0          7m5s
+pod/ingest-count-1125101337-ts7r5         0/1     Completed   0          6m38s
+pod/ingest-count-1125101401-5z79n         0/1     Completed   0          6m15s
+pod/ingest-delete-1125101353-p75dn        0/1     Completed   0          6m23s
+pod/ingest-restore-1125101015-25564       0/1     Completed   0          10m
+pod/ingest-restore-1125101030-vcpw4       0/1     Completed   0          9m46s
+pod/ingest-restore-1125101136-cgcs5       0/1     Completed   0          8m40s
+pod/ingest-restore-1125101157-bsrwg       0/1     Completed   0          8m19s
+pod/ingest-status-1125101055-r2bw9        0/1     Completed   0          9m21s
+pod/ingest-status-1125101121-jwrk4        0/1     Completed   0          8m55s
+pod/ingest-status-1125101142-vbn28        0/1     Completed   0          8m34s
+pod/ingest-status-1125101204-9jsst        0/1     Completed   0          8m12s
+pod/ingest-svx5k                          0/1     Completed   0          16h
+pod/ingest-sync-1124173342-q8c89          0/1     Completed   0          16h
+pod/ingest-sync-1125100818-dsgc8          0/1     Completed   0          11m
+pod/ingest-sync-1125100949-msb4x          0/1     Completed   0          10m
+pod/ingest-sync-1125101250-2gv8k          0/1     Completed   0          7m26s
+pod/ingest-sync-1125101318-w6zc2          0/1     Completed   0          6m58s
+pod/ingest-sync-1125101344-22h2v          0/1     Completed   0          6m32s
+pod/ingest-unregister-1125095533-8g6xl    0/1     Completed   0          24m
+pod/ingest-unregister-1125095540-gmvjk    0/1     Completed   0          24m
+pod/ragops-loader                         1/1     Running     0          55s
+pod/redis-b8d9d4b69-wg8cb                 1/1     Running     0          17h
+pod/ui-b84f8ffd9-f5kt6                    1/1     Running     0          17h
+
+NAME                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/api             ClusterIP   10.104.39.239    <none>        8000/TCP   17h
+service/api-candidate   ClusterIP   10.107.226.194   <none>        8000/TCP   4h35m
+service/chroma          ClusterIP   10.102.49.243    <none>        8000/TCP   17h
+service/redis           ClusterIP   10.99.128.134    <none>        6379/TCP   17h
+service/ui              ClusterIP   10.111.182.52    <none>        8080/TCP   17h
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api             3/3     3            3           17h
+deployment.apps/api-candidate   1/1     1            1           4h35m
+deployment.apps/redis           1/1     1            1           17h
+deployment.apps/ui              1/1     1            1           17h
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-557cd64bd8             0         0         0       32m
+replicaset.apps/api-56cc49f58f             0         0         0       28m
+replicaset.apps/api-6c8bc44955             3         3         3       17h
+replicaset.apps/api-candidate-576d98d55    0         0         0       4h35m
+replicaset.apps/api-candidate-5b69d4b458   0         0         0       152m
+replicaset.apps/api-candidate-6cc5b7b76b   1         1         1       4h35m
+replicaset.apps/api-candidate-7d485b8ffc   0         0         0       152m
+replicaset.apps/api-candidate-865f654767   0         0         0       109m
+replicaset.apps/api-candidate-867bcf44bd   0         0         0       108m
+replicaset.apps/redis-b8d9d4b69            1         1         1       17h
+replicaset.apps/ui-b84f8ffd9               1         1         1       17h
+
+NAME                      READY   AGE
+statefulset.apps/chroma   1/1     17h
+
+NAME                                      REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api   Deployment/api   cpu: 3%/70%   3         8         3          17h
+
+NAME                   SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cronjob.batch/ingest   0 3 * * 0   <none>     False     0        <none>          17h
+
+NAME                                      STATUS     COMPLETIONS   DURATION   AGE
+job.batch/coverage                        Failed     0/1           5m25s      5m25s
+job.batch/eval                            Running    0/1           5m4s       5m4s
+job.batch/ingest                          Complete   1/1           9m29s      16h
+job.batch/ingest-build-index-1125052238   Complete   1/1           10m        4h57m
+job.batch/ingest-build-index-1125053321   Complete   1/1           11m        4h46m
+job.batch/ingest-build-index-1125072356   Complete   1/1           23m        176m
+job.batch/ingest-count-1125100708         Complete   1/1           6s         13m
+job.batch/ingest-count-1125101008         Complete   1/1           6s         10m
+job.batch/ingest-count-1125101024         Complete   1/1           6s         9m53s
+job.batch/ingest-count-1125101039         Complete   1/1           6s         9m38s
+job.batch/ingest-count-1125101243         Complete   1/1           6s         7m34s
+job.batch/ingest-count-1125101311         Complete   1/1           6s         7m6s
+job.batch/ingest-count-1125101337         Complete   1/1           5s         6m39s
+job.batch/ingest-count-1125101401         Complete   1/1           7s         6m16s
+job.batch/ingest-delete-1125101353        Complete   1/1           6s         6m24s
+job.batch/ingest-restore-1125101015       Complete   1/1           7s         10m
+job.batch/ingest-restore-1125101030       Complete   1/1           7s         9m47s
+job.batch/ingest-restore-1125101136       Complete   1/1           6s         8m41s
+job.batch/ingest-restore-1125101157       Complete   1/1           6s         8m20s
+job.batch/ingest-status-1125101055        Complete   1/1           7s         9m22s
+job.batch/ingest-status-1125101121        Complete   1/1           7s         8m56s
+job.batch/ingest-status-1125101142        Complete   1/1           7s         8m35s
+job.batch/ingest-status-1125101204        Complete   1/1           6s         8m13s
+job.batch/ingest-sync-1124173342          Complete   1/1           7s         16h
+job.batch/ingest-sync-1125100818          Complete   1/1           48s        11m
+job.batch/ingest-sync-1125100949          Complete   1/1           8s         10m
+job.batch/ingest-sync-1125101250          Complete   1/1           19s        7m27s
+job.batch/ingest-sync-1125101318          Complete   1/1           19s        6m59s
+job.batch/ingest-sync-1125101344          Complete   1/1           6s         6m33s
+job.batch/ingest-unregister-1125095533    Complete   1/1           6s         24m
+job.batch/ingest-unregister-1125095540    Complete   1/1           5s         24m
+
+NAME                                   STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-chroma-0    Bound    pvc-8ead4e92-176d-4a0b-ab16-676631dd1bdb   2Gi        RWO            standard       <unset>                 17h
+persistentvolumeclaim/ragops-data      Bound    pvc-eaaa6238-673e-4358-9924-9d76dba7bebf   2Gi        RWO            standard       <unset>                 17h
+persistentvolumeclaim/ragops-results   Bound    pvc-1ede994b-f23c-4764-9884-4df29757a839   512Mi      RWO            standard       <unset>                 17h
+persistentvolumeclaim/ragops-traces    Bound    pvc-6dd27eeb-6c18-45c5-a3ee-e6197e13207a   1Gi        RWO            standard       <unset>                 17h
+persistentvolumeclaim/redis-data       Bound    pvc-bca09b45-1b8a-4b58-9231-db6322099f18   1Gi        RWO            standard       <unset>                 17h
+
+NAME                           DATA   AGE
+configmap/kube-root-ca.crt     1      17h
+configmap/ragops-config        12     17h
+configmap/ragops-eval-target   7      17h
+configmap/ragops-gate          1      17h
+configmap/rahbar-config        21     17h
+
+[exit 0 at 2026-11-25T10:20:17 UTC]

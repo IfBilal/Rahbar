@@ -1,7 +1,7 @@
 $ kubectl exec -n rahbar ragops-loader -- python -m ragops.trace.summary --traces /traces --route /api/ask --release R1-nomic
 62 requests  routes={'/api/ask': 62}  status={'ok': 48, 'abstained': 14}
 abstention 0.2258  fallback 0.0  cache hit 0.0
-top-1 retrieval similarity (n=62): min 0.6  p10 0.6  p50 0.8  p90 0.9  max 0.9
+top-1 retrieval similarity (n=62): min 0.5731  p10 0.6291  p50 0.7692  p90 0.8741  max 0.8906
 releases={'R1-nomic': 62}  collections={'rahbar': 62}
 latency ms (p50 / p95):
   generate   111903.3 / 177153.9
@@ -9,4 +9,4 @@ latency ms (p50 / p95):
   total      110903.9 / 173606.5
 guardrail actions: {} (0 request(s))
 
-[exit 0 at 2026-11-25T10:18:13 UTC]
+[exit 0 at 2026-11-25T10:19:25 UTC]
