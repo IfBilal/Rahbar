@@ -1,0 +1,7 @@
+$ scripts/ragops/eval.sh suite cand-minilm-module --target http://api-candidate:8000 --suite-args --batches A --levels module
+job/eval started: mode=suite label=cand-minilm-module target=http://api-candidate:8000
+INFRASTRUCTURE FAILURE: embedding service failed: Client error '400 Bad Request' for url 'http://host.minikube.internal:11434/api/embed'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+RESULT=INFRA_ERROR suite_exit=3
+
+[exit 3 at 2026-11-25T07:16:24 UTC]

@@ -262,3 +262,21 @@ def test_module_level_embeds_with_the_target_model_not_the_environment(monkeypat
     assert target_embed_model(Api({"embed_model": "all-minilm"})) == "all-minilm"
     assert target_embed_model(Api({"embed_model": None})) == "nomic-embed-text"            # target silent: fallback
     assert target_embed_model(Api(InfrastructureError("down"))) == "nomic-embed-text"
+
+
+def test_the_suite_embedder_halves_a_text_a_small_context_model_refuses() -> None:
+    import json
+
+    import httpx
+
+    from ragops.suite.clients import OllamaEmbedder
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        texts = json.loads(request.content)["input"]
+        if any(len(t.split()) > 50 for t in texts):
+            return httpx.Response(400, json={"error": "input length exceeds the context length"})
+        return httpx.Response(200, json={"embeddings": [[1.0, 2.0] for _ in texts]})
+    e = OllamaEmbedder("http://x", "all-minilm")
+    e.http = httpx.Client(transport=httpx.MockTransport(handler))
+    out = e.embed(["short", " ".join(["w"] * 400)])
+    assert out == [[1.0, 2.0], [1.0, 2.0]] and e.shortened == 1
