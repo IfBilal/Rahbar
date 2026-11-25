@@ -47,10 +47,10 @@ done
 ( until kubectl logs -n rahbar -f job/ingest --all-containers >>/tmp/ingest-job.log 2>&1; do sleep 2; done ) &
 LOGGER=$!
 kubectl wait -n rahbar --for=condition=complete job/ingest --timeout="${INDEX_TIMEOUT:-900s}" || {
-  kill "$LOGGER" 2>/dev/null
+  kill "$LOGGER" 2>/dev/null || true
   kubectl get pods,jobs -n rahbar; kubectl describe job/ingest -n rahbar | tail -30
   echo "---- ingest Job log captured while it ran"; tail -120 /tmp/ingest-job.log; exit 1; }
-kill "$LOGGER" 2>/dev/null
+kill "$LOGGER" 2>/dev/null || true
 kubectl logs -n rahbar job/ingest --tail=5
 kubectl rollout status -n rahbar deployment/api --timeout=300s
 kubectl rollout status -n rahbar deployment/ui --timeout=120s
