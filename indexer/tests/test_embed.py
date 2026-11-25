@@ -101,3 +101,27 @@ def test_bad_vectors_are_rejected(vectors, expected, match) -> None:
 
 def test_good_vectors_report_their_dimension() -> None:
     assert check_vectors([[0.0] * 768, [1.0] * 768], 2) == 768
+
+
+def test_a_candidate_index_halves_a_chunk_the_model_refuses_and_counts_it() -> None:
+    """all-minilm and mxbai have a 512-token context and refuse dense 300-word chunks with a 400. The
+    live index stays strict (the 400 propagates); a candidate build shortens that chunk and counts it."""
+    import httpx
+
+    from pipeline.config import IndexerSettings
+    settings = IndexerSettings(embed_model="all-minilm", chroma_host="x", chroma_port=1, collection="c",
+                               corpus_dir="/", chunk_size=300, chunk_overlap=40, ollama_url="http://o")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        import json
+        texts = json.loads(request.content)["input"]
+        if any(len(t.split()) > 40 for t in texts):
+            return httpx.Response(400, json={"error": "input length exceeds the context length"})
+        return httpx.Response(200, json={"embeddings": [[1.0, 0.0] for _ in texts]})
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    texts = ["short text", " ".join(f"w{i}" for i in range(300)), "another short one"]
+    emb.STATS["shortened"] = 0
+    with pytest.raises(httpx.HTTPStatusError):
+        emb.embed(texts, settings, client=client)                         # strict: the live index fails
+    vectors = emb.embed(texts, settings, client=client, shorten_on_overflow=True)
+    assert len(vectors) == 3 and emb.STATS["shortened"] == 1

@@ -32,7 +32,7 @@ def cli(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureF
     monkeypatch.setenv("CHUNK_OVERLAP", "10")
     client, embed = FakeClient(), CountingEmbed()
     monkeypatch.setattr("pipeline.store.get_client", lambda settings: client)
-    monkeypatch.setattr("pipeline.embed.embed", lambda texts, settings: embed(texts))
+    monkeypatch.setattr("pipeline.embed.embed", lambda texts, settings, shorten_on_overflow=False: embed(texts))
 
     class Cli:
         def __init__(self) -> None:

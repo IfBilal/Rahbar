@@ -56,13 +56,24 @@ def prepare_document(model: str, text: str) -> str:
     return document_prefix(model) + (text.lower() if profile["lowercase"] else text)
 
 
+# Chunks that had to be shortened to fit a small-context model (candidate indexes only), counted so a
+# build can report them: a candidate that cannot read 15 percent of the corpus should show it.
+STATS = {"shortened": 0}
+
+
 def embed(texts: list[str], settings: IndexerSettings,
-          client: httpx.Client | None = None) -> list[list[float]]:
+          client: httpx.Client | None = None, shorten_on_overflow: bool = False) -> list[list[float]]:
     """Embed with settings.embed_model and nothing else.
 
     POST {ollama_url}/api/embed with {"model": ..., "input": [texts]} returns
     {"embeddings": [[...], ...]}. Batched, retried, and every vector is checked: one per
     text, finite, and all of the same dimension.
+
+    The live index is strict: a chunk the model refuses fails the Job. A CANDIDATE index may pass
+    `shorten_on_overflow`: all-minilm and mxbai have a 512-token context and refuse about 15 percent
+    of our 300-word chunks (dense tables and numbers), and Ollama 0.17 answers 400 'input length
+    exceeds the context length' even with truncate=true. Such a chunk is embedded from a halved text,
+    and counted in STATS, because that is what the candidate model can actually do with it.
     """
     if not texts:
         return []
@@ -72,12 +83,35 @@ def embed(texts: list[str], settings: IndexerSettings,
     try:
         for start in range(0, len(texts), BATCH):
             batch = [prepare_document(settings.embed_model, t) for t in texts[start:start + BATCH]]
-            vectors.extend(_embed_batch(http, settings, batch))
+            try:
+                vectors.extend(_embed_batch(http, settings, batch))
+            except httpx.HTTPStatusError as exc:
+                if not (shorten_on_overflow and exc.response.status_code == 400):
+                    raise
+                vectors.extend(_embed_one_by_one(http, settings, batch))
     finally:
         if own:
             http.close()
     check_vectors(vectors, len(texts))
     return vectors
+
+
+def _embed_one_by_one(http: httpx.Client, settings: IndexerSettings,
+                      batch: list[str]) -> list[list[float]]:
+    """Embed each text alone; one the model refuses is halved (by words) until it fits."""
+    out: list[list[float]] = []
+    for text in batch:
+        words, shortened = text.split(), False
+        while True:
+            try:
+                out.extend(_embed_batch(http, settings, [" ".join(words)]))
+                break
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code != 400 or len(words) <= 8:
+                    raise
+                words, shortened = words[: len(words) // 2], True
+        STATS["shortened"] += int(shortened)
+    return out
 
 
 def _embed_batch(http: httpx.Client, settings: IndexerSettings,
