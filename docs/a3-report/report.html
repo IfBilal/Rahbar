@@ -764,10 +764,20 @@ aid, swimming pool, degree attestation</td>
 <code>E/e4-round2.jsonl</code></td>
 </tr>
 <tr>
-<td>E4 suite on the new questions</td>
-<td>«MEASURE: result of <code>--only-added E4</code> (15 questions),
-<code>eval/results/*_e4-added.md</code>»</td>
-<td></td>
+<td>E4 suite on the new questions (15 run, g008 retired)</td>
+<td>13 answerable: recall@3 0.769, <strong>recall@5 0.846</strong> (11
+of 13), MRR 0.712, faithfulness 1.000, abstention 2 of 2, citation
+validity 1.000, false abstention 0.077 (one question). Two misses, both
+reported: <strong>g032</strong> (club events end by 10 pm) abstained
+because the page that holds the answer (page 2 of the clubs PDF) was not
+retrieved; <strong>g041</strong> (lab credit hours) retrieved the wrong
+page and answered “1 credit hour” against the expected “1 or 2”, which
+the judge still called supported (a case for short answer (d)). Latency
+p95 736 s is not comparable with the baseline: part of this run was on
+battery power, around a reboot
+(<code>docs/a3-evidence/F/F9-reboot-and-disk.md</code>)</td>
+<td><code>eval/results/20261125T135400Z_e4-added.md</code>,
+<code>.json</code></td>
 </tr>
 </tbody>
 </table>
