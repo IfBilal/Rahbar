@@ -5,11 +5,11 @@ release_id: R3-minilm
 change: embedding_model
 collection: rahbar-cand-minilm
 embed_model: all-minilm
-embed_version: ""
+embed_version: "1b226e2802db"
 chunk_size: 300
 chunk_overlap: 40
 top_k: 5
-relevance_floor: null
+relevance_floor: 0.25           # calibrated: docs/a3-evidence/C/C0-floor-minilm.txt (lowest best-gold score 0.2997)
 cache_threshold: null
 prompt_version: same
 expected: fail

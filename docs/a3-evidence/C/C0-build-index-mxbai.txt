@@ -1,0 +1,7 @@
+$ scripts/ragops/job.sh build-index -- build-index --collection rahbar-cand-mxbai --embed-model mxbai-embed-large
+job.batch/ingest-build-index-1125053321 created
+job/ingest-build-index-1125053321
+job.batch/ingest-build-index-1125053321 condition met
+{"chunks_embedded": 532, "chunks_shortened": 0, "chunks_written": 532, "collection": "rahbar-cand-mxbai", "command": "build-index", "exit": 0, "indexes": {"rahbar-cand-mxbai": {"revision": "r0001", "revision_bumped": true}}, "run_id": "ingest-20261125T053324Z-25jt", "schema": 1, "seconds": 674.69, "type": "ingest_summary"}
+
+[exit 0 at 2026-11-25T05:44:43 UTC]
