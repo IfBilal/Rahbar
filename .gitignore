@@ -30,3 +30,4 @@ htmlcov/
 # Batch B build output (corpus/batch-b/build.py --out ...)
 corpus/batch-b/out/
 docs/a3-report/report.html
+.claude/worktrees/

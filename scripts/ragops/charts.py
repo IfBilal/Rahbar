@@ -40,13 +40,13 @@ def candidates() -> Image.Image:
             ("cand-mxbai", "20261125T083132Z_cand-mxbai.json"), ("cand-llama1b", "20261125T074817Z_cand-llama1b.json")]
     groups = [("recall@5", ("component", "clean", "recall@5")), ("faithfulness", ("endpoint", "faithfulness")),
               ("abstention correctness", ("endpoint", "abstention_correctness"))]
-    w, h, left, top, bottom = 1500, 700, 90, 70, 150
+    w, h, left, top, bottom = 1500, 760, 90, 110, 160
     img = Image.new("RGB", (w, h), "white")
     d = ImageDraw.Draw(img)
-    d.text((left, 44), "Part C: baseline and three candidates (golden set v1, Batch A, 20 answerable / 6 unanswerable)", font=font(20, True), fill=INK)
+    d.text((left, 20), "Part C: baseline and three candidates (golden v1, Batch A: 20 answerable, 6 unanswerable)", font=font(21, True), fill=INK)
     plot_h = h - top - bottom
     for i in range(0, 11, 2):
-        y = top + plot_h - plot_h * i / 10
+        y = top + plot_h - plot_h * i / 10 * 0.92
         d.line((left, y, w - 30, y), fill=GRID)
         d.text((left - 48, y - 10), f"{i / 10:.1f}", font=font(18), fill=INK)
     gw = (w - left - 40) / len(groups)
@@ -56,16 +56,16 @@ def candidates() -> Image.Image:
         for ri, (rname, f) in enumerate(runs):
             v = metric(f, *keys)
             x = x0 + ri * bw
-            y = top + plot_h - plot_h * v
+            y = top + plot_h - plot_h * v * 0.92
             d.rectangle((x, y, x + bw * 0.85, top + plot_h), fill=COLORS[ri])
             d.text((x, y - 24), f"{v:.3f}", font=font(17), fill=INK)
         d.text((x0, h - bottom + 12), gname, font=font(21, True), fill=INK)
     base_r5 = metric(runs[0][1], "component", "clean", "recall@5")
     for val, gi in ((base_r5 - 0.02, 0), (0.89, 1)):
-        y = top + plot_h - plot_h * val
+        y = top + plot_h - plot_h * val * 0.92
         d.line((left + gi * gw, y, left + (gi + 1) * gw - 10, y), fill=(120, 0, 0), width=3)
-    d.text((w - 560, 20), "dark red line: gate limit (recall@5 baseline - 0.02 = 0.78; faithfulness 0.89)",
-           font=font(15, True), fill=(120, 0, 0))
+    d.text((left, 74), "dark red line = gate limit: recall@5 baseline - 0.02 = 0.78; faithfulness minimum 0.89",
+           font=font(17, True), fill=(120, 0, 0))
     lx = left
     for ri, (rname, _) in enumerate(runs):
         d.rectangle((lx, h - 60, lx + 22, h - 38), fill=COLORS[ri])
