@@ -1,0 +1,14 @@
+$ bash /tmp/a4.sh
+### 1. normal state
+  ledger: ['2022-05:archived', '2026-11:current'] | index revision r0004 chunks 558
+  /api/retrieve versions returned: ['2026-11'] at index revision r0004
+### 2. rollback: restore the archived 2022-05 version
+  restored: faculty-entrepreneurship-and-technical-start-ups-policy@2022-05 | archived: faculty-entrepreneurship-and-technical-start-ups-policy@2026-11 | chunks_embedded: 0
+  ledger: ['2022-05:current', '2026-11:archived'] | index revision r0005 chunks 558
+  /api/retrieve versions returned: ['2022-05'] at index revision r0005
+### 3. back to normal: restore 2026-11
+  restored: faculty-entrepreneurship-and-technical-start-ups-policy@2026-11 | archived: faculty-entrepreneurship-and-technical-start-ups-policy@2022-05 | chunks_embedded: 0
+  ledger: ['2022-05:archived', '2026-11:current'] | index revision r0006 chunks 558
+  /api/retrieve versions returned: ['2026-11'] at index revision r0006
+
+[exit 0 at 2026-11-25T10:12:16 UTC]

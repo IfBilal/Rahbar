@@ -31,7 +31,11 @@ print(yaml.safe_dump(job))
 PY
 echo "job/$name"
 if [ "${WAIT:-1}" = "1" ]; then
-  kubectl wait --for=condition=complete "job/$name" -n "$NS" --timeout="${TIMEOUT:-3600s}" \
-    || { kubectl logs -n "$NS" "job/$name" --all-containers --tail=40; exit 1; }
+  # wait for Complete OR Failed (a plain --for=condition=complete would sit out the whole timeout on a failure)
+  for _ in $(seq 1 "${WAIT_STEPS:-1800}"); do
+    st=$(kubectl get "job/$name" -n "$NS" -o jsonpath='{.status.succeeded}/{.status.failed}' 2>/dev/null || true)
+    case "$st" in 1/*) break ;; */1) kubectl logs -n "$NS" "job/$name" --all-containers --tail=40; echo "job/$name FAILED" >&2; exit 1 ;; esac
+    sleep 2
+  done
   kubectl logs -n "$NS" "job/$name" -c indexer --tail=3
 fi

@@ -209,7 +209,7 @@ kubectl -n rahbar wait --for=condition=complete job/ingest --timeout=3600s
 | --- | --- | --- |
 | A ingest, verify, update | `scripts/ragops/job.sh sync` | the last log line is the run summary (`chunks_embedded`); `/data/reports/verification/<run>.md` and `.json` on the `ragops-data` volume |
 | A Batch B | `kubectl cp <batch-b dir> rahbar/ragops-loader:/data/inbox/` then `scripts/ragops/job.sh sync` (`python corpus/batch-b/build.py --out DIR` writes the 13 files) | verification report with a pass or fail and a reason per check; quarantined files under `/data/quarantine/` |
-| A counts, restore, delete | `scripts/ragops/job.sh count -- count --json`, `... restore -- restore <doc>@<ver>`, `... delete -- delete <doc>` | chunk count per document id, orphans, archived and restored versions |
+| A counts, restore, delete | `scripts/ragops/job.sh count -- count`, `... restore -- restore <doc>@<ver>`, `... delete -- delete <doc>` | chunk count per document id, orphans, archived and restored versions |
 | B suite | `make eval-suite LABEL=baseline` (or `scripts/ragops/eval.sh suite baseline --suite-args "--batches A --repeat 2"`) | `/results/<timestamp>_<label>.json` with a summary table; committed under `eval/results/` |
 | B stochasticity | `python -m ragops.suite.stochasticity run1.json run2.json` | per-metric difference between two runs |
 | C gate | `make eval-gate LABEL=cand-mxbai` (suite then gate); thresholds in `ragops/config/gate.yaml`, served as ConfigMap `ragops-gate` | `<timestamp>_<label>.decision.json`; the Job fails when the gate fails |

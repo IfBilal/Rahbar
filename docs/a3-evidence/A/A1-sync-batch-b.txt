@@ -1,0 +1,8 @@
+$ scripts/ragops/job.sh sync
+job.batch/ingest-sync-1125100818 created
+job/ingest-sync-1125100818
+EOF marker not found
+{"chunks_deleted": 0, "chunks_embedded": 52, "chunks_reused": 0, "chunks_written": 52, "command": "sync", "docs_deleted": 0, "docs_new": 6, "docs_quarantined": 6, "docs_renamed": 0, "docs_seen": 21, "docs_superseded": 1, "docs_unchanged": 9, "docs_updated": 0, "exit": 1, "indexes": {"rahbar": {"chunks_deleted": 0, "chunks_embedded": 26, "chunks_written": 26, "revision": "r0002", "revision_bumped": true}, "rahbar-cand-minilm": {"chunks_deleted": 0, "chunks_embedded": 26, "chunks_written": 26, "revision": "r0002", "revision_bumped": true}}, "repairs": 0, "run_id": "ingest-20261125T100821Z-sgc8", "schema": 1, "seconds": 42.13, "type": "ingest_summary", "verification_embeddings": 23}
+{"logger":"rahbar.indexer","msg":"finished with quarantined documents: exit 1 mapped to 0"}
+
+[exit 0 at 2026-11-25T10:09:07 UTC]

@@ -1,0 +1,13 @@
+$ kubectl exec -n rahbar ragops-loader -- cat /data/reports/verification/ingest-20261125T100952Z-sb4x.md
+# Verification report ingest-20261125T100952Z-sb4x
+
+embedding `nomic-embed-text` · documents 1 · unchanged 15
+
+| document | quality | complete | recency | unique | outcome | reason |
+| --- | --- | --- | --- | --- | --- | --- |
+| batch-b/faculty-entrepreneurship-policy-2019.md | PASS | PASS | FAIL | PASS | quarantined | R-NEWER-EXISTS: a newer version is already held: faculty-en… |
+
+**accepted 0 · quarantined 1 · archived 0 · unchanged 15**
+failures by check: quality 0 · completeness 0 · recency 1 · uniqueness 0
+
+[exit 0 at 2026-11-25T10:09:58 UTC]

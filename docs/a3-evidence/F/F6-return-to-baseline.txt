@@ -1,0 +1,26 @@
+$ bash -c kubectl -n rahbar rollout undo deployment/api --to-revision=1 && kubectl -n rahbar rollout status deployment/api --timeout=400s && kubectl -n rahbar annotate deployment/api kubernetes.io/change-cause="rollback to release R1-nomic (single variable for the Batch B drift experiment)" --overwrite && kubectl -n rahbar rollout history deployment/api && kubectl get deploy api -n rahbar -o jsonpath="{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{\"\\n\"}{end}" | grep -E "RELEASE|COLLECTION|EMBED|FLOOR"
+Warning: resource deployments/api was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/api rolled back
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "api" rollout to finish: 1 old replicas are pending termination...
+deployment "api" successfully rolled out
+deployment.apps/api annotated
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+3         release R5-bad-typo (collection name typo, deliberately broken for the rollback demo)
+4         release R3-minilm (gate decision a832a043e7f0)
+5         rollback to release R1-nomic (single variable for the Batch B drift experiment)
+
+RELEASE_ID=R1-nomic
+CHROMA_COLLECTION=rahbar
+EMBED_MODEL=nomic-embed-text
+EMBED_VERSION=0a109f422b47
+RELEVANCE_FLOOR=0.60
+
+[exit 0 at 2026-11-25T09:55:10 UTC]

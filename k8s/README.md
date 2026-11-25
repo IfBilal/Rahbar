@@ -34,7 +34,7 @@ Job, then apply it again (the ingest Job in the base is the exception; it runs o
 | Part | Command | Object |
 | --- | --- | --- |
 | A ingest, verify, update | `scripts/ragops/job.sh sync` (or `kubectl create job --from=cronjob/ingest ingest-manual-1 -n rahbar`) | Job / CronJob `ingest` |
-| A report, count, restore, delete | `scripts/ragops/job.sh count -- count --json`, `... restore -- restore <doc>@<ver>`, `... delete -- delete <doc>` | Job `ingest-<action>-<ts>` |
+| A report, count, restore, delete | `scripts/ragops/job.sh count -- count`, `... restore -- restore <doc>@<ver>`, `... delete -- delete <doc>` | Job `ingest-<action>-<ts>` |
 | B suite | `make eval-suite LABEL=baseline` | Job `eval` (`MODE=suite`) |
 | C gate | `make eval-gate LABEL=cand-mxbai`; thresholds: `kubectl edit configmap ragops-gate -n rahbar` | Job `eval`, ConfigMap `ragops-gate` |
 | C/F3 release | `scripts/ragops/release.sh cand-mxbai`; undo: `kubectl rollout undo deployment/api -n rahbar` | Deployments `api`, `api-candidate` |
