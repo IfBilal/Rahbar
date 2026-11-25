@@ -1,0 +1,19 @@
+$ .venv/bin/python -m ragops.suite.agreement score eval/results/20261124T174636Z_baseline.json eval/judge_labels.jsonl
+{
+  "n": 16,
+  "agreement_3class": 0.875,
+  "agreement": 0.875,
+  "cohen_kappa": -0.06666666666666667,
+  "disagreements": [
+    {
+      "human": "supported",
+      "judge": "unsupported"
+    },
+    {
+      "human": "unsupported",
+      "judge": "supported"
+    }
+  ]
+}
+
+[exit 0 at 2026-11-25T10:26:31 UTC]

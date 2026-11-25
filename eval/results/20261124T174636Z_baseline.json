@@ -128,7 +128,10 @@
       "judge": {
         "model": "llama3.2:3b",
         "unparseable": 0,
-        "judged": 19
+        "judged": 19,
+        "hand_labels": 16,
+        "agreement": 0.875,
+        "cohen_kappa": -0.06666666666666667
       }
     }
   },
