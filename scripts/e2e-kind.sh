@@ -42,8 +42,15 @@ for attempt in 1 2 3 4 5 6; do
   [ "$attempt" = 6 ] && exit 1; echo "apply failed, retrying in 10 s"; sleep 10
 done
 
+# A failed Job's pods are deleted by Kubernetes, taking their logs with them: keep a copy while it runs so a
+# failure in CI can be diagnosed (the first A3 CI failure left nothing to read).
+( until kubectl logs -n rahbar -f job/ingest --all-containers >>/tmp/ingest-job.log 2>&1; do sleep 2; done ) &
+LOGGER=$!
 kubectl wait -n rahbar --for=condition=complete job/ingest --timeout="${INDEX_TIMEOUT:-900s}" || {
-  kubectl get pods -n rahbar; kubectl logs -n rahbar job/ingest --all-containers --tail=50; exit 1; }
+  kill "$LOGGER" 2>/dev/null
+  kubectl get pods,jobs -n rahbar; kubectl describe job/ingest -n rahbar | tail -30
+  echo "---- ingest Job log captured while it ran"; tail -120 /tmp/ingest-job.log; exit 1; }
+kill "$LOGGER" 2>/dev/null
 kubectl logs -n rahbar job/ingest --tail=5
 kubectl rollout status -n rahbar deployment/api --timeout=300s
 kubectl rollout status -n rahbar deployment/ui --timeout=120s
