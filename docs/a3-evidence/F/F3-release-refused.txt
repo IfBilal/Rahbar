@@ -1,0 +1,18 @@
+$ bash -c kubectl -n rahbar rollout history deployment/api; echo; scripts/ragops/release.sh cand-llama1b; echo "release.sh exit=$?"; echo; kubectl -n rahbar rollout history deployment/api; kubectl get deploy api -n rahbar -o jsonpath="{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{\"\\n\"}{end}" | grep -E "RELEASE|COLLECTION|EMBED_MODEL"
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+
+
+REFUSED: gate decision for cand-llama1b is 'fail', not pass (/results/20261125T074817Z_cand-llama1b.decision.json)
+release.sh exit=1
+
+deployment.apps/api 
+REVISION  CHANGE-CAUSE
+1         <none>
+
+RELEASE_ID=R1-nomic
+CHROMA_COLLECTION=rahbar
+EMBED_MODEL=nomic-embed-text
+
+[exit 0 at 2026-11-25T08:31:04 UTC]
