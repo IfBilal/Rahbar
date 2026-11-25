@@ -3,7 +3,7 @@
 **CS4032 Assignment 03 (RAGOps), Fall 2026.** Team: **Taimoor Shaukat (24I-3015)** and **Muhammad Bilal Tahir (24I-3166)**.
 Repository: <https://github.com/IfBilal/Rahbar> · submitted commit: `«MEASURE: git SHA»` · every number below is from a run on one CPU-only laptop (`docs/a3-evidence/host.md`; no GPU, so latencies are slow and comparable only with themselves) and cites a committed file under `docs/a3-evidence/` (letter = Part) or `eval/results/`.
 
-We added the RAGOps layer of the reference paper (Xu et al., 2026) to our Assignment-02 pipeline RAHBAR (FAST-NUCES rules, cited answers, abstains when the documents do not cover a question): a verification and incremental-update lifecycle for the data (**Batch A**: nine public documents, 279 pages, 532 chunks; **Batch B**: thirteen fictional files with planted problems), a three-level offline suite, a configurable release gate, a trace and metrics for every query, a coverage check, and a gated rolling release on Kubernetes. Ingestion, evaluation and coverage are Jobs; data, traces and results are on PersistentVolumeClaims; thresholds are a ConfigMap.
+We added the RAGOps layer of the reference paper (Xu et al., arXiv:2506.03401; cited as 2026 in the assignment, posted 3 Jun 2025) to our Assignment-02 pipeline RAHBAR (FAST-NUCES rules, cited answers, abstains when the documents do not cover a question): a verification and incremental-update lifecycle for the data (**Batch A**: nine public documents, 279 PDF pages plus 2 web pages, 532 chunks; **Batch B**: thirteen files with planted problems (eleven fictional, two byte copies of Batch-A documents)), a three-level offline suite, a configurable release gate, a trace and metrics for every query, a coverage check, and a gated rolling release on Kubernetes. Ingestion, evaluation and coverage are Jobs; data, traces and results are on PersistentVolumeClaims; thresholds are a ConfigMap.
 
 ## 1. Table 1: the stages of Figure 3
 
@@ -13,7 +13,7 @@ We added the RAGOps layer of the reference paper (Xu et al., 2026) to our Assign
 | Verify | Four checks per document (quality, completeness, recency, uniqueness) with a reason code; failures go to quarantine; one report per run | `verify.py`, `report.py` | No consistency check across documents; malicious content is not detectable here (B08 passes all four checks) |
 | Update data lake | Verified versions on the PVC, superseded versions archived and restorable, deletions recorded, a versioned ledger | `lake.py`, `ledger.py`, `ops.py` | No access-control metadata |
 | Update retrieval sources | Chunk-level incremental update: 0 embeddings when nothing changed, changed document replaces only its chunks, deletion leaves no orphans, `superseded` flag in metadata, revision in a registry | `incremental.py`, `store.py`, `index.py` | A change of embedding model or chunking is a full rebuild of a new collection |
-| Offline testing | Golden set (30) and a three-level suite (module, component, end-to-end), seeds, run twice, one command; gate over ConfigMap thresholds | `ragops/suite/`, `ragops/gate/` | Public benchmarks; a larger golden set; a stronger judge than the 3B generator |
+| Offline testing | Golden set (30 frozen, 45 after E4) and a three-level suite (module, component, end-to-end), seeds, run twice, one command; gate over ConfigMap thresholds | `ragops/suite/`, `ragops/gate/` | Public benchmarks; a larger golden set; a stronger judge than the 3B generator |
 | Live testing | A candidate Deployment on its own collection, the same suite against it, a gated rolling release with `kubectl rollout undo`; traces and a summary over a time window | `k8s/candidate.yaml`, `scripts/ragops/release.sh`, `ragops/trace/` | No A/B traffic split; no alerting |
 | Check coverage | Embedding similarity between live queries and golden questions; share against a calibrated threshold; uncovered topics; exit code | `ragops/coverage/coverage.py` | Retrieval-level and generation-level coverage |
 
@@ -48,7 +48,7 @@ Failures by check, first Batch-B run: completeness 4, uniqueness 3, quality 1, r
 
 | Run | docs new / unchanged / quarantined | chunks embedded / deleted | revision | seconds | file |
 |---|---|---|---|---|---|
-| Batch A first sync | 9 / 0 / 0 (1 superseded) | 532 / 0 | r0001 | n/a | `F/F2` |
+| Batch A first sync | 9 / 0 / 0 (1 superseded) | 532 / 0 | r0001 | 561.35 | `F/F2` |
 | Unchanged re-run | 0 / 9 / 0 | **0** / 0 | r0001, not bumped | 0.06 | `A/A2` |
 | Batch B sync | 6 / 9 / 6 (1 superseded) | 26 in each of 2 indexes / 0 | r0002 (532 to 558 chunks) | 42.13 | `A/A1-sync-batch-b.txt` |
 | B13 later run | 0 / 15 / 1 | 0 / 0 | n/a | n/a | `A/A1b` |
@@ -78,7 +78,7 @@ Source `B/B1-eval-summary.txt` (`eval/results/20261124T174636Z_baseline.md`). Fo
 | endpoint | faithfulness (limit 0.89) | 0.947 | 0.944 | 0.947 | **0.857** |
 | endpoint | abstention correctness | 1.000 | 1.000 | **0.833** | 1.000 |
 | endpoint | false abstention; citation validity | 0.050; 1.000 | 0.100; 1.000 | 0.050; 1.000 | 0.300; 1.000 |
-| endpoint | latency p50 / p95 s (limit 225) | 99.6 / 153.0 | 85.1 / 175.4 | 107.1 / 190.9 | 59.7 / 87.8 |
+| endpoint | latency p50 / p95 s (limit 225) | 99.6 / 153.0 | 85.1 / 175.35 | 107.1 / 190.9 | 59.7 / 87.8 |
 | gate | verdict | baseline | **PASS** | **FAIL** | **FAIL** |
 | spec | predicted before the run (`expected:`) | | fail | pass | fail |
 
@@ -88,7 +88,7 @@ Source `C/comparison.md`; decisions `eval/results/*_cand-*.decision.json`; gate 
 
 | Candidate | Decision | Reason |
 |---|---|---|
-| cand-minilm | **RELEASE**, with reservations | Passed every rule (recall@5 unchanged, faithfulness 0.944, p95 175.4 s); embeds 9 times faster; vectors half the size. Reservations no rule covers: false abstention doubled (0.10 vs 0.05); 74 of 532 chunks (14 %) were embedded from shortened text (512-token context); floor 0.25 lets 5 of 6 unanswerable questions reach the model (`C/C0-floor-minilm.txt`). Released by rolling update, then rolled back to R1-nomic so that Batch B changes one thing (`F/F6-return-to-baseline.txt`). |
+| cand-minilm | **RELEASE**, with reservations | Passed every rule (recall@5 unchanged, faithfulness 0.944, p95 175.35 s); embeds 9 times faster; vectors half the size. Reservations no rule covers: false abstention doubled (0.10 vs 0.05); 74 of 532 chunks (14 %) were embedded from shortened text (512-token context); floor 0.25 lets 5 of 6 unanswerable questions reach the model (`C/C0-floor-minilm.txt`). Released by rolling update, then rolled back to R1-nomic so that Batch B changes one thing (`F/F6-return-to-baseline.txt`). |
 | cand-mxbai | **REJECT** | Best retrieval (recall@5 0.850) but the Canada-visa question (g022, must be declined) was answered: abstention 0.833 vs 1.000. Its score scale needs its own floor; we did not re-tune after seeing the result, which would tune to the test set. Follow-up. |
 | cand-llama1b | **REJECT** | A language model has no retrieval training: recall@3 0.775 to 0.450, false abstention 0.30, faithfulness 0.857. `release.sh` refused it (exit 1, revision unchanged, `F/F3-release-refused.txt`). |
 
@@ -133,7 +133,7 @@ The E4 questions were written by Claude Code from the uncovered topics, each che
 | Network matrix | eval pods reach api, api-candidate, Ollama only; chroma only from api and api-candidate; redis only from api; ui reaches only api; loader nothing | `F/F7-network-matrix.txt` |
 | Gate result after a ConfigMap edit | Job on the stored `cand-llama1b` result: `GATE_FAIL` (exit 1); after setting `recall5_drop` 0.02 to 0.25 and `faithfulness_min` 0.89 to 0.80 in `ragops-gate`, the same manifest: `GATE_PASS` (exit 0); the image printed both times is `rahbar-ragops:dev`; thresholds restored afterwards. The demo writes to `gate-demo.decision.json`: an earlier version overwrote the real decision and was fixed (`docs/AI-USAGE.md` item 6) | `F/F4-configmap-edit-flips-gate.txt` |
 | Volumes survive pod deletion | ledger hash, 14 quarantined files, archive, 34 reports identical before and after deleting the loader, API and Chroma pods; Chroma 558 chunks again | `F/F8-pvc-survival.txt` |
-| Resources (measured peak / steady, request, limit) | api 9m/75Mi peak, 3m/72Mi steady: 100m/80Mi, 500m/256Mi (A2 startup peak 151m); chroma 8m/99Mi, 2m/97Mi: 10m/96Mi, 500m/512Mi; ingest Job 1377m/1206Mi, 1219m/824Mi: 1250m/896Mi, 2 CPU/1792Mi; eval Job 36m/30Mi, 20m/23Mi: 50m/64Mi, 1 CPU/768Mi; redis 19m/9Mi: 20m/16Mi, 250m/256Mi; ui, loader unchanged; candidate sized like the api (no separate sample); coverage Job not measured. Applied to the cluster, all pods Ready, re-ingest embedded 0 | `F5-resources.md`, `F/F5-apply-measured-resources.txt` |
+| Resources (measured peak / steady, request, limit) | api 9m/75Mi peak, 3m/72Mi steady: 100m/80Mi, 500m/256Mi (A2 startup peak 151m); chroma 8m/99Mi, 2m/97Mi: 10m/96Mi, 500m/512Mi; ingest Job 1377m/1206Mi, 1219m/824Mi: 1250m/896Mi, 2 CPU/1792Mi; eval Job 36m/30Mi, 20m/23Mi: 50m/64Mi, 1 CPU/768Mi; redis 19m/9Mi: 20m/16Mi, 250m/256Mi; ui, loader unchanged; candidate sized like the api (no separate sample); coverage Job not measured. Applied to the cluster: the api, chroma and redis rollouts completed | `F5-resources.md`, `F/F5-apply-measured-resources.txt` |
 | Clean-cluster rehearsal | «MEASURE: time to rebuild from a clean cluster» | |
 
 ## 4. Short answers
@@ -148,7 +148,7 @@ The E4 questions were written by Claude Code from the uncovered topics, each che
 
 **(e)** Hardest: **coverage with a threshold**. The paper gives a share; a similarity needs a calibrated tau that depends on the embedding model and on hand labels we did not make, and the share swings 0.81 to 0.40 for +-0.05. Changed from the paper: a shadow candidate plus gated rolling release instead of an A/B split; archive by metadata flag, not a separate store; per-document incremental update; no consistency check or access-control metadata; a CPU 3B model limited the end-to-end set to 26 questions.
 
-**(f)** Table below. Single writer: only the ingestion Job writes, enforced by Job/CronJob (`concurrencyPolicy: Forbid`, `parallelism 1`), a lock on the data PVC and NetworkPolicy (`F/F7`: among the pods tested, chroma is reachable only from api and api-candidate). Chroma has no authentication, so Kubernetes alone does not make the API read-only.
+**(f)** Table below. Single writer: only the ingestion Job writes, enforced by Job/CronJob (`concurrencyPolicy: Forbid`), a lock on the data PVC and NetworkPolicy (`F/F7`: among the pods tested, chroma is reachable only from api and api-candidate). Chroma has no authentication, so Kubernetes alone does not make the API read-only.
 
 | Responsibility | Object |
 |---|---|
@@ -164,9 +164,9 @@ The E4 questions were written by Claude Code from the uncovered topics, each che
 
 ## 5. Contribution and AI statement
 
-Git history only (`git log --format='%an' | sort | uniq -c`, `git shortlog -sn`, at `a9a845b`): 114 commits `T361` and 7 `Taimoor Shaukat` (one account, 121); 48 `IfBilal` and 16 `8BitNinja` (one email, 64). Commits touching each path (Bilal / Taimoor): `ragops/` 2 / 2; `indexer/pipeline/` 3 / 5; `k8s/` 1 / 19; `scripts/ragops/` 1 / 5; `api/app/` 11 / 18; `docs/a3-ragops/` 7 / 0; `corpus/batch-b/` 1 / 0. A commit author is the configured git user, not necessarily who wrote the change. **Bilal merged PR #24 (`a9a845b`) himself and has not reviewed the work after it**; both members must read the other's half before the demo. The 11 synthetic golden questions were spot-checked by Taimoor only (`docs/a3-evidence/synthetic-spot-check.md`).
+Git history only (`git log --format='%an' | sort | uniq -c`, `git shortlog -sn`, at `0b98546`; later commits are Taimoor's): 170 commits `T361` and 7 `Taimoor Shaukat` (one account, 177); 48 `IfBilal` and 16 `8BitNinja` (one email, 64). Commits touching each path (Bilal / Taimoor): `ragops/` 2 / 19; `indexer/pipeline/` 3 / 9; `k8s/` 1 / 24; `scripts/ragops/` 1 / 18; `api/app/` 11 / 22; `docs/a3-ragops/` 7 / 1; `corpus/batch-b/` 1 / 0. A commit author is the configured git user, not necessarily who wrote the change. **Bilal merged PR #24 (`a9a845b`) himself.** He has not reviewed the 11 synthetic golden questions (`docs/AI-USAGE.md` item 4); both members must read the other's half before the demo. The questions were read by Taimoor: his statement, recorded by Claude Code in `docs/a3-evidence/synthetic-spot-check.md`.
 
-**AI statement.** Claude Code drafted the plans, code, tests, manifests, the synthetic golden questions, the E1 live queries, the coverage pair labels, the 16 judge labels and this report. Every metric, trace and screenshot comes from our runs on our cluster; the AI-made labels (judge, coverage pairs, live queries) are marked above and await a member's check.
+**AI statement.** Claude Code (on both laptops) and an AI chat assistant (planning and first drafts, Bilal's laptop) drafted the plans, code, tests, manifests, the synthetic golden questions, the E1 live queries, the coverage pair labels, the 16 judge labels and this report; the full list, including OpenAI Codex in Assignment 02, is in `docs/AI-USAGE.md`. Every metric, trace and screenshot comes from our runs on our cluster; the AI-made labels (judge, coverage pairs, live queries) are marked above and await a member's check.
 
 <div class="appendix"></div>
 

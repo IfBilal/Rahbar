@@ -46,12 +46,14 @@ one CPU-only laptop (<code>docs/a3-evidence/host.md</code>; no GPU, so
 latencies are slow and comparable only with themselves) and cites a
 committed file under <code>docs/a3-evidence/</code> (letter = Part) or
 <code>eval/results/</code>.</p>
-<p>We added the RAGOps layer of the reference paper (Xu et al., 2026) to
+<p>We added the RAGOps layer of the reference paper (Xu et al.,
+arXiv:2506.03401; cited as 2026 in the assignment, posted 3 Jun 2025) to
 our Assignment-02 pipeline RAHBAR (FAST-NUCES rules, cited answers,
 abstains when the documents do not cover a question): a verification and
 incremental-update lifecycle for the data (<strong>Batch A</strong>:
-nine public documents, 279 pages, 532 chunks; <strong>Batch B</strong>:
-thirteen fictional files with planted problems), a three-level offline
+nine public documents, 279 PDF pages plus 2 web pages, 532 chunks;
+<strong>Batch B</strong>: thirteen files with planted problems (eleven
+fictional, two byte copies of Batch-A documents)), a three-level offline
 suite, a configurable release gate, a trace and metrics for every query,
 a coverage check, and a gated rolling release on Kubernetes. Ingestion,
 evaluation and coverage are Jobs; data, traces and results are on
@@ -112,9 +114,9 @@ collection</td>
 </tr>
 <tr>
 <td>Offline testing</td>
-<td>Golden set (30) and a three-level suite (module, component,
-end-to-end), seeds, run twice, one command; gate over ConfigMap
-thresholds</td>
+<td>Golden set (30 frozen, 45 after E4) and a three-level suite (module,
+component, end-to-end), seeds, run twice, one command; gate over
+ConfigMap thresholds</td>
 <td><code>ragops/suite/</code>, <code>ragops/gate/</code></td>
 <td>Public benchmarks; a larger golden set; a stronger judge than the 3B
 generator</td>
@@ -323,7 +325,7 @@ problems; B08 is the one verification cannot see.</p>
 <td>9 / 0 / 0 (1 superseded)</td>
 <td>532 / 0</td>
 <td>r0001</td>
-<td>n/a</td>
+<td>561.35</td>
 <td><code>F/F2</code></td>
 </tr>
 <tr>
@@ -540,7 +542,7 @@ set (hash 2cabdf74ca990ab2)</h3>
 <td>endpoint</td>
 <td>latency p50 / p95 s (limit 225)</td>
 <td>99.6 / 153.0</td>
-<td>85.1 / 175.4</td>
+<td>85.1 / 175.35</td>
 <td>107.1 / 190.9</td>
 <td>59.7 / 87.8</td>
 </tr>
@@ -599,11 +601,11 @@ surprise, so it was not a blind prediction.</p>
 <tr>
 <td>cand-minilm</td>
 <td><strong>RELEASE</strong>, with reservations</td>
-<td>Passed every rule (recall@5 unchanged, faithfulness 0.944, p95 175.4
-s); embeds 9 times faster; vectors half the size. Reservations no rule
-covers: false abstention doubled (0.10 vs 0.05); 74 of 532 chunks (14 %)
-were embedded from shortened text (512-token context); floor 0.25 lets 5
-of 6 unanswerable questions reach the model
+<td>Passed every rule (recall@5 unchanged, faithfulness 0.944, p95
+175.35 s); embeds 9 times faster; vectors half the size. Reservations no
+rule covers: false abstention doubled (0.10 vs 0.05); 74 of 532 chunks
+(14 %) were embedded from shortened text (512-token context); floor 0.25
+lets 5 of 6 unanswerable questions reach the model
 (<code>C/C0-floor-minilm.txt</code>). Released by rolling update, then
 rolled back to R1-nomic so that Batch B changes one thing
 (<code>F/F6-return-to-baseline.txt</code>).</td>
@@ -858,8 +860,8 @@ peak 151m); chroma 8m/99Mi, 2m/97Mi: 10m/96Mi, 500m/512Mi; ingest Job
 1377m/1206Mi, 1219m/824Mi: 1250m/896Mi, 2 CPU/1792Mi; eval Job 36m/30Mi,
 20m/23Mi: 50m/64Mi, 1 CPU/768Mi; redis 19m/9Mi: 20m/16Mi, 250m/256Mi;
 ui, loader unchanged; candidate sized like the api (no separate sample);
-coverage Job not measured. Applied to the cluster, all pods Ready,
-re-ingest embedded 0</td>
+coverage Job not measured. Applied to the cluster: the api, chroma and
+redis rollouts completed</td>
 <td><code>F5-resources.md</code>,
 <code>F/F5-apply-measured-resources.txt</code></td>
 </tr>
@@ -915,11 +917,10 @@ incremental update; no consistency check or access-control metadata; a
 CPU 3B model limited the end-to-end set to 26 questions.</p>
 <p><strong>(f)</strong> Table below. Single writer: only the ingestion
 Job writes, enforced by Job/CronJob
-(<code>concurrencyPolicy: Forbid</code>, <code>parallelism 1</code>), a
-lock on the data PVC and NetworkPolicy (<code>F/F7</code>: among the
-pods tested, chroma is reachable only from api and api-candidate).
-Chroma has no authentication, so Kubernetes alone does not make the API
-read-only.</p>
+(<code>concurrencyPolicy: Forbid</code>), a lock on the data PVC and
+NetworkPolicy (<code>F/F7</code>: among the pods tested, chroma is
+reachable only from api and api-candidate). Chroma has no
+authentication, so Kubernetes alone does not make the API read-only.</p>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -977,25 +978,29 @@ history, <code>rollout undo</code></td>
 statement</h2>
 <p>Git history only
 (<code>git log --format='%an' | sort | uniq -c</code>,
-<code>git shortlog -sn</code>, at <code>a9a845b</code>): 114 commits
-<code>T361</code> and 7 <code>Taimoor Shaukat</code> (one account, 121);
-48 <code>IfBilal</code> and 16 <code>8BitNinja</code> (one email, 64).
-Commits touching each path (Bilal / Taimoor): <code>ragops/</code> 2 /
-2; <code>indexer/pipeline/</code> 3 / 5; <code>k8s/</code> 1 / 19;
-<code>scripts/ragops/</code> 1 / 5; <code>api/app/</code> 11 / 18;
-<code>docs/a3-ragops/</code> 7 / 0; <code>corpus/batch-b/</code> 1 / 0.
+<code>git shortlog -sn</code>, at <code>0b98546</code>; later commits
+are Taimoor’s): 170 commits <code>T361</code> and 7
+<code>Taimoor Shaukat</code> (one account, 177); 48 <code>IfBilal</code>
+and 16 <code>8BitNinja</code> (one email, 64). Commits touching each
+path (Bilal / Taimoor): <code>ragops/</code> 2 / 19;
+<code>indexer/pipeline/</code> 3 / 9; <code>k8s/</code> 1 / 24;
+<code>scripts/ragops/</code> 1 / 18; <code>api/app/</code> 11 / 22;
+<code>docs/a3-ragops/</code> 7 / 1; <code>corpus/batch-b/</code> 1 / 0.
 A commit author is the configured git user, not necessarily who wrote
-the change. <strong>Bilal merged PR #24 (<code>a9a845b</code>) himself
-and has not reviewed the work after it</strong>; both members must read
-the other’s half before the demo. The 11 synthetic golden questions were
-spot-checked by Taimoor only
-(<code>docs/a3-evidence/synthetic-spot-check.md</code>).</p>
-<p><strong>AI statement.</strong> Claude Code drafted the plans, code,
-tests, manifests, the synthetic golden questions, the E1 live queries,
-the coverage pair labels, the 16 judge labels and this report. Every
-metric, trace and screenshot comes from our runs on our cluster; the
-AI-made labels (judge, coverage pairs, live queries) are marked above
-and await a member’s check.</p>
+the change. <strong>Bilal merged PR #24 (<code>a9a845b</code>)
+himself.</strong> He has not reviewed the 11 synthetic golden questions
+(<code>docs/AI-USAGE.md</code> item 4); both members must read the
+other’s half before the demo. The questions were read by Taimoor: his
+statement, recorded by Claude Code in
+<code>docs/a3-evidence/synthetic-spot-check.md</code>.</p>
+<p><strong>AI statement.</strong> Claude Code (on both laptops) and an
+AI chat assistant (planning and first drafts, Bilal’s laptop) drafted
+the plans, code, tests, manifests, the synthetic golden questions, the
+E1 live queries, the coverage pair labels, the 16 judge labels and this
+report; the full list, including OpenAI Codex in Assignment 02, is in
+<code>docs/AI-USAGE.md</code>. Every metric, trace and screenshot comes
+from our runs on our cluster; the AI-made labels (judge, coverage pairs,
+live queries) are marked above and await a member’s check.</p>
 <div class="appendix">
 
 </div>
