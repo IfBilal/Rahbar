@@ -22,7 +22,7 @@ pipeline or this table is wrong; decide which, fix it in a separate commit, and 
 | # | File | Planted problem | Expected check outcome | Outcome |
 |---|---|---|---|---|
 | B01 | `Student_Handbook_Copy.pdf` | **exact duplicate** #1 of a Batch-A PDF | uniqueness `U-EXACT-DUP` | quarantined |
-| B02 | `grading-page-backup.html` | **exact duplicate** #2 of a Batch-A HTML page | uniqueness `U-EXACT-DUP` | quarantined |
+| B02 | `grading-page-backup.html` | **exact duplicate** #2 of a Batch-A HTML page | uniqueness `U-EXACT-DUP` (also fails completeness: it has no date or version) | quarantined |
 | B03 | `library-lending-regulations.md` | **near-duplicate** of B09 (a different title, three words changed, whitespace re-flowed) | uniqueness `U-NEAR-DUP` (embedding cosine and shingle Jaccard) | quarantined |
 | B04 | `lab-safety-notice.pdf` | **corrupt** PDF, cut at 55% of its bytes | quality `Q-EXTRACT-FAIL` (and completeness `C-MISSING-PAGES`) | quarantined |
 | B05 | `exam-schedule-policy-trunc.md` | **truncated**: "Page 3 of 5" footer, a cut table row, an unclosed sentence | completeness `C-TRUNCATED` | quarantined |

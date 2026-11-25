@@ -1,9 +1,9 @@
 # RAHBAR + RAGOps: operating a grounded RAG pipeline on Kubernetes
 
 **CS4032 Assignment 03 (RAGOps), Fall 2026.** Team: **Taimoor Shaukat (24I-3015)** and **Muhammad Bilal Tahir (24I-3166)**.
-Repository: <https://github.com/IfBilal/Rahbar> · submitted commit: `42960ec` (the commit this report was built from; the final state is the head of the submitted branch) · every number below is from a run on one CPU-only laptop (`docs/a3-evidence/host.md`; no GPU, so latencies are slow and comparable only with themselves) and cites a committed file under `docs/a3-evidence/` (letter = Part) or `eval/results/`.
+Repository: <https://github.com/IfBilal/Rahbar> · report built at commit `d14788a`; the submitted state is the head of `main` after the final merge · every number below is from a run on one CPU-only laptop (`docs/a3-evidence/host.md`; no GPU, so latencies are slow and comparable only with themselves) and cites a committed file under `docs/a3-evidence/` (letter = Part) or `eval/results/`.
 
-We added the RAGOps layer of the reference paper (Xu et al., arXiv:2506.03401; cited as 2026 in the assignment, posted 3 Jun 2025) to our Assignment-02 pipeline RAHBAR (FAST-NUCES rules, cited answers, abstains when the documents do not cover a question): a verification and incremental-update lifecycle for the data (**Batch A**: nine public documents, 279 PDF pages plus 2 web pages, 532 chunks; **Batch B**: thirteen files with planted problems (eleven fictional, two byte copies of Batch-A documents)), a three-level offline suite, a configurable release gate, a trace and metrics for every query, a coverage check, and a gated rolling release on Kubernetes. Ingestion, evaluation and coverage are Jobs; data, traces and results are on PersistentVolumeClaims; thresholds are a ConfigMap.
+We added the RAGOps layer of the reference paper (Xu et al., arXiv:2506.03401; the assignment cites it as 2026, the arXiv posting date is 3 June 2025) to our Assignment-02 pipeline RAHBAR (FAST-NUCES rules, cited answers, abstains when the documents do not cover a question): a verification and incremental-update lifecycle for the data (**Batch A**: nine public documents, 279 PDF pages plus 2 web pages, 532 chunks; **Batch B**: thirteen files with planted problems (eleven fictional, two byte copies of Batch-A documents)), a three-level offline suite, a configurable release gate, a trace and metrics for every query, a coverage check, and a gated rolling release on Kubernetes. Ingestion, evaluation and coverage are Jobs; data, traces and results are on PersistentVolumeClaims; thresholds are a ConfigMap.
 
 ## 1. Table 1: the stages of Figure 3
 
@@ -48,7 +48,7 @@ Failures by check, first Batch-B run: completeness 4, uniqueness 3, quality 1, r
 
 | Run | docs new / unchanged / quarantined | chunks embedded / deleted | revision | seconds | file |
 |---|---|---|---|---|---|
-| Batch A first sync | 9 / 0 / 0 (1 superseded) | 532 / 0 | r0001 | 561.35 | `F/F2` |
+| Batch A first sync | 9 / 0 / 0 (1 superseded) | 532 / 0 | r0001 | 561.35 | `F/F2-ingest-first-run.txt` |
 | Unchanged re-run | 0 / 9 / 0 | **0** / 0 | r0001, not bumped | 0.06 | `A/A2` |
 | Batch B sync | 6 / 9 / 6 (1 superseded) | 26 in each of 2 indexes / 0 | r0002 (532 to 558 chunks) | 42.13 | `A/A1-sync-batch-b.txt` |
 | B13 later run | 0 / 15 / 1 | 0 / 0 | n/a | n/a | `A/A1b` |
@@ -90,13 +90,13 @@ Source `C/comparison.md`; decisions `eval/results/*_cand-*.decision.json`; gate 
 
 | Candidate | Decision | Reason |
 |---|---|---|
-| cand-minilm | **RELEASE**, with reservations | Passed every rule (recall@5 unchanged, faithfulness 0.944, p95 175.35 s); embeds 9 times faster; vectors half the size. Reservations no rule covers: false abstention doubled (0.10 vs 0.05); 74 of 532 chunks (14 %) were embedded from shortened text (512-token context); floor 0.25 lets 5 of 6 unanswerable questions reach the model (`C/C0-floor-minilm.txt`). Released by rolling update, then rolled back to R1-nomic so that Batch B changes one thing (`F/F6-return-to-baseline.txt`). |
+| cand-minilm | **RELEASE as a trial** (gate PASS), with reservations | Passed every rule (recall@5 unchanged, faithfulness 0.944, p95 175.35 s); embeds 9 times faster; vectors half the size. Reservations no rule covers: false abstention doubled (0.10 vs 0.05); 74 of 532 chunks (14 %) were embedded from shortened text (512-token context); floor 0.25 lets 5 of 6 unanswerable questions reach the model (`C/C0-floor-minilm.txt`). Released by rolling update, then rolled back to R1-nomic so that Batch B changes one thing (`F/F6-return-to-baseline.txt`). |
 | cand-mxbai | **REJECT** | Best retrieval (recall@5 0.850) but the Canada-visa question (g022, must be declined) was answered: abstention 0.833 vs 1.000. Its score scale needs its own floor; we did not re-tune after seeing the result, which would tune to the test set. Follow-up. |
 | cand-llama1b | **REJECT** | A language model has no retrieval training: recall@3 0.775 to 0.450, false abstention 0.30, faithfulness 0.857. `release.sh` refused it (exit 1, revision unchanged, `F/F3-release-refused.txt`). |
 
 `release.sh` hardening (`F/F3-release-hardened-checks.txt`): a fresh passing decision gives a dry-run plan (exit 0); a mistyped option, a name with odd characters, and the failed llama1b and mxbai decisions are each refused (exit 1).
 
-![Part C comparison](fig-candidates.png)
+![](fig-candidates.png)
 
 *Figure 1: recall@5, faithfulness and abstention for the baseline and the three candidates (`scripts/ragops/charts.py` from `eval/results/*.json`). mxbai has the best recall and fails on abstention; llama1b fails on recall and faithfulness.*
 
@@ -129,7 +129,7 @@ The E4 questions were written by Claude Code from the uncovered topics, each che
 
 **The E1 live queries were drafted by Claude Code (header of `eval/live_queries.jsonl`) and the coverage pair labels were labelled by Claude Code (`eval/coverage-calibration.jsonl`); a member still has to spot-check both.** Tau is only as good as those labels. **Drift** (`E/E3-drift-diff.txt`, `eval/results/20261125T101514Z_drift-AB.md`; corpus A+B, 558 chunks): backward compatibility on the 25 common questions, recall@5 **0.7895 to 0.7895, 0 per-question changes**; the 4 new Batch-B questions (g027 to g030) retrieved, forward recall@5 **1.0**; g008 retired because the 2022 policy is archived. Overall recall@5 went 0.800 to 0.826 only because the question mix changed (23 answerable instead of 20); the common-subset figure is the fair one. p95 latency 153.0 to 186.4 s.
 
-![Part E coverage](fig-coverage.png)
+![](fig-coverage.png)
 
 *Figure 2: coverage before and after the E4 questions (`E/E1-coverage-before.txt`, `E/E2-coverage-after.txt`, `E/E2-coverage-after-round2.txt`).*
 
@@ -180,19 +180,19 @@ The E4 questions were written by Claude Code from the uncovered topics, each che
 | Part A code: verify, incremental update, lake, ledger, ops; Batch B fixtures | ran on the cluster; found and fixed 3 bugs (embedding-window overflow, Chroma start race, count flag) | wrote and unit-tested (3 commits to `indexer/pipeline/` against Taimoor's 9) |
 | Parts B, C, E code: suite, gate, coverage, trace tools | ran every measurement; fixed 4 integration bugs; derived the two thresholds; judge and coverage labels with Claude Code | wrote and unit-tested (2 commits to `ragops/` against Taimoor's 19) |
 | Part D: API traces, `/api/retrieve`, eval headers | token guard, metrics series, `trace.show` prompt output | wrote traces, retrieval endpoint, release id (11 commits to `api/app/` against Taimoor's 22) |
-| Part F: Kubernetes objects, scripts, CI changes, evidence runs, rehearsal | wrote all (24 commits to `k8s/`, 18 to `scripts/ragops/`) | merged PR #24; has not reviewed the later work (1 commit each) |
+| Part F: Kubernetes objects, scripts, CI changes, evidence runs, rehearsal | wrote all (24 commits to `k8s/`, 18 to `scripts/ragops/`) | approved and merged PRs #24, #25 and #26 on GitHub (1 commit each in `k8s/` and `scripts/ragops/`) |
 | Data: golden set, pairs, live queries | reviewed against the pages with Claude Code; read the 11 synthetic questions | first drafts with the AI assistant; the Assignment-02 questions are both members' |
-| Report, README, demo runbook | wrote with Claude Code | not yet reviewed |
+| Report, README, demo runbook | wrote with Claude Code | approved the PRs that merged them (#25, #26) |
 
-Commit counts are from git history (`git shortlog -sn`, at `0b98546`; later commits are Taimoor's): `T361` and `Taimoor Shaukat` are one person (177 commits), `IfBilal` and `8BitNinja` another (64). A commit author is the configured git user, not necessarily who wrote the change. **Bilal merged PR #24 (`a9a845b`) himself.** He has not reviewed the synthetic golden questions (`docs/AI-USAGE.md` item 4); both members must read the other's half before the demo. The v1 synthetic questions were read by Taimoor: his statement, recorded by Claude Code in `docs/a3-evidence/synthetic-spot-check.md`.
+Commit counts are from git history (`git shortlog -sn`, at `0b98546`; later commits are Taimoor's): `T361` and `Taimoor Shaukat` are one person (177 commits), `IfBilal` and `8BitNinja` another (64). A commit author is the configured git user, not necessarily who wrote the change. **Bilal approved and merged PRs #24, #25 and #26 himself (GitHub review record).** That is code review: he has not read the synthetic golden questions or the AI-made labels (`docs/AI-USAGE.md` item 4); both members must read the other's half before the demo. The v1 synthetic questions were read by Taimoor: his statement, recorded by Claude Code in `docs/a3-evidence/synthetic-spot-check.md`.
 
-**AI statement.** Claude Code (on both laptops) and an AI chat assistant (planning and first drafts, Bilal's laptop) drafted the plans, code, tests, manifests, the synthetic golden questions, the E1 live queries, the coverage pair labels, the 16 judge labels and this report; the full list, including OpenAI Codex in Assignment 02, is in `docs/AI-USAGE.md`. Every metric, trace and screenshot comes from our runs on our cluster; the AI-made labels (judge, coverage pairs, live queries) are marked above and await a member's check.
+**AI statement.** Claude Code and an AI chat assistant drafted the code, manifests, synthetic questions, labels and this report (details in `docs/AI-USAGE.md`). All metrics, traces and screenshots come from our own cluster runs; the AI-made labels still need a member's check.
 
 <div class="appendix"></div>
 
 ## Appendix: screenshots
 
-Each shows the command and its output; raw text is next to each in `docs/a3-evidence/<part>/`.
+Each shows the command and its output. The images are rendered from the captured terminal transcripts, not operating-system screenshots; a few commands cut their own output with `tail` or `cut` (C1, F2, F3, and the reason column of A1), and the complete raw text is next to each in `docs/a3-evidence/<part>/`.
 
 ### A1 verification report, Batch B
 ![A1](../a3-evidence/A/screenshots/A1-verification-report-batch-b.png)
@@ -232,11 +232,15 @@ Each shows the command and its output; raw text is next to each in `docs/a3-evid
 ![E2](../a3-evidence/E/screenshots/E2-coverage-after-round2.png)
 
 ### F1 namespace overview
+*(`coverage` Failed is the intentional E1 gap run; `eval` Running is a suite in progress when this was captured.)*
+
 ![F1](../a3-evidence/F/screenshots/F1-namespace-overview-1.png)
 
 ![F1 continued](../a3-evidence/F/screenshots/F1-namespace-overview-2.png)
 
 ### F2 logs of the completed ingestion Job
+*(The clean-cluster rehearsal run, 1,031.67 s; the 561.35 s first sync is in `F/F2-ingest-first-run.txt`.)*
+
 ![F2](../a3-evidence/F/screenshots/F2-ingest-job-full-log.png)
 
 ### F3 logs of a completed evaluation Job
@@ -246,9 +250,13 @@ Each shows the command and its output; raw text is next to each in `docs/a3-evid
 ![F4](../a3-evidence/F/screenshots/F4-configmap-edit-flips-gate.png)
 
 ### F5 rollout status
+*(The 47 of 47 requests answered 200 during this rollout are in `F/F5-zero-downtime.txt`.)*
+
 ![F5](../a3-evidence/F/screenshots/F5-release-rollout.png)
 
 ### F6 bad release, undo, and the trace afterwards
+*(The script behind `bash /tmp/s3.sh` is shown in `F/F6-bad-release-and-undo.txt`; the trace is the same one as D2, taken after the undo.)*
+
 ![F6](../a3-evidence/F/screenshots/F6-bad-release-and-undo.png)
 ![F6t](../a3-evidence/F/screenshots/F6-trace-after-undo.png)
 
