@@ -876,9 +876,19 @@ redis rollouts completed</td>
 <code>F/F5-apply-measured-resources.txt</code></td>
 </tr>
 <tr>
-<td>Clean-cluster rehearsal</td>
-<td>«MEASURE: time to rebuild from a clean cluster»</td>
-<td></td>
+<td>Clean-cluster rehearsal (<code>scripts/ragops/rehearsal.sh</code>:
+fresh clone of <code>f3afd60</code>, <code>minikube delete</code>,
+README commands only)</td>
+<td><strong>2,909 s (48.5 min) from the clone to a working
+pipeline</strong>, exit 0: tests 145+182+14+66+143 passed; cluster 5.6
+min; four images from the real Dockerfiles 7.9 min; first ingest
+(downloads and checks the corpus, then 9 documents, 532 chunks, 0
+quarantined) 20 min; the API answered the withdrawal question and
+declined the hostel fee; <code>make eval-demo</code> (3-question
+evaluation Job) 7.2 min. The Ingress controller image was still
+downloading, so questions went through a port-forward to the
+Service</td>
+<td><code>F/F10-clean-cluster-rehearsal.txt</code></td>
 </tr>
 </tbody>
 </table>
