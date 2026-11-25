@@ -40,7 +40,7 @@ dev: ## run the API with stubs on http://localhost:8000, serving the chat UI too
 	cd api && SERVE_UI_DIR=../ui RETRIEVER=stub LLM_PROVIDER=stub $(BIN)/uvicorn app.main:app --reload --port 8000
 
 cluster: ## start minikube with Calico, then enable metrics-server and ingress
-	minikube start --driver=docker --cni=calico --memory=6144 --cpus=4
+	minikube start --driver=docker --cni=calico --memory=8192 --cpus=4
 	minikube addons enable metrics-server
 	minikube addons enable ingress
 

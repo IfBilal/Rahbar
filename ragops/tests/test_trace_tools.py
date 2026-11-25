@@ -84,3 +84,17 @@ def test_summary_reports_the_top1_similarity_distribution_and_filters_by_release
     assert len(summary.load(traces, None, None, release)) >= 1
     assert summary.load(traces, None, None, "no-such-release") == []
     assert summary.main(["--traces", str(traces)]) == 0       # the CLI runs end to end on these traces
+
+
+def test_show_prints_the_exact_prompt_and_context(tmp_path, capsys) -> None:
+    """D2: the tool must print the exact context and prompt that produced the answer, not only their hash."""
+    traces, lake, _ = make(tmp_path)
+    assert show.main(["t0", "--traces", str(traces), "--lake", str(lake)]) == 0
+    out = capsys.readouterr().out
+    assert "PROMPT (exactly what the model received" in out
+    assert "--- SYSTEM MESSAGE ---" in out and "--- USER MESSAGE ---" in out
+    assert "<evidence>Students need a CGPA of 2.00.</evidence>" in out          # the retrieved context, verbatim
+    assert show.main(["t0", "--traces", str(traces), "--no-prompt"]) == 0
+    assert "PROMPT (exactly" not in capsys.readouterr().out
+    assert show.main(["t0", "--traces", str(traces), "--json"]) == 0
+    assert "prompt_messages" in capsys.readouterr().out

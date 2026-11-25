@@ -38,7 +38,7 @@ fi
 [ -n "$CANDIDATE" ] || finish INFRA_ERROR "MODE=gate needs CANDIDATE_RESULT" 2
 DECISION="${CANDIDATE%.json}.decision.json"
 python -m ragops.gate.apply --baseline "$BASELINE_RESULT" --candidate "$CANDIDATE" \
-    --config "$GATE_CONFIG" --decision-out "$DECISION"
+    --config "$GATE_CONFIG" --decision-out "$DECISION" --git-sha "${GIT_SHA:-}"
 rc=$?
 case "$rc" in
   0) finish GATE_PASS "decision=$DECISION" 0 ;;

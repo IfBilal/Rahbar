@@ -60,7 +60,7 @@ make install                         # .venv with the api, indexer and test depe
 make test                            # 250+ tests, no cluster, no model, no network
 
 # 1. A cluster whose network plugin enforces NetworkPolicy (Calico), plus ingress and metrics
-make cluster        # minikube start --driver=docker --cni=calico --memory=6144 --cpus=4
+make cluster        # minikube start --driver=docker --cni=calico --memory=8192 --cpus=4
                     # minikube addons enable metrics-server ; minikube addons enable ingress
 
 # 2. The models, on the laptop (ollama-host mode). Ollama must listen where pods can reach it.
@@ -107,11 +107,13 @@ probes. Applied file by file, the equivalent order is:
 ```bash
 kubectl apply -f k8s/base/namespace.yaml
 kubectl apply -f k8s/base/serviceaccounts.yaml -f k8s/base/configmap.yaml
+scripts/ragops/eval-token.sh          # A3: the run-time Secret the API, the candidate and the eval Job read (pods wait for it)
 # hosted LLM only; never from a file:
 #   kubectl create secret generic rahbar-secret -n rahbar --from-literal=LLM_API_KEY="$LLM_API_KEY"
 kubectl apply -f k8s/base/networkpolicy.yaml -f k8s/base/services.yaml
+kubectl apply -f k8s/base/ragops-storage.yaml -f k8s/base/ragops-config.yaml -f k8s/base/ragops-gate.yaml -f k8s/base/ragops-networkpolicy.yaml
 kubectl apply -f k8s/base/chroma-statefulset.yaml -f k8s/base/redis.yaml
-kubectl apply -f k8s/base/indexer-job.yaml -f k8s/base/reindex-cronjob.yaml
+kubectl apply -f k8s/base/ingest-job.yaml -f k8s/base/ingest-cronjob.yaml
 kubectl apply -f k8s/base/api.yaml -f k8s/base/ui.yaml -f k8s/base/hpa.yaml -f k8s/base/ingress.yaml
 ```
 

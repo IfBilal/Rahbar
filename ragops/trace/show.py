@@ -1,8 +1,10 @@
 """Show one trace and prove what the model was given (docs/a3-ragops/08, contract 14 s.6/11).
 
-    python -m ragops.trace.show TRACE_ID --traces /traces [--lake /data] [--json]
+    python -m ragops.trace.show TRACE_ID --traces /traces [--lake /data] [--json] [--no-prompt]
 
-Prints the PDF's D1 fields for the request. Checks that the stored prompt's hash matches its
+Prints the PDF's D1 fields for the request, then the EXACT prompt the model received (the system message,
+and the user message with its evidence passages and the question: the retrieved context), read from the
+prompt store. Checks that the stored prompt's hash matches its
 content (tamper check) and, with --lake, that every chunk in the prompt can be rebuilt from the
 immutable chunk snapshot in the data lake (the id carries the first 8 hex of the chunk's SHA).
 Exit: 0 found and consistent - 2 usage - 4 not found - 5 prompt store corrupt - 6 a prompt chunk
@@ -118,12 +120,23 @@ def render(rec: dict[str, Any], notes: list[str]) -> str:
     return "\n".join(lines)
 
 
+def render_prompt(body: dict[str, Any] | None) -> str:
+    """The stored prompt, verbatim: this is the context and the instructions that produced the answer."""
+    if not body:
+        return ""
+    out = ["", "=" * 100, f"PROMPT (exactly what the model received; template {body.get('template_version')})", "=" * 100]
+    for m in body.get("messages", []):
+        out += [f"--- {str(m.get('role')).upper()} MESSAGE ---", str(m.get("content", "")), ""]
+    return "\n".join(out)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Show one trace and verify its prompt.")
     ap.add_argument("trace_id")
     ap.add_argument("--traces", type=Path, required=True)
     ap.add_argument("--lake", type=Path)
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--no-prompt", action="store_true", help="do not print the prompt text")
     args = ap.parse_args(argv)
     if not args.traces.is_dir():
         print(f"traces directory {args.traces} not found", file=sys.stderr)
@@ -136,7 +149,11 @@ def main(argv: list[str] | None = None) -> int:
     if code == 0 and args.lake:
         code, more = rebuild_check(rec, body, args.lake)
         notes += more
-    print(json.dumps(rec, indent=2) if args.json else render(rec, notes))
+    if args.json:
+        print(json.dumps({**rec, **({} if args.no_prompt or body is None else {"prompt_messages": body.get("messages")})},
+                         indent=2, ensure_ascii=False))
+    else:
+        print(render(rec, notes) + ("" if args.no_prompt else render_prompt(body)))
     return code
 
 
