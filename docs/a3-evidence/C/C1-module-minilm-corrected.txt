@@ -1,7 +1,15 @@
 $ scripts/ragops/eval.sh suite cand-minilm-module --target http://api-candidate:8000 --suite-args --batches A --levels module
 job/eval started: mode=suite label=cand-minilm-module target=http://api-candidate:8000
-INFRASTRUCTURE FAILURE: embedding service failed: Client error '400 Bad Request' for url 'http://host.minikube.internal:11434/api/embed'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
-RESULT=INFRA_ERROR suite_exit=3
+RAGOps suite  label=cand-minilm-module  2026-11-25T07:23:35Z  git=f207027  embed=all-minilm  collection=ok: rahbar-cand-minilm (532 chunks)  corpus=A (ledger 0f1f81...)
+LEVEL      METRIC                           VALUE              N
+module     paraphrase mean cosine           0.641              20
+module     unrelated mean cosine            0.116              20
+module     gap                              0.525
+module     embed ms/chunk (mean / p95)      58.4 / 112.8
+module     determinism max |d|              0.0e+00
+skipped 4 question(s): g027 (requires batch ['B'] not ingested), g028 (requires batch ['B'] not ingested), g029 (requires batch ['B'] not ingested), g030 (requires batch ['B'] not ingested)
+RESULT=/results/20261125T072335Z_cand-minilm-module.json
+result file: /results/20261125T072335Z_cand-minilm-module.json
+RESULT=SUITE_DONE file=/results/20261125T072335Z_cand-minilm-module.json
 
-[exit 3 at 2026-11-25T07:16:24 UTC]
+[exit 0 at 2026-11-25T07:23:49 UTC]
