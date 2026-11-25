@@ -1,6 +1,6 @@
 # Judge-label review sheet (for a team member to fill in)
 
-The PDF (Part B) asks for at least 8 answers labelled by hand. The labels in `eval/judge_labels.jsonl` were made by Claude Code. Read each answer against its cited page, write your own label (`supported` / `unsupported`) in the YOUR label column, copy your labels into `eval/judge_labels.jsonl` (`labeller`: your name) and run `python -m ragops.suite.agreement`. Do not copy the AI column without reading.
+The PDF (Part B) asks for at least 8 answers labelled by hand. The labels in `eval/judge_labels.jsonl` were first made by Claude Code; Taimoor read all 16 answers against the cited pages and confirmed them (commit c988c9c). Read each answer against its cited page, write your own label (`supported` / `unsupported`) in the YOUR label column, copy your labels into `eval/judge_labels.jsonl` (`labeller`: your name) and run `python -m ragops.suite.agreement`. Do not copy the AI column without reading.
 
 | ID | Question | System answer | Citations | AI label (not yours) | YOUR label | Initials, date |
 |---|---|---|---|---|---|---|
