@@ -37,9 +37,10 @@ def test_uncased_model_input_is_lowercased() -> None:
     from pipeline.embed import prepare_document
     assert prepare_document("nomic-embed-text", "Rector's List, BS") == \
         "search_document: rector's list, bs"
-    # the candidates have their own profiles (A3 07 section 3.1): no document prefix, lowercased
-    assert prepare_document("mxbai-embed-large", "Rector") == "rector"
-    assert prepare_document("all-minilm", "Rector") == "rector"
+    # the candidates have their own profiles (A3 07 section 3.1). Measured: they lowercase themselves
+    # (docs/a3-evidence/C/casing-check.txt), so the text goes through untouched
+    assert prepare_document("mxbai-embed-large", "Rector") == "Rector"
+    assert prepare_document("all-minilm", "Rector") == "Rector"
     assert prepare_document("some-unknown-model", "Rector") == "Rector"      # no profile: untouched
 
 

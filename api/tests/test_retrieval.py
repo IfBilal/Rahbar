@@ -188,6 +188,6 @@ def test_each_embedding_model_has_its_own_query_profile() -> None:
     from app.retrieval.embedder import prepare_query
     assert prepare_query("nomic-embed-text", "What is CGPA?") == "search_query: what is cgpa?"
     assert prepare_query("mxbai-embed-large", "What is CGPA?") == \
-        "Represent this sentence for searching relevant passages: what is cgpa?"
-    assert prepare_query("all-minilm", "What is CGPA?") == "what is cgpa?"
+        "Represent this sentence for searching relevant passages: What is CGPA?"
+    assert prepare_query("all-minilm", "What is CGPA?") == "What is CGPA?"
     assert prepare_query("unknown-model", "What is CGPA?") == "What is CGPA?"

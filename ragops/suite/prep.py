@@ -14,14 +14,15 @@ from __future__ import annotations
 # api/app/retrieval/embedder.py, indexer/pipeline/embed.py and ragops/suite/prep.py.
 # tests/test_boundaries.py fails if they differ, so the writer, the reader and the suite cannot drift.
 #   doc_prefix / query_prefix: the task instruction the model was trained with
-#   lowercase: the model has an uncased vocabulary and Ollama 0.17 does not lowercase for it
+#   lowercase: the model has an uncased vocabulary and Ollama 0.17 does not lowercase for it. Measured
+#   (docs/a3-evidence/C/casing-check.txt): true for nomic-embed-text only; mxbai and minilm lowercase themselves.
 EMBED_PROFILES: dict[str, dict[str, object]] = {
     "nomic-embed-text": {"doc_prefix": "search_document: ", "query_prefix": "search_query: ",
                          "lowercase": True},
     "mxbai-embed-large": {"doc_prefix": "",
                           "query_prefix": "Represent this sentence for searching relevant passages: ",
-                          "lowercase": True},
-    "all-minilm": {"doc_prefix": "", "query_prefix": "", "lowercase": True},
+                          "lowercase": False},
+    "all-minilm": {"doc_prefix": "", "query_prefix": "", "lowercase": False},
 }
 NO_PROFILE: dict[str, object] = {"doc_prefix": "", "query_prefix": "", "lowercase": False}
 
