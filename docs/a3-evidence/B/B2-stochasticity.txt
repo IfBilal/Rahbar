@@ -1,0 +1,46 @@
+$ .venv/bin/python -m ragops.suite.stochasticity eval/results/20261124T174636Z_baseline.json eval/results/20261125T034256Z_baseline.json
+METRIC                                               RUN1       RUN2    |DELTA|  EXPLANATION
+component.clean.mrr                                0.7250     0.7250     0.0000  identical
+component.clean.ndcg@5                             0.7272     0.7272     0.0000  identical
+component.clean.precision@5                        0.1800     0.1800     0.0000  identical
+component.clean.recall@3                           0.7750     0.7750     0.0000  identical
+component.clean.recall@5                           0.8000     0.8000     0.0000  identical
+component.clean.retrieval_ms_mean                 94.7373    14.6384    80.0989  wall-clock time cannot be fixed; always differs
+component.clean.retrieval_ms_p95                 151.8355    20.0075   131.8280  wall-clock time cannot be fixed; always differs
+component.delta_noisy.mrr                         -0.0833    -0.0833     0.0000  identical
+component.delta_noisy.ndcg@5                      -0.0750    -0.0750     0.0000  identical
+component.delta_noisy.recall@5                    -0.0500    -0.0500     0.0000  identical
+component.noisy.mrr                                0.6417     0.6417     0.0000  identical
+component.noisy.ndcg@5                             0.6522     0.6522     0.0000  identical
+component.noisy.recall@3                           0.7250     0.7250     0.0000  identical
+component.noisy.recall@5                           0.7500     0.7500     0.0000  identical
+component.noisy.typo_rate                          0.0600     0.0600     0.0000  identical
+endpoint.abstention_correctness                    1.0000     1.0000     0.0000  identical
+endpoint.answered_without_citation                 0.0000     0.0000     0.0000  identical
+endpoint.citation_gold_hit                         0.7368     0.7368     0.0000  identical
+endpoint.citation_validity                         1.0000     1.0000     0.0000  identical
+endpoint.citations_checked                        19.0000    19.0000     0.0000  identical
+endpoint.faithfulness                              0.9474     0.9474     0.0000  identical
+endpoint.faithfulness_partial                      0.0000     0.0000     0.0000  identical
+endpoint.faithfulness_proxy                        1.0000     1.0000     0.0000  identical
+endpoint.faithfulness_unsupported                  0.0526     0.0526     0.0000  identical
+endpoint.fallback_rate                             0.0000     0.0000     0.0000  identical
+endpoint.false_abstention_rate                     0.0500     0.0500     0.0000  identical
+endpoint.latency_p50_s                            99.5700   130.9800    31.4100  wall-clock time cannot be fixed; always differs
+endpoint.latency_p95_s                           153.0400   177.2800    24.2400  wall-clock time cannot be fixed; always differs
+endpoint.n                                        26.0000    26.0000     0.0000  identical
+endpoint.n_answerable                             20.0000    20.0000     0.0000  identical
+endpoint.n_unanswerable                            6.0000     6.0000     0.0000  identical
+module.determinism_max_abs_diff                    0.0000     0.0000     0.0000  identical
+module.determinism_min_cos                         1.0000     1.0000     0.0000  identical
+module.embed_ms_mean                             525.3366   881.7161   356.3795  wall-clock time cannot be fixed; always differs
+module.embed_ms_p95                             1434.5667  2199.1831   764.6164  wall-clock time cannot be fixed; always differs
+module.gap                                         0.3267     0.3267     0.0000  identical
+module.n_paraphrase                               20.0000    20.0000     0.0000  identical
+module.n_unrelated                                20.0000    20.0000     0.0000  identical
+module.pair_accuracy                               0.9850     0.9850     0.0000  identical
+module.paraphrase_mean_cos                         0.8233     0.8233     0.0000  identical
+module.unrelated_mean_cos                          0.4966     0.4966     0.0000  identical
+module.vector_bytes                             3072.0000  3072.0000     0.0000  identical
+
+[exit 0 at 2026-11-25T05:04:15 UTC]
