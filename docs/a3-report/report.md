@@ -115,7 +115,11 @@ Source `C/comparison.md`; decisions `eval/results/*_cand-*.decision.json`; gate 
 | tau calibration | 42 labelled (live query, nearest golden) pairs; maximum F1 at tau 0.6448 (precision 0.68, recall 0.944); conservative alternative 0.79 (precision 1.0, recall 0.444) | `E/E0-calibrate.txt`, `coverage.yaml` |
 | Coverage before | 42 live queries, 25 covered, **share 0.595** (in-domain 0.750, out-of-domain 0.286) vs min share 0.85: `COVERAGE GAP`, Job `Failed`; tau -0.05 gives 0.810, +0.05 gives 0.405; tf-idf cross-check 0.024 | `E/E1-coverage-before.txt` |
 | Uncovered (17 queries) | late bus, financial aid, clubs in classrooms, retake exam (2 queries each); one each: society size, medals, cafeteria, F vs FA, lab credit hours, swimming pool, cum laude, plagiarism, degree attestation | same |
-| New golden questions; coverage after | «MEASURE: E4 new golden questions (8 drafted in `E/e4-questions.draft.jsonl`, not yet run) and the coverage-after share» | |
+| E4 round 1: 8 new golden questions (g031-g038: clubs, transport, scholarships, two absent topics) | coverage **0.595 to 0.738** (out-of-domain 0.286 to 0.714), still below 0.85: `COVERAGE GAP`, exit 1 | `E/E2-coverage-after.txt`, `E/e4-questions.draft.jsonl` |
+| E4 round 2: 7 more (g039-g045: medals, FA grade, lab credit hours, retake, late exam, cum laude, cheating in a project) | coverage **0.905** (in-domain 1.000, out-of-domain 0.714): `COVERAGE OK`, Job `Complete`; tau -0.05 gives 0.976, +0.05 gives 0.690. Still uncovered: late bus, financial aid, swimming pool, degree attestation | `E/E2-coverage-after-round2.txt`, `E/e4-round2.jsonl` |
+| E4 suite on the new questions | «MEASURE: result of `--only-added E4` (15 questions), `eval/results/*_e4-added.md`» | |
+
+The E4 questions were written by Claude Code from the uncovered topics, each checked against the page that answers it, and worded differently from the live queries; a member should spot-check them. Writing questions for the uncovered topics is what E4 asks, and it raises the share by construction: the number shows the gap closed for those topics, not that the golden set is representative.
 
 **The E1 live queries were drafted by Claude Code (header of `eval/live_queries.jsonl`) and the coverage pair labels were labelled by Claude Code (`eval/coverage-calibration.jsonl`); a member still has to spot-check both.** Tau is only as good as those labels. **Drift** (`E/E3-drift-diff.txt`, `eval/results/20261125T101514Z_drift-AB.md`; corpus A+B, 558 chunks): backward compatibility on the 25 common questions, recall@5 **0.7895 to 0.7895, 0 per-question changes**; the 4 new Batch-B questions (g027 to g030) retrieved, forward recall@5 **1.0**; g008 retired because the 2022 policy is archived. Overall recall@5 went 0.800 to 0.826 only because the question mix changed (23 answerable instead of 20); the common-subset figure is the fair one. p95 latency 153.0 to 186.4 s.
 
@@ -127,8 +131,9 @@ Source `C/comparison.md`; decisions `eval/results/*_cand-*.decision.json`; gate 
 | Bad release (collection typo, R5-bad-typo) | new pod never Ready, `rollout status` timed out (exit 1), old pods kept serving; `rollout undo` restored; 150 of 150 requests 200 | `F/F6-bad-release-and-undo.txt` |
 | Trace after undo | previous release R3-minilm: collection `rahbar-cand-minilm` @ r0001, embedding `all-minilm` 1b226e2802db, hash verified | `F/F6-trace-after-undo.txt` |
 | Network matrix | eval pods reach api, api-candidate, Ollama only; chroma only from api and api-candidate; redis only from api; ui reaches only api; loader nothing | `F/F7-network-matrix.txt` |
-| Gate result after a ConfigMap edit | «MEASURE: F4 demo, GATE_FAIL then GATE_PASS after editing `ragops-gate`» | |
-| Resources (requests, limits, measured use) | «MEASURE: F5 resource table, `docs/a3-evidence/F5-resources.md`» | |
+| Gate result after a ConfigMap edit | Job on the stored `cand-llama1b` result: `GATE_FAIL` (exit 1); after setting `recall5_drop` 0.02 to 0.25 and `faithfulness_min` 0.89 to 0.80 in `ragops-gate`, the same manifest: `GATE_PASS` (exit 0); the image printed both times is `rahbar-ragops:dev`; thresholds restored afterwards. The demo writes to `gate-demo.decision.json`: an earlier version overwrote the real decision and was fixed (`docs/AI-USAGE.md` item 6) | `F/F4-configmap-edit-flips-gate.txt` |
+| Volumes survive pod deletion | ledger hash, 14 quarantined files, archive, 34 reports identical before and after deleting the loader, API and Chroma pods; Chroma 558 chunks again | `F/F8-pvc-survival.txt` |
+| Resources (measured peak / steady, request, limit) | api 9m/75Mi peak, 3m/72Mi steady: 100m/80Mi, 500m/256Mi (A2 startup peak 151m); chroma 8m/99Mi, 2m/97Mi: 10m/96Mi, 500m/512Mi; ingest Job 1377m/1206Mi, 1219m/824Mi: 1250m/896Mi, 2 CPU/1792Mi; eval Job 36m/30Mi, 20m/23Mi: 50m/64Mi, 1 CPU/768Mi; redis 19m/9Mi: 20m/16Mi, 250m/256Mi; ui, loader unchanged; candidate sized like the api (no separate sample); coverage Job not measured. Applied to the cluster, all pods Ready, re-ingest embedded 0 | `F5-resources.md`, `F/F5-apply-measured-resources.txt` |
 | Clean-cluster rehearsal | «MEASURE: time to rebuild from a clean cluster» | |
 
 ## 4. Short answers
@@ -198,7 +203,7 @@ Each shows the command and its output; raw text is next to each in `docs/a3-evid
 ![E1](../a3-evidence/E/screenshots/E1-coverage-before.png)
 
 ### E2 coverage after
-«MEASURE: E2 screenshot after the E4 questions are added»
+![E2](../a3-evidence/E/screenshots/E2-coverage-after-round2.png)
 
 ### F1 namespace overview
 ![F1](../a3-evidence/F/screenshots/F1-namespace-overview-1.png)
@@ -207,7 +212,7 @@ Each shows the command and its output; raw text is next to each in `docs/a3-evid
 ![F2](../a3-evidence/F/screenshots/F2-ingest-first-run.png)
 
 ### F4 gate result changing after a ConfigMap edit
-«MEASURE: F4 screenshot of GATE_FAIL then GATE_PASS after the edit»
+![F4](../a3-evidence/F/screenshots/F4-configmap-edit-flips-gate.png)
 
 ### F5 rollout status
 ![F5](../a3-evidence/F/screenshots/F5-release-rollout.png)
