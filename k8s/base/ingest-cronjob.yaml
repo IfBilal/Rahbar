@@ -103,9 +103,10 @@ spec:
                     - {name: EMBED_VERSION, value: "0a109f422b47"}   # ollama digest of EMBED_MODEL, see docs/a3-evidence/embed-versions.txt
                   resources:
                     # A2 measured peak 1268m / 910Mi while OCRing; verification adds document vectors.
-                    # Re-measured for A3 in docs/a3-evidence/top-ingest.txt (F5).
-                    requests: {cpu: "1", memory: 1Gi}
-                    limits: {cpu: "2", memory: 1536Mi}
+                    # A3 (docs/a3-evidence/top-ingest.txt, F5-resources.md): 1377m / 1206Mi peak, 1219m / 824Mi steady.
+                    # Memory limit = peak x 1.49 (the old 1536Mi was only x 1.27).
+                    requests: {cpu: 1250m, memory: 896Mi}
+                    limits: {cpu: "2", memory: 1792Mi}
                   volumeMounts:
                     - {name: work, mountPath: /work}
                     - {name: tmp, mountPath: /tmp}
