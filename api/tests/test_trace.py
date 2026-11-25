@@ -205,3 +205,14 @@ def test_a_neutralised_injection_increments_the_flag_counter() -> None:
     finally:
         rail_var.reset(token)
     assert m.INJECTION_FLAGGED._value.get() == before + 1
+
+
+def test_a_non_ascii_token_header_is_just_a_wrong_token_not_a_500(app_client) -> None:
+    client, app, _ = app_client
+    _with_token(app)
+    r = client.post("/api/retrieve", json={"question": "attendance rule", "k": 2},
+                    headers={"X-Eval-Token": "café".encode("latin-1")})
+    assert r.status_code == 404
+    ok = client.post("/api/ask", json={"question": "What is the attendance rule?"},
+                     headers={"X-Eval-Token": "café".encode("latin-1")})
+    assert ok.status_code == 200

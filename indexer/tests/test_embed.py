@@ -125,3 +125,17 @@ def test_a_candidate_index_halves_a_chunk_the_model_refuses_and_counts_it() -> N
         emb.embed(texts, settings, client=client)                         # strict: the live index fails
     vectors = emb.embed(texts, settings, client=client, shorten_on_overflow=True)
     assert len(vectors) == 3 and emb.STATS["shortened"] == 1
+
+
+def test_a_400_is_not_retried(monkeypatch) -> None:
+    """A context-length refusal is deterministic; retrying it three times only slowed candidate builds."""
+    calls = {"n": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        return httpx.Response(400, json={"error": "input length exceeds the context length"})
+    monkeypatch.setattr(emb.time, "sleep", lambda s: (_ for _ in ()).throw(AssertionError("slept before retrying a 400")))
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    with pytest.raises(httpx.HTTPStatusError):
+        emb.embed(["x"], get_settings(), client=client)
+    assert calls["n"] == 1

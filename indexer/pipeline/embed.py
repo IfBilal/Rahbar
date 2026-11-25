@@ -125,8 +125,10 @@ def _embed_batch(http: httpx.Client, settings: IndexerSettings,
             if len(got) != len(batch):
                 raise ValueError(f"asked for {len(batch)} embeddings, got {len(got)}")
             return [list(map(float, v)) for v in got]
-        except (httpx.HTTPError, ValueError):
-            if attempt == ATTEMPTS:
+        except (httpx.HTTPError, ValueError) as exc:
+            # a 4xx is a deterministic refusal (context too long, bad model): retrying cannot help
+            refused = isinstance(exc, httpx.HTTPStatusError) and 400 <= exc.response.status_code < 500
+            if refused or attempt == ATTEMPTS:
                 raise
             time.sleep(2 ** attempt)
     raise AssertionError("unreachable")

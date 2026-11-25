@@ -23,12 +23,13 @@ finish() { echo "RESULT=$1 ${2:-}"; exit "$3"; }
 
 CANDIDATE=${CANDIDATE_RESULT:-}
 if [ "$MODE" != "gate" ]; then
+  STARTED=$(mktemp)                       # only a result written AFTER this point may be gated
   # shellcheck disable=SC2086
   python -m ragops.suite.run_suite --api "$TARGET_URL" --ollama "${OLLAMA_URL:-}" --label "$LABEL" \
       --ledger /data/ledger/ledger.json --lake /data --traces /traces --out "$RESULTS_DIR" ${SUITE_ARGS:-}
   rc=$?
   if [ "$rc" -ne 0 ]; then finish INFRA_ERROR "suite_exit=$rc" "$rc"; fi
-  CANDIDATE=$(ls -1t "$RESULTS_DIR"/*_"$LABEL".json 2>/dev/null | head -1)
+  CANDIDATE=$(find "$RESULTS_DIR" -maxdepth 1 -name "*_$LABEL.json" -newer "$STARTED" 2>/dev/null | sort | tail -1)
   [ -n "$CANDIDATE" ] || finish INFRA_ERROR "no result file for label $LABEL" 3
   echo "result file: $CANDIDATE"
   [ "$MODE" = "suite" ] && finish SUITE_DONE "file=$CANDIDATE" 0

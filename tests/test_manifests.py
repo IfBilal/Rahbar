@@ -377,3 +377,50 @@ def test_the_evaluation_endpoint_is_guarded_by_a_runtime_secret_and_not_routed_p
     retrieve = next(p for p in rule if p["path"] == "/api/retrieve")
     assert retrieve["pathType"] == "Exact" and retrieve["backend"]["service"]["name"] == "ui"
     assert not [o for o in objs if o["kind"] == "Secret"]
+
+
+def test_the_data_stores_accept_connections_only_from_named_workloads(objs) -> None:
+    """The earlier 'eval cannot reach chroma' assertions only looked at rules that name a podSelector, so an
+    allow-all ingress rule (no `from`, an ipBlock, a namespaceSelector, an empty podSelector) would have passed
+    them. Every ingress rule of chroma and redis must name its sources explicitly."""
+    allowed = {"chroma": {"api", "indexer", "api-candidate"}, "redis": {"api"}}
+    for target, sources in allowed.items():
+        policies = [p for p in _policies(objs) if p["spec"]["podSelector"].get("matchLabels", {}).get("app") == target]
+        assert policies, target
+        for p in policies:
+            for rule in p["spec"].get("ingress", []):
+                assert rule.get("from"), f"{p['metadata']['name']}: an ingress rule without `from` allows everyone"
+                for f in rule["from"]:
+                    assert set(f) == {"podSelector"} and f["podSelector"].get("matchLabels"), (p["metadata"]["name"], f)
+                    assert f["podSelector"]["matchLabels"]["app"] in sources, (p["metadata"]["name"], f)
+
+
+def test_only_the_baseline_policies_select_every_pod(objs) -> None:
+    """A policy that selects all pods could grant the evaluation Job egress that eval-policy does not list."""
+    selecting_all = {p["metadata"]["name"] for p in _policies(objs) if p["spec"]["podSelector"] == {}}
+    assert selecting_all == {"default-deny-all", "allow-dns-egress"}
+
+
+def test_the_evaluation_job_is_selected_only_by_its_own_policy(objs) -> None:
+    for p in _policies(objs):
+        sel = p["spec"]["podSelector"].get("matchLabels", {})
+        if sel.get("app") == "ragops-eval":
+            assert p["metadata"]["name"] == "eval-policy"
+
+
+def test_the_standalone_containers_drop_all_capabilities_and_forbid_escalation() -> None:
+    for name in ("eval-job.yaml", "candidate.yaml", "loader-pod.yaml", "coverage-job.yaml"):
+        for o in standalone(name):
+            if o["kind"] == "Service":
+                continue
+            spec = o["spec"] if o["kind"] == "Pod" else o["spec"]["template"]["spec"]
+            for c in spec["containers"]:
+                assert c["securityContext"]["allowPrivilegeEscalation"] is False, name
+                assert c["securityContext"]["capabilities"]["drop"] == ["ALL"], name
+
+
+def test_the_writer_and_the_reader_agree_on_the_embedding_version(objs) -> None:
+    api = {e["name"]: e.get("value") for e in pod_spec(one(objs, "Deployment", "api"))["containers"][0]["env"]}
+    ingest = {e["name"]: e.get("value") for e in pod_spec(one(objs, "Job", "ingest"))["containers"][0]["env"]}
+    cron = {e["name"]: e.get("value") for e in pod_spec(one(objs, "CronJob", "ingest"))["containers"][0]["env"]}
+    assert api["EMBED_VERSION"] == ingest["EMBED_VERSION"] == cron["EMBED_VERSION"]

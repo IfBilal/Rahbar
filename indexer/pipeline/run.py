@@ -144,7 +144,7 @@ def build_targets(settings: IndexerSettings, ledger, client):  # type: ignore[no
                                 chunk_size=int(info["chunk_size"]),
                                 chunk_overlap=int(info["chunk_overlap"]))
         targets.append(Target(ChromaIndex(client, name, s, info.get("embed_version", "")),
-                              make_embedder(s, shorten=True), s.embed_model, s.chunk_size, s.chunk_overlap,
+                              make_embedder(s, shorten=info.get("role") != "live"), s.embed_model, s.chunk_size, s.chunk_overlap,
                               info.get("embed_version", ""), info.get("role", "candidate")))
     return targets
 
@@ -329,7 +329,17 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Exit 1 is reserved for 'finished, some documents quarantined' (job_entry.sh maps it to success), so an
+    uncaught exception anywhere here must never surface as 1 (a traceback exits 1 by default): it is 3."""
     args = _parser().parse_args(argv)
+    try:
+        return _main(args)
+    except Exception as exc:
+        log("fatal", error=f"{type(exc).__name__}: {str(exc)[:300]}")
+        return 3
+
+
+def _main(args: argparse.Namespace) -> int:
     settings = get_settings()
     if args.command:
         return run_command(args, settings)

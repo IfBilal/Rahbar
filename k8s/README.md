@@ -65,9 +65,17 @@ Job, then apply it again (the ingest Job in the base is the exception; it runs o
 * **Eval token.** `/api/retrieve` and the `X-Eval-*` headers need `X-Eval-Token`, read from the Secret `ragops-eval-token`, which `scripts/ragops/eval-token.sh` creates with a random value. The Ingress sends `/api/retrieve` to the UI.
 * **Ollama host.** If `host.minikube.internal` is not 192.168.49.1, change the `ipBlock` entries in `k8s/base/networkpolicy.yaml` and `k8s/base/ragops-networkpolicy.yaml`.
 
+## A release is not in Git
+
+`scripts/ragops/release.sh` changes the live Deployment with `kubectl set env`, because the release identity must
+live in the pod template for `kubectl rollout undo` to restore it. The manifests in Git still say `R1-nomic`, so
+re-running `kubectl apply -k k8s/overlays/dev` (or `make apply`) after a release **rolls the release back** to the
+committed values. To keep a release, commit the new values in `k8s/base/api.yaml` (and `rahbar-config`), through a pull
+request. The ingest Job and the API must agree on `EMBED_VERSION`; `tests/test_manifests.py` checks that.
+
 ## Limits
 
-Single node: `ReadWriteOnce` here means one node, so several pods share a claim; on a multi-node
+The in-cluster Ollama bonus overlay (`k8s/overlays/incluster`) patches the API and indexer policies only: the eval Job, the candidate and the coverage Job still point at the host Ollama there. Single node: `ReadWriteOnce` here means one node, so several pods share a claim; on a multi-node
 cluster the data and traces volumes would need `ReadWriteMany` or a log-shipping sidecar. Ollama
 runs on the host (no GPU on the measurement laptop, see `docs/a3-evidence/host.md`). No TLS, no
 authentication on Chroma (it is isolated by NetworkPolicy only), demo-scale resources.

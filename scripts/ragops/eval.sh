@@ -35,8 +35,12 @@ echo "job/eval started: mode=$mode label=$label target=$target"
 # wait for either terminal condition
 for _ in $(seq 1 "${EVAL_WAIT_STEPS:-4320}"); do
   s=$(kubectl get job eval -n "$NS" -o jsonpath='{.status.succeeded}/{.status.failed}' 2>/dev/null || true)
-  case "$s" in 1/*) kubectl logs -n "$NS" job/eval --tail=${TAIL:-40}; exit 0 ;; */1) kubectl logs -n "$NS" job/eval --tail=${TAIL:-40}; \
-      exit "$(kubectl logs -n "$NS" job/eval --tail=1 | grep -q 'RESULT=GATE_FAIL' && echo 1 || echo 3)" ;; esac
+  case "$s" in
+    1/*) kubectl logs -n "$NS" job/eval --tail="${TAIL:-40}"; exit 0 ;;
+    */1) kubectl logs -n "$NS" job/eval --tail="${TAIL:-40}"
+         last=$(kubectl logs -n "$NS" job/eval --tail=1)      # no pipe into grep -q: SIGPIPE would change the code
+         case "$last" in *RESULT=GATE_FAIL*) exit 1 ;; *) exit 3 ;; esac ;;
+  esac
   sleep 5
 done
 echo "timed out waiting for job/eval" >&2; exit 3
