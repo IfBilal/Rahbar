@@ -1,0 +1,961 @@
+{
+  "documents": [
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9432,
+            "bad_ratio": 0.0,
+            "chars": 62663.0,
+            "chars_per_page": 979.1,
+            "empty_pages": 2,
+            "ocr_pages": 4,
+            "pages": 64,
+            "tokens": 8845.0,
+            "word_ratio": 0.4105,
+            "wordlike_ratio": 0.9973
+          },
+          "reason": "64 page(s), 62663 characters, common-word share 0.41",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-REVISION",
+          "evaluated": true,
+          "evidence": {
+            "replaces": "student-handbook@2026-06"
+          },
+          "reason": "same version label 2026-06 as an earlier copy; treated as a revision that replaces it",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-EXACT-DUP",
+          "evaluated": true,
+          "evidence": {
+            "duplicate_of": "student-handbook@2026-06",
+            "sha256": "717eb4b8d37e50185ffe952735c08ef19edd16074d547f10ebd22cf23da67c4d"
+          },
+          "reason": "byte-identical to student-handbook@2026-06 (sha256 717eb4b8d37e)",
+          "status": "fail"
+        }
+      },
+      "destination": "quarantine/ingest-20261125T180050Z-4znr/Student_Handbook_Copy.pdf",
+      "file": "batch-b/Student_Handbook_Copy.pdf",
+      "outcome": "quarantined",
+      "pages": 64,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "embedded",
+          "value": "2026-06"
+        },
+        "doc_id": "student-handbook",
+        "doc_version": {
+          "route": "derived",
+          "value": "2026-06"
+        },
+        "source": "Student_Handbook_Copy.pdf",
+        "title": {
+          "route": "derived",
+          "value": "National University\u00bb \""
+        }
+      },
+      "sha256": "717eb4b8d37e50185ffe952735c08ef19edd16074d547f10ebd22cf23da67c4d"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9643,
+            "bad_ratio": 0.0,
+            "chars": 925.0,
+            "chars_per_page": 925.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 150.0,
+            "word_ratio": 0.4533,
+            "wordlike_ratio": 1.0
+          },
+          "reason": "1 page(s), 925 characters, common-word share 0.45",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "fee-structure@2026-27",
+            "cosine": 0.7387,
+            "jaccard": 0.0
+          },
+          "reason": "no exact or near duplicate (closest fee-structure@2026-27, cosine 0.739)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/campus-parking-policy/2026-09",
+      "file": "batch-b/campus-parking-policy.md",
+      "outcome": "accepted",
+      "pages": 1,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "campus-parking-policy",
+        "doc_version": {
+          "route": "embedded",
+          "value": "2026-09"
+        },
+        "source": "campus-parking-policy.md",
+        "title": {
+          "route": "embedded",
+          "value": "Campus Parking Policy"
+        }
+      },
+      "sha256": "ff0524e56b5f65593299e2cbc48659ae1a173108fa4ce2d1868407ecf18a4559"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-TRUNCATED",
+          "evaluated": true,
+          "evidence": {
+            "codes": [
+              "C-TRUNCATED"
+            ],
+            "missing": [],
+            "signals": [
+              {
+                "detail": "the last line ends with 'an' and no sentence end",
+                "signal": "S1-ends-mid-sentence",
+                "weight": 2
+              },
+              {
+                "detail": "last page marker is 3 of 5",
+                "signal": "S2-page-x-of-y",
+                "weight": 3
+              }
+            ],
+            "truncation_score": 5
+          },
+          "reason": "looks truncated (the last line ends with 'an' and no sentence end; last page marker is 3 of 5)",
+          "status": "fail"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9181,
+            "bad_ratio": 0.0,
+            "chars": 916.0,
+            "chars_per_page": 916.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 141.0,
+            "word_ratio": 0.6028,
+            "wordlike_ratio": 1.0
+          },
+          "reason": "1 page(s), 916 characters, common-word share 0.60",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "academic-rules@2023-08",
+            "cosine": 0.8087,
+            "jaccard": 0.0
+          },
+          "reason": "no exact or near duplicate (closest academic-rules@2023-08, cosine 0.809)",
+          "status": "pass"
+        }
+      },
+      "destination": "quarantine/ingest-20261125T180050Z-4znr/exam-schedule-policy-trunc.md",
+      "file": "batch-b/exam-schedule-policy-trunc.md",
+      "outcome": "quarantined",
+      "pages": 1,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "examination-schedule-policy",
+        "doc_version": {
+          "route": "embedded",
+          "value": "2026-09"
+        },
+        "source": "exam-schedule-policy-trunc.md",
+        "title": {
+          "route": "embedded",
+          "value": "Examination Schedule Policy"
+        }
+      },
+      "sha256": "cf173476bae80ea4e0a537de26919f1ecd5a08bce95e1a1f6d60cd073b09795e"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9556,
+            "bad_ratio": 0.0,
+            "chars": 1080.0,
+            "chars_per_page": 1080.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 163.0,
+            "word_ratio": 0.4663,
+            "wordlike_ratio": 1.0
+          },
+          "reason": "1 page(s), 1080 characters, common-word share 0.47",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-SUPERSEDES",
+          "evaluated": true,
+          "evidence": {
+            "supersedes": [
+              "faculty-entrepreneurship-and-technical-start-ups-policy@2022-05"
+            ]
+          },
+          "reason": "newer version detected: supersedes faculty-entrepreneurship-and-technical-start-ups-policy@2022-05",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "academic-rules@2023-08",
+            "cosine": 0.7579,
+            "jaccard": 0.0
+          },
+          "reason": "no exact or near duplicate (closest academic-rules@2023-08, cosine 0.758)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/faculty-entrepreneurship-and-technical-start-ups-policy/2026-11",
+      "file": "batch-b/faculty-entrepreneurship-policy-2026.md",
+      "outcome": "accepted",
+      "pages": 1,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "derived",
+          "value": "2026"
+        },
+        "doc_id": "faculty-entrepreneurship-and-technical-start-ups-policy",
+        "doc_version": {
+          "route": "embedded",
+          "value": "2026-11"
+        },
+        "source": "faculty-entrepreneurship-policy-2026.md",
+        "title": {
+          "route": "embedded",
+          "value": "Faculty Entrepreneurship and Technical Start-ups Policy"
+        }
+      },
+      "sha256": "a4d3d1bb7d519df8146431e3e7b3de4a635770d0e3b3701e92fb05480f6a63c9"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-MISSING-DATE-VERSION",
+          "evaluated": true,
+          "evidence": {
+            "codes": [
+              "C-MISSING-DATE-VERSION"
+            ],
+            "missing": [
+              "date or version"
+            ],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "missing date or version",
+          "status": "fail"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9149,
+            "bad_ratio": 0.0,
+            "chars": 3821.0,
+            "chars_per_page": 3821.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 566.0,
+            "word_ratio": 0.5777,
+            "wordlike_ratio": 0.9947
+          },
+          "reason": "1 page(s), 3821 characters, common-word share 0.58",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": false,
+          "evidence": {},
+          "reason": "no version or date could be resolved, so recency cannot be compared",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-EXACT-DUP",
+          "evaluated": true,
+          "evidence": {
+            "duplicate_of": "grading@2026",
+            "sha256": "66a995b4d8474e914d37bfa14755a5361f47327d5a7314f9b7ec15d9b6176e6e"
+          },
+          "reason": "byte-identical to grading@2026 (sha256 66a995b4d847)",
+          "status": "fail"
+        }
+      },
+      "destination": "quarantine/ingest-20261125T180050Z-4znr/grading-page-backup.html",
+      "file": "batch-b/grading-page-backup.html",
+      "outcome": "quarantined",
+      "pages": 1,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "academic-grading",
+        "doc_version": {
+          "route": "missing",
+          "value": null
+        },
+        "source": "grading-page-backup.html",
+        "title": {
+          "route": "embedded",
+          "value": "Academic Grading"
+        }
+      },
+      "sha256": "66a995b4d8474e914d37bfa14755a5361f47327d5a7314f9b7ec15d9b6176e6e"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-MISSING-TITLE",
+          "evaluated": true,
+          "evidence": {
+            "codes": [
+              "C-MISSING-TITLE",
+              "C-MISSING-DATE-VERSION",
+              "C-MISSING-PAGES"
+            ],
+            "missing": [
+              "title",
+              "date or version",
+              "page count"
+            ],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "missing title, date or version, page count",
+          "status": "fail"
+        },
+        "quality": {
+          "code": "Q-EXTRACT-FAIL",
+          "evaluated": true,
+          "evidence": {
+            "error": "PdfminerException: Unexpected EOF"
+          },
+          "reason": "extraction failed: PdfminerException: Unexpected EOF",
+          "status": "fail"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": false,
+          "evidence": {},
+          "reason": "no version or date could be resolved, so recency cannot be compared",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": false,
+          "evidence": {},
+          "reason": "byte hash is unique; near-duplicate check not run (no text or no embedding service)",
+          "status": "pass"
+        }
+      },
+      "destination": "quarantine/ingest-20261125T180050Z-4znr/lab-safety-notice.pdf",
+      "file": "batch-b/lab-safety-notice.pdf",
+      "outcome": "quarantined",
+      "pages": 0,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "lab-safety-notice",
+        "doc_version": {
+          "route": "missing",
+          "value": null
+        },
+        "source": "lab-safety-notice.pdf",
+        "title": {
+          "route": "missing",
+          "value": null
+        }
+      },
+      "sha256": "d7ae8ba52176cd31018cf1397fcc680364fc0f85a9b462bf9ef31515b8798352"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9328,
+            "bad_ratio": 0.0,
+            "chars": 1160.0,
+            "chars_per_page": 1160.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 197.0,
+            "word_ratio": 0.4416,
+            "wordlike_ratio": 1.0
+          },
+          "reason": "1 page(s), 1160 characters, common-word share 0.44",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "prospectus-academic-rules@2026",
+            "cosine": 0.7952,
+            "jaccard": 0.0
+          },
+          "reason": "no exact or near duplicate (closest prospectus-academic-rules@2026, cosine 0.795)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/library-borrowing-rules/2026-08",
+      "file": "batch-b/library-borrowing-rules.md",
+      "outcome": "accepted",
+      "pages": 1,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "library-borrowing-rules",
+        "doc_version": {
+          "route": "embedded",
+          "value": "2026-08"
+        },
+        "source": "library-borrowing-rules.md",
+        "title": {
+          "route": "embedded",
+          "value": "Library Borrowing Rules"
+        }
+      },
+      "sha256": "138e30e39a35daaf92f24bea53aa6aa01bb6558950d7a31ee25bea7b5aa3f186"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9326,
+            "bad_ratio": 0.0,
+            "chars": 1172.0,
+            "chars_per_page": 1172.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 198.0,
+            "word_ratio": 0.4343,
+            "wordlike_ratio": 1.0
+          },
+          "reason": "1 page(s), 1172 characters, common-word share 0.43",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-NEAR-DUP",
+          "evaluated": true,
+          "evidence": {
+            "cosine": 0.9987,
+            "jaccard": 0.97,
+            "near_duplicate_of": "library-borrowing-rules@2026-08"
+          },
+          "reason": "near-duplicate of library-borrowing-rules@2026-08: embedding cosine 0.999, shingle Jaccard 0.97",
+          "status": "fail"
+        }
+      },
+      "destination": "quarantine/ingest-20261125T180050Z-4znr/library-lending-regulations.md",
+      "file": "batch-b/library-lending-regulations.md",
+      "outcome": "quarantined",
+      "pages": 1,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "central-library-lending-regulations",
+        "doc_version": {
+          "route": "embedded",
+          "value": "2026-08"
+        },
+        "source": "library-lending-regulations.md",
+        "title": {
+          "route": "embedded",
+          "value": "Central Library Lending Regulations"
+        }
+      },
+      "sha256": "4baab6dd17f385c2eecd89dea473642db88a70f3b926b24a7b03645960f7e7d0"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9685,
+            "bad_ratio": 0.0,
+            "chars": 1080.0,
+            "chars_per_page": 1080.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 176.0,
+            "word_ratio": 0.517,
+            "wordlike_ratio": 1.0
+          },
+          "reason": "1 page(s), 1080 characters, common-word share 0.52",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "prospectus-academic-rules@2026",
+            "cosine": 0.8085,
+            "jaccard": 0.0
+          },
+          "reason": "no exact or near duplicate (closest prospectus-academic-rules@2026, cosine 0.808)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/scholarship-frequently-asked-questions/2026-09",
+      "file": "batch-b/scholarship-faq.md",
+      "outcome": "accepted",
+      "pages": 1,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "scholarship-frequently-asked-questions",
+        "doc_version": {
+          "route": "embedded",
+          "value": "2026-09"
+        },
+        "source": "scholarship-faq.md",
+        "title": {
+          "route": "embedded",
+          "value": "Scholarship Frequently Asked Questions"
+        }
+      },
+      "sha256": "87f909d45a393ef10d2858cf6d1715a7a07406cfd7a00113348193d0dd30f020"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9689,
+            "bad_ratio": 0.0,
+            "chars": 804.0,
+            "chars_per_page": 402.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 2,
+            "tokens": 139.0,
+            "word_ratio": 0.5396,
+            "wordlike_ratio": 1.0
+          },
+          "reason": "2 page(s), 804 characters, common-word share 0.54",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "academic-rules@2023-08",
+            "cosine": 0.8,
+            "jaccard": 0.0
+          },
+          "reason": "no exact or near duplicate (closest academic-rules@2023-08, cosine 0.800)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/student-clubs-guidelines/v1.0",
+      "file": "batch-b/student-clubs-guidelines.pdf",
+      "outcome": "accepted",
+      "pages": 2,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "student-clubs-guidelines",
+        "doc_version": {
+          "route": "derived",
+          "value": "v1.0"
+        },
+        "source": "student-clubs-guidelines.pdf",
+        "title": {
+          "route": "derived",
+          "value": "Student Clubs Guidelines"
+        }
+      },
+      "sha256": "e18ef47a3156b74a931838b28b8e88e411295d127ade5065b38db61bc4999f48"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.8983,
+            "bad_ratio": 0.0,
+            "chars": 639.0,
+            "chars_per_page": 639.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 99.0,
+            "word_ratio": 0.4242,
+            "wordlike_ratio": 1.0
+          },
+          "reason": "1 page(s), 639 characters, common-word share 0.42",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "fee-structure@2026-27",
+            "cosine": 0.7846,
+            "jaccard": 0.0
+          },
+          "reason": "no exact or near duplicate (closest fee-structure@2026-27, cosine 0.785)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/transport-routes/2026-08",
+      "file": "batch-b/transport-routes-2026.html",
+      "outcome": "accepted",
+      "pages": 1,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "embedded",
+          "value": "2026-08"
+        },
+        "doc_id": "transport-routes",
+        "doc_version": {
+          "route": "derived",
+          "value": "2026-08"
+        },
+        "source": "transport-routes-2026.html",
+        "title": {
+          "route": "embedded",
+          "value": "Transport Routes 2026"
+        }
+      },
+      "sha256": "4e62a554e4be4d6c0afff6acbf664d7985ad5298d0e7b03b783ef153907448d6"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-MISSING-TITLE",
+          "evaluated": true,
+          "evidence": {
+            "codes": [
+              "C-MISSING-TITLE",
+              "C-MISSING-DATE-VERSION"
+            ],
+            "missing": [
+              "title",
+              "date or version"
+            ],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "missing title, date or version",
+          "status": "fail"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9882,
+            "bad_ratio": 0.0,
+            "chars": 760.0,
+            "chars_per_page": 760.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 145.0,
+            "word_ratio": 0.4759,
+            "wordlike_ratio": 1.0
+          },
+          "reason": "1 page(s), 760 characters, common-word share 0.48",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": false,
+          "evidence": {},
+          "reason": "no version or date could be resolved, so recency cannot be compared",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "prospectus-academic-rules@2026",
+            "cosine": 0.7204,
+            "jaccard": 0.0
+          },
+          "reason": "no exact or near duplicate (closest prospectus-academic-rules@2026, cosine 0.720)",
+          "status": "pass"
+        }
+      },
+      "destination": "quarantine/ingest-20261125T180050Z-4znr/untitled-notes.txt",
+      "file": "batch-b/untitled-notes.txt",
+      "outcome": "quarantined",
+      "pages": 1,
+      "resolved": {
+        "batch": "B",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "untitled-notes",
+        "doc_version": {
+          "route": "missing",
+          "value": null
+        },
+        "source": "untitled-notes.txt",
+        "title": {
+          "route": "missing",
+          "value": null
+        }
+      },
+      "sha256": "47bf755bd27d76757cfad3e850680ef85c2931597b98bb0c83ca811f30b701a5"
+    }
+  ],
+  "embed_model": "nomic-embed-text",
+  "embed_version": "0a109f422b47",
+  "git_sha": "",
+  "image": "",
+  "reevaluated": [
+    {
+      "check": "recency",
+      "code": "R-SUPERSEDED-BY",
+      "doc": "faculty-entrepreneurship-and-technical-start-ups-policy@2022-05",
+      "outcome": "archived",
+      "reason": "a newer version exists: faculty-entrepreneurship-and-technical-start-ups-policy@2026-11",
+      "status": "fail"
+    }
+  ],
+  "run_id": "ingest-20261125T180050Z-4znr",
+  "schema": 1,
+  "started_at": "2026-11-25T18:02:27Z",
+  "summary": {
+    "accepted": 6,
+    "archived": 1,
+    "documents": 12,
+    "failures_by_check": {
+      "completeness": 4,
+      "quality": 1,
+      "recency": 1,
+      "uniqueness": 3
+    },
+    "quarantined": 6,
+    "unchanged": 9
+  },
+  "thresholds": {
+    "empty_page_share": 0.5,
+    "garbled_hard_word_ratio": 0.12,
+    "garbled_max_bad_ratio": 0.02,
+    "garbled_min_alpha_share": 0.3,
+    "garbled_min_word_ratio": 0.35,
+    "garbled_min_wordlike": 0.6,
+    "near_dup_cosine": 0.97,
+    "near_dup_jaccard": 0.8,
+    "quality_min_chars": 200,
+    "quality_min_chars_per_page": 40,
+    "series_similarity": 0.8,
+    "truncation_fail_score": 3
+  },
+  "unchanged": [
+    "academic-rules-handbook-jun-2026.pdf",
+    "annual-report-2019-20.pdf",
+    "annual-report-2023-24.pdf",
+    "faculty-entrepreneurship-and-technical-start-ups-policy.pdf",
+    "fee-structure-page.html",
+    "grading-page.html",
+    "prospectus-2026-academic-rules-and-regulations.pdf",
+    "student-handbook-jun-2026.pdf",
+    "undergraduate-academic-rules-aug-2023.pdf"
+  ]
+}

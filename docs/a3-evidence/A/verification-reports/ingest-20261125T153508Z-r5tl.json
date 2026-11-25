@@ -1,0 +1,708 @@
+{
+  "documents": [
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9206,
+            "bad_ratio": 0.0,
+            "chars": 28817.0,
+            "chars_per_page": 1108.3,
+            "empty_pages": 1,
+            "ocr_pages": 24,
+            "pages": 26,
+            "tokens": 3735.0,
+            "word_ratio": 0.5357,
+            "wordlike_ratio": 0.9874
+          },
+          "reason": "26 page(s), 28817 characters, common-word share 0.54",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no exact or near duplicate",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/academic-rules/2023-08",
+      "file": "undergraduate-academic-rules-aug-2023.pdf",
+      "outcome": "accepted",
+      "pages": 26,
+      "resolved": {
+        "batch": "A",
+        "date": {
+          "route": "derived",
+          "value": "2023-08"
+        },
+        "doc_id": "academic-rules",
+        "doc_version": {
+          "route": "catalog",
+          "value": "2023-08"
+        },
+        "source": "undergraduate-academic-rules-aug-2023.pdf",
+        "title": {
+          "route": "catalog",
+          "value": "Undergraduate Academic Rules (Aug 2023)"
+        }
+      },
+      "sha256": "cddfe1f5e9770132e27d686abd1c2e6742ef4732f0c2f431ed514bc1691d2004"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9469,
+            "bad_ratio": 0.0,
+            "chars": 53848.0,
+            "chars_per_page": 928.4,
+            "empty_pages": 3,
+            "ocr_pages": 5,
+            "pages": 58,
+            "tokens": 7429.0,
+            "word_ratio": 0.4807,
+            "wordlike_ratio": 0.9993
+          },
+          "reason": "58 page(s), 53848 characters, common-word share 0.48",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-SUPERSEDES",
+          "evaluated": true,
+          "evidence": {
+            "supersedes": [
+              "academic-rules@2023-08"
+            ]
+          },
+          "reason": "newer version detected: supersedes academic-rules@2023-08",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no exact or near duplicate",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/academic-rules/2026-06",
+      "file": "academic-rules-handbook-jun-2026.pdf",
+      "outcome": "accepted",
+      "pages": 58,
+      "resolved": {
+        "batch": "A",
+        "date": {
+          "route": "derived",
+          "value": "2026-06"
+        },
+        "doc_id": "academic-rules",
+        "doc_version": {
+          "route": "catalog",
+          "value": "2026-06"
+        },
+        "source": "academic-rules-handbook-jun-2026.pdf",
+        "title": {
+          "route": "catalog",
+          "value": "Academic Rules Handbook (Jun 2026)"
+        }
+      },
+      "sha256": "4cfee3e191b84aeb9168f17656c7642212ff52b90f2780d028b33c154aa74b62"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.907,
+            "bad_ratio": 0.0,
+            "chars": 42063.0,
+            "chars_per_page": 1274.6,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 33,
+            "tokens": 5361.0,
+            "word_ratio": 0.3175,
+            "wordlike_ratio": 0.9918
+          },
+          "reason": "33 page(s), 42063 characters, common-word share 0.32",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "academic-rules@2026-06",
+            "cosine": 0.8691,
+            "jaccard": 0.004
+          },
+          "reason": "no exact or near duplicate (closest academic-rules@2026-06, cosine 0.869)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/annual-report-2019-20/2019-20",
+      "file": "annual-report-2019-20.pdf",
+      "outcome": "accepted",
+      "pages": 33,
+      "resolved": {
+        "batch": "A",
+        "date": {
+          "route": "derived",
+          "value": "2019-20"
+        },
+        "doc_id": "annual-report-2019-20",
+        "doc_version": {
+          "route": "catalog",
+          "value": "2019-20"
+        },
+        "source": "annual-report-2019-20.pdf",
+        "title": {
+          "route": "catalog",
+          "value": "Annual Report 2019-20"
+        }
+      },
+      "sha256": "4d1961e340b13273bb039805ab5fd5e2c7bd0144a5bd5870f2ce4da13becd650"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9266,
+            "bad_ratio": 0.0,
+            "chars": 168712.0,
+            "chars_per_page": 1984.8,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 85,
+            "tokens": 22710.0,
+            "word_ratio": 0.3074,
+            "wordlike_ratio": 0.9877
+          },
+          "reason": "85 page(s), 168712 characters, common-word share 0.31",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "annual-report-2019-20@2019-20",
+            "cosine": 0.9289,
+            "jaccard": 0.121
+          },
+          "reason": "no exact or near duplicate (closest annual-report-2019-20@2019-20, cosine 0.929)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/annual-report-2023-24/2023-24",
+      "file": "annual-report-2023-24.pdf",
+      "outcome": "accepted",
+      "pages": 85,
+      "resolved": {
+        "batch": "A",
+        "date": {
+          "route": "derived",
+          "value": "2023-24"
+        },
+        "doc_id": "annual-report-2023-24",
+        "doc_version": {
+          "route": "catalog",
+          "value": "2023-24"
+        },
+        "source": "annual-report-2023-24.pdf",
+        "title": {
+          "route": "catalog",
+          "value": "Annual Report 2023-24"
+        }
+      },
+      "sha256": "3c9d89e84af24df4b939f10e32c620a3877b276acea1db52f1aae4098e5c057a"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9446,
+            "bad_ratio": 0.0,
+            "chars": 9952.0,
+            "chars_per_page": 1244.0,
+            "empty_pages": 0,
+            "ocr_pages": 8,
+            "pages": 8,
+            "tokens": 1378.0,
+            "word_ratio": 0.4485,
+            "wordlike_ratio": 0.9978
+          },
+          "reason": "8 page(s), 9952 characters, common-word share 0.45",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "academic-rules@2023-08",
+            "cosine": 0.8339,
+            "jaccard": 0.004
+          },
+          "reason": "no exact or near duplicate (closest academic-rules@2023-08, cosine 0.834)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/faculty-entrepreneurship-and-technical-start-ups-policy/2022-05",
+      "file": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf",
+      "outcome": "accepted",
+      "pages": 8,
+      "resolved": {
+        "batch": "A",
+        "date": {
+          "route": "derived",
+          "value": "2022-05-30"
+        },
+        "doc_id": "faculty-entrepreneurship-and-technical-start-ups-policy",
+        "doc_version": {
+          "route": "catalog",
+          "value": "2022-05"
+        },
+        "source": "faculty-entrepreneurship-and-technical-start-ups-policy.pdf",
+        "title": {
+          "route": "catalog",
+          "value": "Faculty Entrepreneurship and Technical Start-ups Policy"
+        }
+      },
+      "sha256": "c2d5c7648d1593daf34d5c0596ede476e8984b0551830cc1690017e6e22f1359"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [
+              {
+                "detail": "the last line ends with 'transaction' and no sentence end",
+                "signal": "S1-ends-mid-sentence",
+                "weight": 2
+              }
+            ],
+            "truncation_score": 2
+          },
+          "reason": "title, version or date, source and pages present, no truncation; weak signal only (S1-ends-mid-sentence)",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.8973,
+            "bad_ratio": 0.0,
+            "chars": 3010.0,
+            "chars_per_page": 3010.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 432.0,
+            "word_ratio": 0.4097,
+            "wordlike_ratio": 0.9861
+          },
+          "reason": "1 page(s), 3010 characters, common-word share 0.41",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "academic-rules@2023-08",
+            "cosine": 0.8311,
+            "jaccard": 0.0
+          },
+          "reason": "no exact or near duplicate (closest academic-rules@2023-08, cosine 0.831)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/fee-structure/2026-27",
+      "file": "fee-structure-page.html",
+      "outcome": "accepted",
+      "pages": 1,
+      "resolved": {
+        "batch": "A",
+        "date": {
+          "route": "derived",
+          "value": "2026-27"
+        },
+        "doc_id": "fee-structure",
+        "doc_version": {
+          "route": "catalog",
+          "value": "2026-27"
+        },
+        "source": "fee-structure-page.html",
+        "title": {
+          "route": "catalog",
+          "value": "Fee Structure page"
+        }
+      },
+      "sha256": "ec8872ae77cac7e96e20e6979933f36b00aaeb0ab3f668a2116e521c655e7b90"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9149,
+            "bad_ratio": 0.0,
+            "chars": 3821.0,
+            "chars_per_page": 3821.0,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 1,
+            "tokens": 566.0,
+            "word_ratio": 0.5777,
+            "wordlike_ratio": 0.9947
+          },
+          "reason": "1 page(s), 3821 characters, common-word share 0.58",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "academic-rules@2023-08",
+            "cosine": 0.8711,
+            "jaccard": 0.031
+          },
+          "reason": "no exact or near duplicate (closest academic-rules@2023-08, cosine 0.871)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/grading/2026",
+      "file": "grading-page.html",
+      "outcome": "accepted",
+      "pages": 1,
+      "resolved": {
+        "batch": "A",
+        "date": {
+          "route": "missing",
+          "value": null
+        },
+        "doc_id": "grading",
+        "doc_version": {
+          "route": "catalog",
+          "value": "2026"
+        },
+        "source": "grading-page.html",
+        "title": {
+          "route": "catalog",
+          "value": "Grading page"
+        }
+      },
+      "sha256": "66a995b4d8474e914d37bfa14755a5361f47327d5a7314f9b7ec15d9b6176e6e"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9484,
+            "bad_ratio": 0.0,
+            "chars": 17469.0,
+            "chars_per_page": 3493.8,
+            "empty_pages": 0,
+            "ocr_pages": 0,
+            "pages": 5,
+            "tokens": 2535.0,
+            "word_ratio": 0.5819,
+            "wordlike_ratio": 0.9968
+          },
+          "reason": "5 page(s), 17469 characters, common-word share 0.58",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "academic-rules@2023-08",
+            "cosine": 0.9657,
+            "jaccard": 0.113
+          },
+          "reason": "no exact or near duplicate (closest academic-rules@2023-08, cosine 0.966)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/prospectus-academic-rules/2026",
+      "file": "prospectus-2026-academic-rules-and-regulations.pdf",
+      "outcome": "accepted",
+      "pages": 5,
+      "resolved": {
+        "batch": "A",
+        "date": {
+          "route": "derived",
+          "value": "2026"
+        },
+        "doc_id": "prospectus-academic-rules",
+        "doc_version": {
+          "route": "catalog",
+          "value": "2026"
+        },
+        "source": "prospectus-2026-academic-rules-and-regulations.pdf",
+        "title": {
+          "route": "catalog",
+          "value": "Prospectus 2026 - Academic Rules and Regulations"
+        }
+      },
+      "sha256": "a7e7f6896a59eb9413c9e8826e6c4c018ebe52045d10cebfcba92ded10a3174a"
+    },
+    {
+      "checks": {
+        "completeness": {
+          "code": "C-OK",
+          "evaluated": true,
+          "evidence": {
+            "missing": [],
+            "signals": [],
+            "truncation_score": 0
+          },
+          "reason": "title, version or date, source and pages present, no truncation",
+          "status": "pass"
+        },
+        "quality": {
+          "code": "Q-OK",
+          "evaluated": true,
+          "evidence": {
+            "alpha_share": 0.9432,
+            "bad_ratio": 0.0,
+            "chars": 62663.0,
+            "chars_per_page": 979.1,
+            "empty_pages": 2,
+            "ocr_pages": 4,
+            "pages": 64,
+            "tokens": 8845.0,
+            "word_ratio": 0.4105,
+            "wordlike_ratio": 0.9973
+          },
+          "reason": "64 page(s), 62663 characters, common-word share 0.41",
+          "status": "pass"
+        },
+        "recency": {
+          "code": "R-OK-FIRST",
+          "evaluated": true,
+          "evidence": {},
+          "reason": "no other version of this document is known",
+          "status": "pass"
+        },
+        "uniqueness": {
+          "code": "U-OK",
+          "evaluated": true,
+          "evidence": {
+            "closest": "academic-rules@2026-06",
+            "cosine": 0.966,
+            "jaccard": 0.23
+          },
+          "reason": "no exact or near duplicate (closest academic-rules@2026-06, cosine 0.966)",
+          "status": "pass"
+        }
+      },
+      "destination": "lake/docs/student-handbook/2026-06",
+      "file": "student-handbook-jun-2026.pdf",
+      "outcome": "accepted",
+      "pages": 64,
+      "resolved": {
+        "batch": "A",
+        "date": {
+          "route": "derived",
+          "value": "2026-06"
+        },
+        "doc_id": "student-handbook",
+        "doc_version": {
+          "route": "catalog",
+          "value": "2026-06"
+        },
+        "source": "student-handbook-jun-2026.pdf",
+        "title": {
+          "route": "catalog",
+          "value": "Student Handbook (Jun 2026)"
+        }
+      },
+      "sha256": "717eb4b8d37e50185ffe952735c08ef19edd16074d547f10ebd22cf23da67c4d"
+    }
+  ],
+  "embed_model": "nomic-embed-text",
+  "embed_version": "0a109f422b47",
+  "git_sha": "",
+  "image": "",
+  "reevaluated": [
+    {
+      "check": "recency",
+      "code": "R-SUPERSEDED-BY",
+      "doc": "academic-rules@2023-08",
+      "outcome": "archived",
+      "reason": "a newer version exists: academic-rules@2026-06",
+      "status": "fail"
+    }
+  ],
+  "run_id": "ingest-20261125T153508Z-r5tl",
+  "schema": 1,
+  "started_at": "2026-11-25T15:52:21Z",
+  "summary": {
+    "accepted": 9,
+    "archived": 1,
+    "documents": 9,
+    "failures_by_check": {
+      "completeness": 0,
+      "quality": 0,
+      "recency": 1,
+      "uniqueness": 0
+    },
+    "quarantined": 0,
+    "unchanged": 0
+  },
+  "thresholds": {
+    "empty_page_share": 0.5,
+    "garbled_hard_word_ratio": 0.12,
+    "garbled_max_bad_ratio": 0.02,
+    "garbled_min_alpha_share": 0.3,
+    "garbled_min_word_ratio": 0.35,
+    "garbled_min_wordlike": 0.6,
+    "near_dup_cosine": 0.97,
+    "near_dup_jaccard": 0.8,
+    "quality_min_chars": 200,
+    "quality_min_chars_per_page": 40,
+    "series_similarity": 0.8,
+    "truncation_fail_score": 3
+  },
+  "unchanged": []
+}

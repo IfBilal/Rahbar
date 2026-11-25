@@ -48,7 +48,7 @@ Job, then apply it again (the ingest Job in the base is the exception; it runs o
 | Responsibility | Object |
 | --- | --- |
 | Ingestion runs once and ends; scheduled re-ingestion | Job `ingest`; CronJob `ingest` (`concurrencyPolicy: Forbid`) |
-| **Only one writer to the vector store** | the Job/CronJob (`Forbid`), a lock file on the PVC, NetworkPolicy (only `app=indexer` and the candidate reach Chroma; the eval Job cannot), no Kubernetes API token anywhere, and `tests/test_boundaries.py` (no Chroma write call in the API or in `ragops`) |
+| **Only one writer to the vector store** | the Job/CronJob (`Forbid`), a lock file on the PVC, NetworkPolicy (api, indexer and api-candidate may reach Chroma; the eval Job cannot), no Kubernetes API token anywhere, and `tests/test_boundaries.py` (no Chroma write call in the API or in `ragops`) |
 | Data lake, quarantine, archive, ledger survive restarts | PVC `ragops-data` (rw only for the Job and loader; eval mounts it read-only) |
 | Vector index survives restarts | StatefulSet `chroma` with a `volumeClaimTemplate` |
 | Traces survive and are readable | PVC `ragops-traces` (`/traces/<pod>.jsonl`) and stdout (`kubectl logs`) |

@@ -1,15 +1,31 @@
-$ bash -c kubectl get job ingest -n rahbar; echo; echo "--- init container fetch-corpus (last lines)"; kubectl logs -n rahbar job/ingest -c fetch-corpus --tail=3 | cut -c1-200; echo "--- init container seed-inbox"; kubectl logs -n rahbar job/ingest -c seed-inbox | cut -c1-200; echo "--- container indexer (the sync summary)"; kubectl logs -n rahbar job/ingest -c indexer | tail -3 | cut -c1-600
+$ bash -c kubectl get job ingest -n rahbar; echo; for c in fetch-corpus indexer; do echo "--- container $c (complete log)"; kubectl logs -n rahbar job/ingest -c $c; done
 NAME     STATUS     COMPLETIONS   DURATION   AGE
-ingest   Complete   1/1           19m        73m
+ingest   Complete   1/1           19m        3h13m
 
---- init container fetch-corpus (last lines)
+--- container fetch-corpus (complete log)
+  fetch   Undergraduate Academic Rules (Aug 2023)
+          undergraduate-academic-rules-aug-2023.pdf, 14,888,226 bytes
+  fetch   Academic Rules Handbook (Jun 2026)
+          academic-rules-handbook-jun-2026.pdf, 987,731 bytes
+  fetch   Prospectus 2026 - Academic Rules and Regulations
+          prospectus-2026-academic-rules-and-regulations.pdf, 7,066,767 bytes
+  fetch   Student Handbook (Jun 2026)
+          student-handbook-jun-2026.pdf, 1,980,275 bytes
+  fetch   Annual Report 2019-20
+          annual-report-2019-20.pdf, 891,216 bytes
+  fetch   Annual Report 2023-24
+          annual-report-2023-24.pdf, 5,100,456 bytes
+  fetch   Fee Structure page
+          fee-structure-page.html, 91,429 bytes
+  fetch   Grading page
+          grading-page.html, 95,673 bytes
+  fetch   Faculty Entrepreneurship and Technical Start-ups Policy
+          faculty-entrepreneurship-and-technical-start-ups-policy.pdf, 3,872,809 bytes
 
 9 documents in corpus/raw, manifest written to corpus/MANIFEST.md
 corpus matches the committed MANIFEST.md
---- init container seed-inbox
-{"type": "seed", "copied": 9, "already_seeded": false}
---- container indexer (the sync summary)
+--- container indexer (complete log)
 {"logger":"rahbar.indexer","msg":"chroma is up"}
 {"chunks_deleted": 0, "chunks_embedded": 532, "chunks_reused": 0, "chunks_written": 532, "command": "sync", "docs_deleted": 0, "docs_new": 9, "docs_quarantined": 0, "docs_renamed": 0, "docs_seen": 9, "docs_superseded": 1, "docs_unchanged": 0, "docs_updated": 0, "exit": 0, "indexes": {"rahbar": {"chunks_deleted": 0, "chunks_embedded": 532, "chunks_written": 532, "revision": "r0001", "revision_bumped": true}}, "repairs": 0, "run_id": "ingest-20261125T153508Z-r5tl", "schema": 1, "seconds": 1031.67, "type": "ingest_summary", "verification_embeddings": 72}
 
-[exit 0 at 2026-11-25T16:45:52 UTC]
+[exit 0 at 2026-11-25T18:45:34 UTC]
