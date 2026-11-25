@@ -682,8 +682,20 @@ p10 / p50 / p90 0.629 / 0.769 / 0.874 (min 0.573, max 0.891); latency
 p50 / p95: generate 111.9 / 177.2 s, retrieve 15.2 / 161.3 ms, total
 110.9 / 173.6 s. Guardrail actions 0 in that window (it predates B08).
 Curated samples: <code>traces/</code> (<code>traces/README.md</code>).
-One full record: <code>D/D1-trace-record.txt</code> («MEASURE: D1 clean
-capture of a full record»).</p>
+One full record: <code>D/D1-trace-record.txt</code> (the parking
+question g028, 166 lines of JSON: trace id, query, embedding model and
+version, collection and revision, filters, ranked candidates with
+document versions and scores, the guardrail action, prompt hash, model
+parameters, response, latency per stage, cache). The same line is
+readable with <code>kubectl logs</code>
+(<code>F/F4-trace-in-kubectl-logs.txt</code>). The trace has no
+reranked-order field because the pipeline has no reranker, and
+<code>embedding.dimension</code> is null: both are known gaps.
+<code>/metrics</code> now also exposes
+<code>rahbar_top1_similarity</code> and
+<code>rahbar_injection_flagged_total</code>
+(<code>api/app/routes/metrics.py</code>; the summary script reports the
+same quantities from the trace log).</p>
 <p><strong>D5 root cause</strong> of the abstained g025
 (<code>D/D5-root-cause.md</code>, trace <code>d08cce5a...</code>): (1)
 status <code>abstained</code>, reason <code>model_declined</code>:
@@ -1023,8 +1035,19 @@ alt="C1b" /></p>
 </figure>
 <h3 id="d1-one-full-trace-record">D1 one full trace record</h3>
 <figure>
-<img src="../a3-evidence/D/screenshots/D1-trace-record.png" alt="D1" />
+<img src="../a3-evidence/D/screenshots/D1-trace-record-1.png"
+alt="D1" />
 <figcaption aria-hidden="true">D1</figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/D/screenshots/D1-trace-record-2.png"
+alt="D1 continued" />
+<figcaption aria-hidden="true">D1 continued</figcaption>
+</figure>
+<figure>
+<img src="../a3-evidence/D/screenshots/D1-trace-record-3.png"
+alt="D1 continued" />
+<figcaption aria-hidden="true">D1 continued</figcaption>
 </figure>
 <h3 id="d2-trace-tool-rebuilding-the-prompt">D2 trace tool rebuilding
 the prompt</h3>
@@ -1033,6 +1056,12 @@ the prompt</h3>
 src="../a3-evidence/D/screenshots/D2-trace-tool-prompt-rebuild-1.png"
 alt="D2" />
 <figcaption aria-hidden="true">D2</figcaption>
+</figure>
+<figure>
+<img
+src="../a3-evidence/D/screenshots/D2-trace-tool-prompt-rebuild-2.png"
+alt="D2 continued" />
+<figcaption aria-hidden="true">D2 continued</figcaption>
 </figure>
 <h3 id="d4-injection-rail-b08">D4 injection rail, B08</h3>
 <figure>

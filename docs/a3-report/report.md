@@ -104,7 +104,7 @@ Source `C/comparison.md`; decisions `eval/results/*_cand-*.decision.json`; gate 
 | answer | motorcycle Rs 2,000 and car Rs 5,000, cited to `campus-parking-policy.md`: the true fee, not "parking is free" |
 | checks | prompt hash verified; 3 of 3 chunks rebuilt from snapshot; `trace.show` prints the exact prompt and context |
 
-**Summary** (`D/D3-trace-summary.txt`; `/api/ask`, R1-nomic, the suite's own queries): 62 requests, 48 ok, 14 abstained (0.2258); fallback 0; cache hit 0; top-1 similarity p10 / p50 / p90 0.629 / 0.769 / 0.874 (min 0.573, max 0.891); latency p50 / p95: generate 111.9 / 177.2 s, retrieve 15.2 / 161.3 ms, total 110.9 / 173.6 s. Guardrail actions 0 in that window (it predates B08). Curated samples: `traces/` (`traces/README.md`). One full record: `D/D1-trace-record.txt` («MEASURE: D1 clean capture of a full record»).
+**Summary** (`D/D3-trace-summary.txt`; `/api/ask`, R1-nomic, the suite's own queries): 62 requests, 48 ok, 14 abstained (0.2258); fallback 0; cache hit 0; top-1 similarity p10 / p50 / p90 0.629 / 0.769 / 0.874 (min 0.573, max 0.891); latency p50 / p95: generate 111.9 / 177.2 s, retrieve 15.2 / 161.3 ms, total 110.9 / 173.6 s. Guardrail actions 0 in that window (it predates B08). Curated samples: `traces/` (`traces/README.md`). One full record: `D/D1-trace-record.txt` (the parking question g028, 166 lines of JSON: trace id, query, embedding model and version, collection and revision, filters, ranked candidates with document versions and scores, the guardrail action, prompt hash, model parameters, response, latency per stage, cache). The same line is readable with `kubectl logs` (`F/F4-trace-in-kubectl-logs.txt`). The trace has no reranked-order field because the pipeline has no reranker, and `embedding.dimension` is null: both are known gaps. `/metrics` now also exposes `rahbar_top1_similarity` and `rahbar_injection_flagged_total` (`api/app/routes/metrics.py`; the summary script reports the same quantities from the trace log).
 
 **D5 root cause** of the abstained g025 (`D/D5-root-cause.md`, trace `d08cce5a...`): (1) status `abstained`, reason `model_declined`: retrieval worked. (2) All 5 candidates are 2026 documents. (3) The filter is `superseded_filter: true`: the 2023 rules are archived and excluded. (4) The history switch (`wants_history`) fires on older, previous, earlier, "before 20xx"; "the 2023 rules" has none. (5) The model saw only 2026 text and said so. Cause: version filter plus trigger vocabulary, not retrieval or the model. Fix: also trigger on a year before the current version.
 
@@ -191,10 +191,16 @@ Each shows the command and its output; raw text is next to each in `docs/a3-evid
 ![C2](../a3-evidence/C/screenshots/C2-gate-pass.png)
 
 ### D1 one full trace record
-![D1](../a3-evidence/D/screenshots/D1-trace-record.png)
+![D1](../a3-evidence/D/screenshots/D1-trace-record-1.png)
+
+![D1 continued](../a3-evidence/D/screenshots/D1-trace-record-2.png)
+
+![D1 continued](../a3-evidence/D/screenshots/D1-trace-record-3.png)
 
 ### D2 trace tool rebuilding the prompt
 ![D2](../a3-evidence/D/screenshots/D2-trace-tool-prompt-rebuild-1.png)
+
+![D2 continued](../a3-evidence/D/screenshots/D2-trace-tool-prompt-rebuild-2.png)
 
 ### D4 injection rail, B08
 ![D4](../a3-evidence/D/screenshots/D4-injection-rail-b08.png)
