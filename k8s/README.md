@@ -8,7 +8,7 @@ Ubuntu 24.04, Docker, minikube v1.39 (Calico), kubectl, kustomize, Ollama 0.17.
 ```bash
 make cluster                       # minikube --cni=calico --memory=8g --cpus=4, metrics-server, ingress
 ollama pull nomic-embed-text llama3.2:3b mxbai-embed-large all-minilm
-make ollama-host                   # Ollama on the minikube gateway, reachable as host.minikube.internal
+make ollama-host                   # Ollama on the minikube gateway; runs in the FOREGROUND: leave it, use a second terminal
 make images TAG=dev                # builds api, indexer, ui and ragops, loads them into minikube
 make apply                         # creates the eval-token Secret (random, at run time), applies k8s/overlays/dev
 kubectl -n rahbar wait --for=condition=complete job/ingest --timeout=3600s   # first ingestion: seed, verify, index
@@ -41,7 +41,7 @@ Job, then apply it again (the ingest Job in the base is the exception; it runs o
 | D traces | `kubectl exec -n rahbar ragops-loader -- python -m ragops.trace.show <trace_id> --traces /traces --lake /data`; `... ragops.trace.summary --traces /traces` | PVC `ragops-traces`, loader pod |
 | D metrics | `kubectl port-forward -n rahbar deploy/api 8000:8000` then `curl localhost:8000/metrics` | Service / port-forward |
 | E coverage | `kubectl apply -f k8s/coverage-job.yaml` | Job `coverage` |
-| Getting files in and out | `kubectl cp corpus/batch-b/. rahbar/ragops-loader:/data/inbox/`; `kubectl cp rahbar/ragops-loader:/results/. eval/results/` | loader pod |
+| Getting files in and out | `python corpus/batch-b/build.py --out /tmp/batch-b-out` then `kubectl cp /tmp/batch-b-out/batch-b rahbar/ragops-loader:/data/inbox/`; `kubectl cp rahbar/ragops-loader:/results/. eval/results/` | loader pod |
 
 ## Which object carries which responsibility
 

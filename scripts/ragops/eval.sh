@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run the evaluation Job against a target (docs/a3-ragops/10 section 5.3).
 #
-#   scripts/ragops/eval.sh <mode> <label> [--target URL] [--suite-args "..."] [--baseline FILE] [--candidate FILE]
+#   scripts/ragops/eval.sh <mode> <label> [--target URL] [--suite-args "..."] [--baseline FILE] [--candidate FILE] [--decision-out FILE]
 #     mode: suite | suite+gate | gate
 # Examples:
 #   scripts/ragops/eval.sh suite baseline --suite-args "--batches A --repeat 2"

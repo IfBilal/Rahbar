@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Clean-cluster rehearsal (T58): from a fresh clone and a wiped minikube to a working pipeline, using only the
-# commands of README.md and k8s/README.md, with a timestamp per step. Output goes to docs/a3-evidence/F/.
+# commands of README.md and k8s/README.md, with a timestamp per step. Output goes to stdout: run it through scripts/ragops/capture.sh to keep it.
 #   scripts/ragops/rehearsal.sh [source-repo-dir]
 # DESTRUCTIVE for the local cluster: it runs `minikube delete`. Results and traces already copied into the repository
 # are unaffected. Needs Ollama with the models pulled (llama3.2:3b, nomic-embed-text, ...).

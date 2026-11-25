@@ -5,7 +5,7 @@
 #
 #   scripts/ragops/job.sh sync                         # verify + update (same as the CronJob)
 #   scripts/ragops/job.sh restore -- restore academic-rules@2023-08
-#   scripts/ragops/job.sh count  -- count --json
+#   scripts/ragops/job.sh count  -- count [--doc-id ID]
 #   scripts/ragops/job.sh build-index -- build-index --collection rahbar-cand-mxbai --embed-model mxbai-embed-large
 # Environment: TAG (image tag, default dev), NS (default rahbar), WAIT=0 to skip waiting.
 set -euo pipefail

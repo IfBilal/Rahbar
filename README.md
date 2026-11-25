@@ -64,15 +64,15 @@ make cluster        # minikube start --driver=docker --cni=calico --memory=8192 
                     # minikube addons enable metrics-server ; minikube addons enable ingress
 
 # 2. The models, on the laptop (ollama-host mode). Ollama must listen where pods can reach it.
-ollama pull llama3.2:3b && ollama pull nomic-embed-text
-OLLAMA_HOST=0.0.0.0 ollama serve     # or, in another terminal: make ollama-host
+ollama pull llama3.2:3b && ollama pull nomic-embed-text   # Assignment 03 candidates also need: mxbai-embed-large all-minilm
+OLLAMA_HOST=0.0.0.0 ollama serve     # leave it running; use a second terminal for the rest (or: make ollama-host)
 
-# 3. Images: build api, ui and indexer locally and load them into minikube
+# 3. Images: build api, ui, indexer and ragops locally and load them into minikube
 make images                          # TAG=dev
 
 # 4. Apply (one command, see the order below), then wait for the index and the rollout
 kubectl apply -k k8s/overlays/dev
-kubectl wait --for=condition=complete job/indexer -n rahbar --timeout=40m
+kubectl wait --for=condition=complete job/ingest -n rahbar --timeout=40m
 kubectl rollout status deployment/api -n rahbar
 
 # 5. Ask through the Ingress
@@ -124,8 +124,8 @@ kubectl apply -f k8s/base/api.yaml -f k8s/base/ui.yaml -f k8s/base/hpa.yaml -f k
 
 | Task | Command |
 | --- | --- |
-| Re-index now, no redeploy | `kubectl create job --from=cronjob/reindex manual-reindex-1 -n rahbar` (or `make index`) |
-| Change the Job's template | `kubectl delete job indexer -n rahbar` first: a Job's pod template is immutable |
+| Re-index now, no redeploy | `kubectl create job --from=cronjob/ingest ingest-manual-1 -n rahbar` (or `make index`) |
+| Change the Job's template | `kubectl delete job ingest -n rahbar` first: a Job's pod template is immutable |
 | Evaluate through the Ingress | `make eval` (writes `eval/results.json`, exits 1 if the gate fails) |
 | Smoke test | `python3 scripts/smoke.py --api http://$(minikube ip)` |
 | Live system checks | `make system-test` (pin, policy, abstention, pod deletion) |
@@ -161,7 +161,7 @@ indexer/    the Job's image: extract, clean, chunk, embed, store (Dockerfile, te
 ui/         chat page served by nginx                            (Dockerfile, nginx.conf)
 corpus/     fetch.py, sources.yaml, MANIFEST.md (no documents)
 eval/       golden.yaml (19 questions), run_eval.py, baseline.json, results.json, fixtures/
-k8s/        base/, overlays/{dev,prod,ci}/, components/ephemeral-cluster/
+k8s/        base/, overlays/{dev,prod,ci,incluster}/, components/, and the standalone eval-job, candidate, loader-pod, coverage-job
 tests/      architecture tests over rendered manifests and code boundaries; system/ live checks
 scripts/    check_submission.py, e2e-kind.sh, smoke.py, chunk-sweep.sh, cache_threshold.py
 docs/       CORPUS, PIPELINE, FAILURE-ANALYSIS, ENGINEERING-NOTES, AI-USAGE, ARCHITECTURE,
@@ -203,14 +203,19 @@ release, all on Kubernetes. Team: Taimoor Shaukat (24I-3015), Muhammad Bilal Tah
 behind every number and screenshot in [`docs/a3-evidence/`](docs/a3-evidence/host.md).
 
 ```bash
-make cluster && make ollama-host && make images && make apply     # see k8s/README.md (8 GB minikube, Calico)
+make cluster                                   # see k8s/README.md (8 GB minikube, Calico)
+make ollama-host                               # runs in the foreground: leave it and use a second terminal
+make images && make apply
+kubectl apply -f k8s/loader-pod.yaml && kubectl wait --for=condition=Ready pod/ragops-loader -n rahbar --timeout=180s
+kubectl exec -n rahbar ragops-loader -- mkdir -p /results/baselines     # the gate reads its baseline from here
+kubectl cp eval/results/baseline-live.json rahbar/ragops-loader:/results/baselines/live.json
 kubectl -n rahbar wait --for=condition=complete job/ingest --timeout=3600s
 ```
 
 | Part | Command | Output |
 | --- | --- | --- |
 | A ingest, verify, update | `scripts/ragops/job.sh sync` | the last log line is the run summary (`chunks_embedded`); `/data/reports/verification/<run>.md` and `.json` on the `ragops-data` volume |
-| A Batch B | `kubectl cp <batch-b dir> rahbar/ragops-loader:/data/inbox/` then `scripts/ragops/job.sh sync` (`python corpus/batch-b/build.py --out DIR` writes the 13 files) | verification report with a pass or fail and a reason per check; quarantined files under `/data/quarantine/` |
+| A Batch B | `python corpus/batch-b/build.py --out /tmp/batch-b-out`, then `kubectl cp /tmp/batch-b-out/batch-b rahbar/ragops-loader:/data/inbox/` (the folder name `batch-b` tags the files as batch B), then `scripts/ragops/job.sh sync` | verification report with a pass or fail and a reason per check; quarantined files under `/data/quarantine/` |
 | A counts, restore, delete | `scripts/ragops/job.sh count -- count`, `... restore -- restore <doc>@<ver>`, `... delete -- delete <doc>` | chunk count per document id, orphans, archived and restored versions |
 | B suite | `make eval-suite LABEL=baseline` (or `scripts/ragops/eval.sh suite baseline --suite-args "--batches A --repeat 2"`) | `/results/<timestamp>_<label>.json` with a summary table; committed under `eval/results/` |
 | B stochasticity | `python -m ragops.suite.stochasticity run1.json run2.json` | per-metric difference between two runs |
