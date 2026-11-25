@@ -24,7 +24,7 @@ pipeline or this table is wrong; decide which, fix it in a separate commit, and 
 | B01 | `Student_Handbook_Copy.pdf` | **exact duplicate** #1 of a Batch-A PDF | uniqueness `U-EXACT-DUP` | quarantined |
 | B02 | `grading-page-backup.html` | **exact duplicate** #2 of a Batch-A HTML page | uniqueness `U-EXACT-DUP` (also fails completeness: it has no date or version) | quarantined |
 | B03 | `library-lending-regulations.md` | **near-duplicate** of B09 (a different title, three words changed, whitespace re-flowed) | uniqueness `U-NEAR-DUP` (embedding cosine and shingle Jaccard) | quarantined |
-| B04 | `lab-safety-notice.pdf` | **corrupt** PDF, cut at 55% of its bytes | quality `Q-EXTRACT-FAIL` (and completeness `C-MISSING-PAGES`) | quarantined |
+| B04 | `lab-safety-notice.pdf` | **corrupt** PDF, cut at 55% of its bytes | quality `Q-EXTRACT-FAIL` (and completeness `C-MISSING-TITLE`, measured) | quarantined |
 | B05 | `exam-schedule-policy-trunc.md` | **truncated**: "Page 3 of 5" footer, a cut table row, an unclosed sentence | completeness `C-TRUNCATED` | quarantined |
 | B06 | `untitled-notes.txt` | **missing metadata**: no title, no date, no version, no catalog row | completeness `C-MISSING-TITLE`, `C-MISSING-DATE-VERSION` | quarantined |
 | B07 | `faculty-entrepreneurship-policy-2026.md` | **newer version** of the Faculty Entrepreneurship policy (series `faculty-entrepreneurship-and-technical-start-ups-policy`, 2022-05 → 2026-11), two clause values changed | recency passes `R-SUPERSEDES`; the 2022 version is re-evaluated `R-SUPERSEDED-BY` | accepted; 2022 version **archived** (restorable) |
@@ -36,7 +36,7 @@ pipeline or this table is wrong; decide which, fix it in a separate commit, and 
 | B13 | `late/…/faculty-entrepreneurship-policy-2019.md` | **older version arriving late**, after B07 is held | recency `R-NEWER-EXISTS` | quarantined |
 
 Expected totals for the first run (B01–B12): **6 quarantined** (B01–B06), **6 accepted** (B07–B12),
-**1 archived** (the 2022 policy). Failures by check: uniqueness 3, completeness 3 (B04, B05, B06),
+**1 archived** (the 2022 policy). Failures by check: uniqueness 3, completeness 4 (B02, B04, B05, B06; B02 is a duplicate whose real HTML has no date or version, measured on the cluster),
 quality 1, recency 1 (the re-evaluated 2022 version). After B13 in a later run: one more quarantine
 (recency). Report the **measured** numbers from the cluster, not these.
 

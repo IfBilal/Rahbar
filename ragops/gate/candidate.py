@@ -14,9 +14,9 @@ import yaml  # type: ignore[import-untyped]
 
 BASELINE = Path(__file__).resolve().parents[1] / "config" / "candidates" / "baseline.yaml"
 DIMENSIONS = {"embed_model": "embedding_model", "chunk_size": "chunk", "chunk_overlap": "chunk",
-              "top_k": "top_k", "prompt_version": "prompt_version", "reranker": "reranker"}
-IDENTITY = {"name", "release_id", "change", "collection", "embed_version", "relevance_floor",
-            "cache_threshold", "expected"}
+              "top_k": "top_k", "relevance_floor": "relevance_floor", "prompt_version": "prompt_version", "reranker": "reranker"}
+IDENTITY = {"name", "release_id", "change", "collection", "embed_version", "cache_threshold",
+            "expected", "calibrates_floor_for"}
 
 
 def changed_dimensions(base: dict[str, Any], cand: dict[str, Any]) -> set[str]:
@@ -38,6 +38,14 @@ def validate(cand: dict[str, Any], base: dict[str, Any] | None = None) -> list[s
     if cand.get("expected") not in ("pass", "fail"):
         problems.append("expected must be 'pass' or 'fail', written before the run")
     dims = changed_dimensions(base, cand)
+    if "relevance_floor" in dims:
+        # The floor is a per-model score-scale calibration: it may only move WITH the embedding model,
+        # and the spec must say so explicitly. It is part of that one change, not a second change.
+        if "embedding_model" not in dims:
+            problems.append("relevance_floor changed without an embed_model change")
+        elif cand.get("calibrates_floor_for") != "embed_model":
+            problems.append("relevance_floor moves with embed_model only if `calibrates_floor_for: embed_model` is set")
+        dims = dims - {"relevance_floor"}
     if len(dims) != 1:
         problems.append(f"exactly one dimension may change, found {sorted(dims) or 'none'}")
     elif cand.get("change") not in dims:

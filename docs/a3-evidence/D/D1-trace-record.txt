@@ -1,12 +1,12 @@
-$ bash -c kubectl exec -n rahbar ragops-loader -- sh -c 'grep -h "\"trace_id\":\"36675b4de5fb48c0a22b5ac5d0fd36c9\"" /traces/*.jsonl | head -1' | python3 -m json.tool
+$ bash -c kubectl exec -n rahbar ragops-loader -- sh -c 'grep -h "\"trace_id\":\"dd8f4789293f4cab937e846393442fe4\"" /traces/*.jsonl | head -1' | python3 -m json.tool
 {
     "type": "trace",
     "schema": 1,
-    "trace_id": "36675b4de5fb48c0a22b5ac5d0fd36c9",
-    "ts": "2026-11-25T11:31:55.867Z",
+    "trace_id": "dd8f4789293f4cab937e846393442fe4",
+    "ts": "2026-11-25T18:07:46.204Z",
     "route": "/api/ask",
     "status": "ok",
-    "pod": "api-6c8bc44955-q9xd6",
+    "pod": "api-58b49c9dc6-btl9x",
     "app_version": "dev",
     "release_id": "R1-nomic",
     "query": "How much is the semester parking fee for a car?",
@@ -15,12 +15,12 @@ $ bash -c kubectl exec -n rahbar ragops-loader -- sh -c 'grep -h "\"trace_id\":\
     "embedding": {
         "model": "nomic-embed-text",
         "version": "0a109f422b47",
-        "dimension": null
+        "dimension": 768
     },
     "collection": {
         "name": "rahbar",
-        "revision": "r0009",
-        "generation": "r0009"
+        "revision": "r0002",
+        "generation": "r0002"
     },
     "retrieval": {
         "top_k": 5,
@@ -84,6 +84,14 @@ $ bash -c kubectl exec -n rahbar ragops-loader -- sh -c 'grep -h "\"trace_id\":\
                 "superseded": false
             }
         ],
+        "reranker": "none",
+        "reranked_order": [
+            "campus-parking-policy@2026-09#0002-9f53036b",
+            "campus-parking-policy@2026-09#0004-02dbda67",
+            "fee-structure@2026-27#0002-95adb291",
+            "campus-parking-policy@2026-09#0001-0f528035",
+            "fee-structure@2026-27#0004-dd56fa60"
+        ],
         "from_cache": false,
         "origin_trace_id": null
     },
@@ -102,7 +110,7 @@ $ bash -c kubectl exec -n rahbar ragops-loader -- sh -c 'grep -h "\"trace_id\":\
     ],
     "prompt": {
         "sha256": "cd7348ce55ab2d8c718afa0ce2dd786d22c5650a9802887a7ffcda078fcfff30",
-        "template_version": "",
+        "template_version": "t-925b07ba4e0e",
         "chunk_ids": [
             "campus-parking-policy@2026-09#0002-9f53036b",
             "campus-parking-policy@2026-09#0004-02dbda67",
@@ -115,8 +123,8 @@ $ bash -c kubectl exec -n rahbar ragops-loader -- sh -c 'grep -h "\"trace_id\":\
         "provider": "ollama-host",
         "name": "llama3.2:3b",
         "params": {
-            "temperature": 0.0,
-            "seed": 20261122,
+            "temperature": 0.2,
+            "seed": null,
             "timeout_s": 600.0
         },
         "attempts": 1
@@ -141,26 +149,21 @@ $ bash -c kubectl exec -n rahbar ragops-loader -- sh -c 'grep -h "\"trace_id\":\
         }
     },
     "latency_ms": {
-        "total": 87109.8,
-        "retrieve": 12.2,
-        "generate": 87097.1
+        "total": 174615.3,
+        "retrieve": 33.2,
+        "generate": 174381.3
     },
     "cache": {
-        "enabled": false,
+        "enabled": true,
         "hit": false,
-        "similarity": null,
-        "scope": null
+        "similarity": -1.0,
+        "scope": "r0002:nomic-embed-text:25b1cd7d78"
     },
     "tokens": {
         "in": 985,
         "out": 107
     },
-    "eval": {
-        "run_id": "suite-20261125T101514Z-1",
-        "label": "drift-AB",
-        "seed": 20261122,
-        "bypass_cache": true
-    }
+    "eval": null
 }
 
-[exit 0 at 2026-11-25T11:43:25 UTC]
+[exit 0 at 2026-11-25T18:11:25 UTC]

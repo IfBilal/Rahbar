@@ -132,6 +132,7 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
             scope = cache_scope(retriever.generation, provider.name, settings)  # type: ignore[attr-defined]
             cache.observe(scope)
             vector = embed(question)
+            note(dimension=len(vector))
             hit, similarity = cache.lookup(scope, vector)
             m.record_cache(hit is not None)
             turn["cache_similarity"] = round(similarity, 4)
@@ -163,6 +164,11 @@ def answer_question(question: str, retriever: Retriever, provider: LLMProvider,
     if passages:
         m.TOP1_SIMILARITY.observe(passages[0].score)
     note(passages=passages, retrieve_ms=turn["retrieval_ms"])
+    if embed is not None and vector is None:   # the embedder memoises, so this is not a second call
+        try:
+            note(dimension=len(embed(question)))
+        except Exception:
+            pass
 
     # relevance floor: nothing relevant enough means an honest abstention, no model call
     relevant = [p for p in passages if p.score >= settings.relevance_floor]

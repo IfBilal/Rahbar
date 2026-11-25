@@ -75,5 +75,26 @@ Memory limit / peak: api 3.4x, chroma 5.2x, redis 28x, ui 32x, indexer 1.49x (wa
 
 - coverage Job, the two ingest init containers, api CPU under sustained load beyond A2 (EVAL peak is only 9m), redis near its
   `maxmemory`, the eval Job doing model work, Ollama (host, out of scope).
-- Per section 10 step 5, a re-run with the final values to confirm no OOMKilled and no throttling is still to be done when the
-  cluster is free.
+- Per section 10 step 5, a re-run with the final values is now partly done, see the next section. Still not measured: the two ingest
+  init containers, redis near `maxmemory`, the eval Job doing model work.
+
+## Re-sample on the rebuilt cluster (2026-11-25, 18:14-18:25 UTC)
+
+The cluster was rebuilt and the stack applied from the working tree, so the limits in force are the ones in the table ("Request
+now" / "Limit now"; checked on the coverage pod: 100m / 128Mi request, 500m / 384Mi limit). Pod-level `kubectl top pods -n rahbar`
+(not per container), 5 s apart, raw: `docs/a3-evidence/F/F5-resample-top.txt`. This is a short sample, not a load test, and one
+CPU-only host shared with other work.
+
+| Workload | What ran | Measured peak (CPU m / Mi) | Against the limit |
+|---|---|---|---|
+| coverage Job | the real job, 20 s start to finish, exit 0 (`COVERAGE OK`, share 0.905) | 73 / 24 (one sample: metrics-server's 15 s resolution caught it once) | 500m / 384Mi: 15 % and 6 % |
+| api (3 pods) | 4 simultaneous questions (Ollama serialised them: 178, 343, 502, 618 s, all HTTP 200) | 18 / 75 per pod | 500m / 256Mi: 4 % and 29 % |
+| chroma | same window | 4 / 49 | 500m / 512Mi |
+| redis | same window | 23 / 4 | 250m / 256Mi |
+| ui | same window | 1 / 2 | 100m / 64Mi |
+
+No pod restarted and none was OOMKilled (`restartCount 0` on every pod after the burst). Throttling was not measured (no
+`container_cpu_cfs_throttled` source here); with peaks far below the CPU limits it is not expected. The api CPU peak (18m) is
+still below the A2 startup peak (151m), so that remains the figure the CPU request is based on. The api memory peak (75Mi) equals
+the earlier measurement (75Mi). Chroma shows 49Mi steady here against 97Mi before: this cluster holds one index (558
+chunks), the earlier cluster two. The ingest Job was not re-sampled.

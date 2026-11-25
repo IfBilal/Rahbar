@@ -216,3 +216,15 @@ def test_a_non_ascii_token_header_is_just_a_wrong_token_not_a_500(app_client) ->
     ok = client.post("/api/ask", json={"question": "What is the attendance rule?"},
                      headers={"X-Eval-Token": "café".encode("latin-1")})
     assert ok.status_code == 200
+
+
+def test_trace_has_reranked_order_dimension_and_template_version(app_client) -> None:
+    client, app, tdir = app_client
+    app.state.retriever.embed_query = lambda q: [0.1] * 768
+    client.post("/api/ask", json={"question": "What is the attendance rule?"})
+    rec = traces(tdir)[-1]
+    r = rec["retrieval"]
+    assert r["reranker"] == "none"
+    assert r["reranked_order"] == [c["chunk_id"] for c in r["candidates"]]
+    assert rec["embedding"]["dimension"] == 768
+    assert rec["prompt"]["template_version"].startswith("t-")

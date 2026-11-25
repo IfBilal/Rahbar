@@ -67,6 +67,7 @@ def test_summary_counts_and_percentiles(tmp_path, capsys) -> None:
     assert s["abstention_rate"] == round(1 / 3, 4) and s["cache_hit_rate"] == round(1 / 3, 4)
     assert s["guardrail_actions"] == {"injection:neutralised": 1}
     assert len(summary.load(traces, "2026-11-26T10:01:00Z", None)) == 2
+    assert len(summary.load(traces, None, None, None, "2026-11-26T10:01:00Z")) == 1
     assert summary.main(["--traces", str(traces)]) == 0
     assert summary.main(["--traces", str(traces), "--route", "/nope"]) == 3
 
