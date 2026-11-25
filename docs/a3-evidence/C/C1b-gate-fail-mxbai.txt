@@ -1,0 +1,17 @@
+$ bash -c kubectl get job eval -n rahbar; kubectl logs -n rahbar job/eval --tail=12
+NAME   STATUS   COMPLETIONS   DURATION   AGE
+eval   Failed   0/1           75m        75m
+skipped 4 question(s): g027 (requires batch ['B'] not ingested), g028 (requires batch ['B'] not ingested), g029 (requires batch ['B'] not ingested), g030 (requires batch ['B'] not ingested)
+RESULT=/results/20261125T083132Z_cand-mxbai.json
+result file: /results/20261125T083132Z_cand-mxbai.json
+RULE                BASELINE  CANDIDATE  VERDICT  DETAIL
+recall5_drop          0.8000     0.8500  PASS     component.recall@5 0.85 is 0.0000 below baseline 0.8 (limit 0.02)
+abstention            1.0000     0.8333  FAIL     endpoint.abstention_correctness 0.8333 vs baseline 1.0 (tolerance 0.0)
+citation_validity     1.0000     1.0000  PASS     endpoint.citation_validity 1.0 vs minimum 0.95
+faithfulness_min      0.9474     0.9474  PASS     endpoint.faithfulness 0.9474 vs minimum 0.89
+p95_latency         153.0400   190.8700  PASS     endpoint.latency_p95_s 190.87 vs maximum 225.0
+
+GATE FAILED
+RESULT=GATE_FAIL decision=/results/20261125T083132Z_cand-mxbai.decision.json
+
+[exit 0 at 2026-11-25T09:46:53 UTC]
