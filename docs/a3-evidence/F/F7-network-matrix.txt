@@ -1,0 +1,28 @@
+$ scripts/ragops/netmatrix.sh
+--- from a pod labelled app=ragops-eval
+api:8000                     allowed
+api-candidate:8000           allowed
+192.168.49.1:11434           allowed
+chroma:8000                  DENIED (TimeoutError)
+redis:6379                   DENIED (TimeoutError)
+ui:8080                      DENIED (TimeoutError)
+--- from a pod labelled app=api-candidate
+chroma:8000                  allowed
+redis:6379                   DENIED (TimeoutError)
+192.168.49.1:11434           allowed
+api:8000                     DENIED (TimeoutError)
+--- from a pod labelled app=ui
+chroma:8000                  DENIED (TimeoutError)
+redis:6379                   DENIED (TimeoutError)
+api:8000                     allowed
+--- from a pod labelled app=api
+chroma:8000                  allowed
+redis:6379                   allowed
+192.168.49.1:11434           allowed
+--- from a pod labelled app=ragops-loader
+api:8000                     DENIED (TimeoutError)
+chroma:8000                  DENIED (TimeoutError)
+redis:6379                   DENIED (TimeoutError)
+192.168.49.1:11434           DENIED (TimeoutError)
+
+[exit 0 at 2026-11-25T10:45:43 UTC]

@@ -1230,3 +1230,603 @@ eval-856z6                       eval     1m    29Mi
 ragops-loader                    loader   1m    1Mi    
 redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
 ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:36:14Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    74Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    70Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   1m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:36:24Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    74Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    70Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   1m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:36:35Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   7m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:36:45Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   7m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:36:55Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   7m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:37:05Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   7m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:37:15Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   7m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:37:26Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   7m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:37:36Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:37:46Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:37:56Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:38:06Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:38:16Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:38:27Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:38:37Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    70Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:38:47Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    70Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:38:57Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    70Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:39:07Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    70Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:39:17Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    70Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:39:27Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    70Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:39:38Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    98Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:39:48Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    98Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:39:58Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    98Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:40:08Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    98Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:40:18Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    98Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:40:28Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    98Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:40:39Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:40:49Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:40:59Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:41:09Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:41:19Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:41:29Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:41:40Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    74Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:41:50Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    74Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:42:00Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    74Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:42:10Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    74Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:42:20Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    74Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:42:30Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:42:40Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:42:51Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:43:01Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:43:11Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:43:21Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:43:31Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:43:41Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:43:52Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:44:02Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:44:12Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:44:22Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      4m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     0m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    13m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:44:32Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   1m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:44:42Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   1m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:44:53Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   1m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:45:03Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   1m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:45:13Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   1m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:45:23Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      4m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   2m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   1m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    12m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:45:33Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   3m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:45:43Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   3m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:45:54Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   3m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:46:04Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   3m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
+2026-11-25T10:46:14Z
+api-6c8bc44955-b7xgn             api      3m    72Mi   
+api-6c8bc44955-q9xd6             api      3m    72Mi   
+api-6c8bc44955-s6qc6             api      3m    73Mi   
+api-candidate-6cc5b7b76b-f9pwr   api      3m    69Mi   
+chroma-0                         chroma   3m    97Mi   
+eval-856z6                       eval     1m    29Mi   
+ragops-loader                    loader   0m    1Mi    
+redis-b8d9d4b69-wg8cb            redis    14m   4Mi    
+ui-b84f8ffd9-f5kt6               ui       1m    2Mi    
