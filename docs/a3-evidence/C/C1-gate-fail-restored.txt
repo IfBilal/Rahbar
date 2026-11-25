@@ -1,0 +1,13 @@
+$ scripts/ragops/eval.sh gate cand-llama1b --candidate /results/20261125T074817Z_cand-llama1b.json --baseline /results/baselines/live.json
+job/eval started: mode=gate label=cand-llama1b target=http://api:8000
+RULE                BASELINE  CANDIDATE  VERDICT  DETAIL
+recall5_drop          0.8000     0.6000  FAIL     component.recall@5 0.6 is 0.2000 below baseline 0.8 (limit 0.02)
+abstention            1.0000     1.0000  PASS     endpoint.abstention_correctness 1.0 vs baseline 1.0 (tolerance 0.0)
+citation_validity     1.0000     1.0000  PASS     endpoint.citation_validity 1.0 vs minimum 0.95
+faithfulness_min      0.9474     0.8571  FAIL     endpoint.faithfulness 0.8571 vs minimum 0.89
+p95_latency         153.0400    87.7900  PASS     endpoint.latency_p95_s 87.79 vs maximum 225.0
+
+GATE FAILED
+RESULT=GATE_FAIL decision=/results/20261125T074817Z_cand-llama1b.decision.json
+
+[exit 1 at 2026-11-25T11:45:09 UTC]

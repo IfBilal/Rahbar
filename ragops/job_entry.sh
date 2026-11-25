@@ -10,7 +10,7 @@
 #   BASELINE_RESULT   defaults to /results/baselines/live.json
 #   CANDIDATE_RESULT  only for MODE=gate
 #   SUITE_ARGS        extra run_suite arguments, e.g. "--batches A --repeat 2"
-#   GATE_CONFIG, RESULTS_DIR, OLLAMA_URL
+#   GATE_CONFIG, RESULTS_DIR, OLLAMA_URL, DECISION_OUT (optional: where to write the decision)
 set -u
 MODE=${MODE:-suite+gate}
 RESULTS_DIR=${RESULTS_DIR:-/results}
@@ -36,7 +36,9 @@ if [ "$MODE" != "gate" ]; then
 fi
 
 [ -n "$CANDIDATE" ] || finish INFRA_ERROR "MODE=gate needs CANDIDATE_RESULT" 2
-DECISION="${CANDIDATE%.json}.decision.json"
+# DECISION_OUT lets a demo write its decision elsewhere: release.sh trusts <result>.decision.json, so a demo with
+# relaxed thresholds must never overwrite the real one
+DECISION="${DECISION_OUT:-${CANDIDATE%.json}.decision.json}"
 python -m ragops.gate.apply --baseline "$BASELINE_RESULT" --candidate "$CANDIDATE" \
     --config "$GATE_CONFIG" --decision-out "$DECISION" --git-sha "${GIT_SHA:-}"
 rc=$?

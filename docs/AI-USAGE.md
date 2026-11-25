@@ -100,3 +100,9 @@ the report's AI statement. Status of each claim is stated as it is, including wh
    tied to the evaluated collection and embedding version, a mistyped `--dryrun` that would have released for real,
    an unquoted candidate name, and a Job timeout reported as success; manifest tests that an allow-all ingress rule
    would have slipped past. See `docs/a3-evidence/F/F3-release-hardened-checks.txt`.
+6. **Our own demo script overwrote a real gate decision (25 Nov).** `scripts/ragops/gate-demo.sh` (the ConfigMap-edit
+   demo) re-ran the gate with relaxed thresholds against the rejected candidate's result, and the Job wrote its PASS to
+   `<result>.decision.json`, the file `release.sh` trusts: for a moment `cand-llama1b` would have been releasable. We
+   caught it from the output, re-ran the gate with the committed thresholds (FAIL again,
+   `docs/a3-evidence/C/C1-gate-fail-restored.txt`), and changed the Job entry script and the demo so demo decisions go to
+   `DECISION_OUT=/results/gate-demo.decision.json`.

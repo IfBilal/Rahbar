@@ -1,0 +1,16 @@
+$ bash -c scripts/ragops/eval.sh gate cand-minilm --candidate /results/20261125T054522Z_cand-minilm.json --baseline /results/baselines/live.json; echo "eval.sh exit code: $?"; kubectl get job eval -n rahbar
+job/eval started: mode=gate label=cand-minilm target=http://api:8000
+RULE                BASELINE  CANDIDATE  VERDICT  DETAIL
+recall5_drop          0.8000     0.8000  PASS     component.recall@5 0.8 is 0.0000 below baseline 0.8 (limit 0.02)
+abstention            1.0000     1.0000  PASS     endpoint.abstention_correctness 1.0 vs baseline 1.0 (tolerance 0.0)
+citation_validity     1.0000     1.0000  PASS     endpoint.citation_validity 1.0 vs minimum 0.95
+faithfulness_min      0.9474     0.9444  PASS     endpoint.faithfulness 0.9444 vs minimum 0.89
+p95_latency         153.0400   175.3500  PASS     endpoint.latency_p95_s 175.35 vs maximum 225.0
+
+GATE PASSED
+RESULT=GATE_PASS decision=/results/20261125T054522Z_cand-minilm.decision.json
+eval.sh exit code: 0
+NAME   STATUS     COMPLETIONS   DURATION   AGE
+eval   Complete   1/1           3s         6s
+
+[exit 0 at 2026-11-25T11:43:50 UTC]
