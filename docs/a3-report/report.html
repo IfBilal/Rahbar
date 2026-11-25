@@ -30,9 +30,6 @@
   <link rel="stylesheet" href="report.css" />
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">RAHBAR RAGOps report</h1>
-</header>
 <h1
 id="rahbar-ragops-operating-a-grounded-rag-pipeline-on-kubernetes">RAHBAR
 + RAGOps: operating a grounded RAG pipeline on Kubernetes</h1>
@@ -41,11 +38,12 @@ id="rahbar-ragops-operating-a-grounded-rag-pipeline-on-kubernetes">RAHBAR
 Tahir (24I-3166)</strong>. Repository: <a
 href="https://github.com/IfBilal/Rahbar"
 class="uri">https://github.com/IfBilal/Rahbar</a> · submitted commit:
-<code>«MEASURE: git SHA»</code> · every number below is from a run on
-one CPU-only laptop (<code>docs/a3-evidence/host.md</code>; no GPU, so
-latencies are slow and comparable only with themselves) and cites a
-committed file under <code>docs/a3-evidence/</code> (letter = Part) or
-<code>eval/results/</code>.</p>
+<code>42960ec</code> (the commit this report was built from; the final
+state is the head of the submitted branch) · every number below is from
+a run on one CPU-only laptop (<code>docs/a3-evidence/host.md</code>; no
+GPU, so latencies are slow and comparable only with themselves) and
+cites a committed file under <code>docs/a3-evidence/</code> (letter =
+Part) or <code>eval/results/</code>.</p>
 <p>We added the RAGOps layer of the reference paper (Xu et al.,
 arXiv:2506.03401; cited as 2026 in the assignment, posted 3 Jun 2025) to
 our Assignment-02 pipeline RAHBAR (FAST-NUCES rules, cited answers,
@@ -375,6 +373,12 @@ problems; B08 is the one verification cannot see.</p>
 id="part-b-the-three-level-suite-baseline-nomic-embed-text-corpus-a-git-3f22101">3.2
 Part B: the three-level suite (baseline <code>nomic-embed-text</code>,
 corpus A, git 3f22101)</h3>
+<p>The golden set <code>eval/golden.jsonl</code> has 19
+<code>human</code> questions (the group’s own Assignment-02 questions,
+written by both members before this assignment; AI help in Assignment 02
+is in <code>docs/AI-USAGE.md</code>) and 26 <code>synthetic</code> ones;
+the 11 v1 synthetic questions were checked against their pages by Claude
+Code and read by Taimoor, the 15 E4 questions by Claude Code only.</p>
 <table style="width:99%;">
 <colgroup>
 <col style="width: 14%" />
@@ -633,6 +637,14 @@ refused it (exit 1, revision unchanged,
 decision gives a dry-run plan (exit 0); a mistyped option, a name with
 odd characters, and the failed llama1b and mxbai decisions are each
 refused (exit 1).</p>
+<figure>
+<img src="fig-candidates.png" alt="Part C comparison" />
+<figcaption aria-hidden="true">Part C comparison</figcaption>
+</figure>
+<p><em>Figure 1: recall@5, faithfulness and abstention for the baseline
+and the three candidates (<code>scripts/ragops/charts.py</code> from
+<code>eval/results/*.json</code>). mxbai has the best recall and fails
+on abstention; llama1b fails on recall and faithfulness.</em></p>
 <h3 id="part-d-traces-rails-tools">3.4 Part D: traces, rails, tools</h3>
 <table>
 <colgroup>
@@ -764,10 +776,20 @@ aid, swimming pool, degree attestation</td>
 <code>E/e4-round2.jsonl</code></td>
 </tr>
 <tr>
-<td>E4 suite on the new questions</td>
-<td>«MEASURE: result of <code>--only-added E4</code> (15 questions),
-<code>eval/results/*_e4-added.md</code>»</td>
-<td></td>
+<td>E4 suite on the new questions (15 run, g008 retired)</td>
+<td>13 answerable: recall@3 0.769, <strong>recall@5 0.846</strong> (11
+of 13), MRR 0.712, faithfulness 1.000, abstention 2 of 2, citation
+validity 1.000, false abstention 0.077 (one question). Two misses, both
+reported: <strong>g032</strong> (club events end by 10 pm) abstained
+because the page that holds the answer (page 2 of the clubs PDF) was not
+retrieved; <strong>g041</strong> (lab credit hours) retrieved the wrong
+page and answered “1 credit hour” against the expected “1 or 2”, which
+the judge still called supported (a case for short answer (d)). Latency
+p95 736 s is not comparable with the baseline: part of this run was on
+battery power, around a reboot
+(<code>docs/a3-evidence/F/F9-reboot-and-disk.md</code>)</td>
+<td><code>eval/results/20261125T135400Z_e4-added.md</code>,
+<code>.json</code></td>
 </tr>
 </tbody>
 </table>
@@ -790,6 +812,14 @@ Batch-B questions (g027 to g030) retrieved, forward recall@5
 Overall recall@5 went 0.800 to 0.826 only because the question mix
 changed (23 answerable instead of 20); the common-subset figure is the
 fair one. p95 latency 153.0 to 186.4 s.</p>
+<figure>
+<img src="fig-coverage.png" alt="Part E coverage" />
+<figcaption aria-hidden="true">Part E coverage</figcaption>
+</figure>
+<p><em>Figure 2: coverage before and after the E4 questions
+(<code>E/E1-coverage-before.txt</code>,
+<code>E/E2-coverage-after.txt</code>,
+<code>E/E2-coverage-after-round2.txt</code>).</em></p>
 <h3 id="part-f-kubernetes">3.6 Part F: Kubernetes</h3>
 <table>
 <colgroup>
@@ -866,9 +896,19 @@ redis rollouts completed</td>
 <code>F/F5-apply-measured-resources.txt</code></td>
 </tr>
 <tr>
-<td>Clean-cluster rehearsal</td>
-<td>«MEASURE: time to rebuild from a clean cluster»</td>
-<td></td>
+<td>Clean-cluster rehearsal (<code>scripts/ragops/rehearsal.sh</code>:
+fresh clone of <code>f3afd60</code>, <code>minikube delete</code>,
+README commands only)</td>
+<td><strong>2,909 s (48.5 min) from the clone to a working
+pipeline</strong>, exit 0: tests 145+182+14+66+143 passed; cluster 5.6
+min; four images from the real Dockerfiles 7.9 min; first ingest
+(downloads and checks the corpus, then 9 documents, 532 chunks, 0
+quarantined) 20 min; the API answered the withdrawal question and
+declined the hostel fee; <code>make eval-demo</code> (3-question
+evaluation Job) 7.2 min. The Ingress controller image was still
+downloading, so questions went through a port-forward to the
+Service</td>
+<td><code>F/F10-clean-cluster-rehearsal.txt</code></td>
 </tr>
 </tbody>
 </table>
@@ -976,22 +1016,78 @@ history, <code>rollout undo</code></td>
 </table>
 <h2 id="contribution-and-ai-statement">5. Contribution and AI
 statement</h2>
-<p>Git history only
-(<code>git log --format='%an' | sort | uniq -c</code>,
-<code>git shortlog -sn</code>, at <code>0b98546</code>; later commits
-are Taimoor’s): 170 commits <code>T361</code> and 7
-<code>Taimoor Shaukat</code> (one account, 177); 48 <code>IfBilal</code>
-and 16 <code>8BitNinja</code> (one email, 64). Commits touching each
-path (Bilal / Taimoor): <code>ragops/</code> 2 / 19;
-<code>indexer/pipeline/</code> 3 / 9; <code>k8s/</code> 1 / 24;
-<code>scripts/ragops/</code> 1 / 18; <code>api/app/</code> 11 / 22;
-<code>docs/a3-ragops/</code> 7 / 1; <code>corpus/batch-b/</code> 1 / 0.
-A commit author is the configured git user, not necessarily who wrote
-the change. <strong>Bilal merged PR #24 (<code>a9a845b</code>)
-himself.</strong> He has not reviewed the 11 synthetic golden questions
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Taimoor Shaukat (24I-3015)</th>
+<th>Muhammad Bilal Tahir (24I-3166)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plan, contracts, paper digest (<code>docs/a3-ragops/</code>)</td>
+<td>reviewed; hand-off executed</td>
+<td>wrote, with an AI chat assistant (7 commits)</td>
+</tr>
+<tr>
+<td>Part A code: verify, incremental update, lake, ledger, ops; Batch B
+fixtures</td>
+<td>ran on the cluster; found and fixed 3 bugs (embedding-window
+overflow, Chroma start race, count flag)</td>
+<td>wrote and unit-tested (3 commits to <code>indexer/pipeline/</code>
+against Taimoor’s 9)</td>
+</tr>
+<tr>
+<td>Parts B, C, E code: suite, gate, coverage, trace tools</td>
+<td>ran every measurement; fixed 4 integration bugs; derived the two
+thresholds; judge and coverage labels with Claude Code</td>
+<td>wrote and unit-tested (2 commits to <code>ragops/</code> against
+Taimoor’s 19)</td>
+</tr>
+<tr>
+<td>Part D: API traces, <code>/api/retrieve</code>, eval headers</td>
+<td>token guard, metrics series, <code>trace.show</code> prompt
+output</td>
+<td>wrote traces, retrieval endpoint, release id (11 commits to
+<code>api/app/</code> against Taimoor’s 22)</td>
+</tr>
+<tr>
+<td>Part F: Kubernetes objects, scripts, CI changes, evidence runs,
+rehearsal</td>
+<td>wrote all (24 commits to <code>k8s/</code>, 18 to
+<code>scripts/ragops/</code>)</td>
+<td>merged PR #24; has not reviewed the later work (1 commit each)</td>
+</tr>
+<tr>
+<td>Data: golden set, pairs, live queries</td>
+<td>reviewed against the pages with Claude Code; read the 11 synthetic
+questions</td>
+<td>first drafts with the AI assistant; the Assignment-02 questions are
+both members’</td>
+</tr>
+<tr>
+<td>Report, README, demo runbook</td>
+<td>wrote with Claude Code</td>
+<td>not yet reviewed</td>
+</tr>
+</tbody>
+</table>
+<p>Commit counts are from git history (<code>git shortlog -sn</code>, at
+<code>0b98546</code>; later commits are Taimoor’s): <code>T361</code>
+and <code>Taimoor Shaukat</code> are one person (177 commits),
+<code>IfBilal</code> and <code>8BitNinja</code> another (64). A commit
+author is the configured git user, not necessarily who wrote the change.
+<strong>Bilal merged PR #24 (<code>a9a845b</code>) himself.</strong> He
+has not reviewed the synthetic golden questions
 (<code>docs/AI-USAGE.md</code> item 4); both members must read the
-other’s half before the demo. The questions were read by Taimoor: his
-statement, recorded by Claude Code in
+other’s half before the demo. The v1 synthetic questions were read by
+Taimoor: his statement, recorded by Claude Code in
 <code>docs/a3-evidence/synthetic-spot-check.md</code>.</p>
 <p><strong>AI statement.</strong> Claude Code (on both laptops) and an
 AI chat assistant (planning and first drafts, Bilal’s laptop) drafted
@@ -1092,12 +1188,23 @@ alt="E2" />
 alt="F1" />
 <figcaption aria-hidden="true">F1</figcaption>
 </figure>
+<figure>
+<img src="../a3-evidence/F/screenshots/F1-namespace-overview-2.png"
+alt="F1 continued" />
+<figcaption aria-hidden="true">F1 continued</figcaption>
+</figure>
 <h3 id="f2-logs-of-the-completed-ingestion-job">F2 logs of the completed
 ingestion Job</h3>
 <figure>
-<img src="../a3-evidence/F/screenshots/F2-ingest-first-run.png"
+<img src="../a3-evidence/F/screenshots/F2-ingest-job-full-log.png"
 alt="F2" />
 <figcaption aria-hidden="true">F2</figcaption>
+</figure>
+<h3 id="f3-logs-of-a-completed-evaluation-job">F3 logs of a completed
+evaluation Job</h3>
+<figure>
+<img src="../a3-evidence/F/screenshots/F3-eval-job-log.png" alt="F3" />
+<figcaption aria-hidden="true">F3</figcaption>
 </figure>
 <h3 id="f4-gate-result-changing-after-a-configmap-edit">F4 gate result
 changing after a ConfigMap edit</h3>

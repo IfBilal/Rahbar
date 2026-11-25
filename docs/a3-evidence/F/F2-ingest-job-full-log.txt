@@ -1,0 +1,15 @@
+$ bash -c kubectl get job ingest -n rahbar; echo; echo "--- init container fetch-corpus (last lines)"; kubectl logs -n rahbar job/ingest -c fetch-corpus --tail=3 | cut -c1-200; echo "--- init container seed-inbox"; kubectl logs -n rahbar job/ingest -c seed-inbox | cut -c1-200; echo "--- container indexer (the sync summary)"; kubectl logs -n rahbar job/ingest -c indexer | tail -3 | cut -c1-600
+NAME     STATUS     COMPLETIONS   DURATION   AGE
+ingest   Complete   1/1           19m        73m
+
+--- init container fetch-corpus (last lines)
+
+9 documents in corpus/raw, manifest written to corpus/MANIFEST.md
+corpus matches the committed MANIFEST.md
+--- init container seed-inbox
+{"type": "seed", "copied": 9, "already_seeded": false}
+--- container indexer (the sync summary)
+{"logger":"rahbar.indexer","msg":"chroma is up"}
+{"chunks_deleted": 0, "chunks_embedded": 532, "chunks_reused": 0, "chunks_written": 532, "command": "sync", "docs_deleted": 0, "docs_new": 9, "docs_quarantined": 0, "docs_renamed": 0, "docs_seen": 9, "docs_superseded": 1, "docs_unchanged": 0, "docs_updated": 0, "exit": 0, "indexes": {"rahbar": {"chunks_deleted": 0, "chunks_embedded": 532, "chunks_written": 532, "revision": "r0001", "revision_bumped": true}}, "repairs": 0, "run_id": "ingest-20261125T153508Z-r5tl", "schema": 1, "seconds": 1031.67, "type": "ingest_summary", "verification_embeddings": 72}
+
+[exit 0 at 2026-11-25T16:45:52 UTC]

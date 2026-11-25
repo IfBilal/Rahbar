@@ -1,7 +1,7 @@
 # RAHBAR + RAGOps: operating a grounded RAG pipeline on Kubernetes
 
 **CS4032 Assignment 03 (RAGOps), Fall 2026.** Team: **Taimoor Shaukat (24I-3015)** and **Muhammad Bilal Tahir (24I-3166)**.
-Repository: <https://github.com/IfBilal/Rahbar> · submitted commit: `«MEASURE: git SHA»` · every number below is from a run on one CPU-only laptop (`docs/a3-evidence/host.md`; no GPU, so latencies are slow and comparable only with themselves) and cites a committed file under `docs/a3-evidence/` (letter = Part) or `eval/results/`.
+Repository: <https://github.com/IfBilal/Rahbar> · submitted commit: `42960ec` (the commit this report was built from; the final state is the head of the submitted branch) · every number below is from a run on one CPU-only laptop (`docs/a3-evidence/host.md`; no GPU, so latencies are slow and comparable only with themselves) and cites a committed file under `docs/a3-evidence/` (letter = Part) or `eval/results/`.
 
 We added the RAGOps layer of the reference paper (Xu et al., arXiv:2506.03401; cited as 2026 in the assignment, posted 3 Jun 2025) to our Assignment-02 pipeline RAHBAR (FAST-NUCES rules, cited answers, abstains when the documents do not cover a question): a verification and incremental-update lifecycle for the data (**Batch A**: nine public documents, 279 PDF pages plus 2 web pages, 532 chunks; **Batch B**: thirteen files with planted problems (eleven fictional, two byte copies of Batch-A documents)), a three-level offline suite, a configurable release gate, a trace and metrics for every query, a coverage check, and a gated rolling release on Kubernetes. Ingestion, evaluation and coverage are Jobs; data, traces and results are on PersistentVolumeClaims; thresholds are a ConfigMap.
 
@@ -57,6 +57,8 @@ Failures by check, first Batch-B run: completeness 4, uniqueness 3, quality 1, r
 
 ### 3.2 Part B: the three-level suite (baseline `nomic-embed-text`, corpus A, git 3f22101)
 
+The golden set `eval/golden.jsonl` has 19 `human` questions (the group's own Assignment-02 questions, written by both members before this assignment; AI help in Assignment 02 is in `docs/AI-USAGE.md`) and 26 `synthetic` ones; the 11 v1 synthetic questions were checked against their pages by Claude Code and read by Taimoor, the 15 E4 questions by Claude Code only.
+
 | Level | Metric | Value (N) | | Level | Metric | Value (N) |
 |---|---|---|---|---|---|---|
 | module | paraphrase / unrelated cosine, gap | 0.823 / 0.497, 0.327 (20) | | endpoint | faithfulness (judge / proxy) | 0.947 / 1.000 (20) |
@@ -94,6 +96,10 @@ Source `C/comparison.md`; decisions `eval/results/*_cand-*.decision.json`; gate 
 
 `release.sh` hardening (`F/F3-release-hardened-checks.txt`): a fresh passing decision gives a dry-run plan (exit 0); a mistyped option, a name with odd characters, and the failed llama1b and mxbai decisions are each refused (exit 1).
 
+![Part C comparison](fig-candidates.png)
+
+*Figure 1: recall@5, faithfulness and abstention for the baseline and the three candidates (`scripts/ragops/charts.py` from `eval/results/*.json`). mxbai has the best recall and fails on abstention; llama1b fails on recall and faithfulness.*
+
 ### 3.4 Part D: traces, rails, tools
 
 | Trace of the B08 parking question (`D/D4-injection-rail-b08.txt`) | |
@@ -117,11 +123,15 @@ Source `C/comparison.md`; decisions `eval/results/*_cand-*.decision.json`; gate 
 | Uncovered (17 queries) | late bus, financial aid, clubs in classrooms, retake exam (2 queries each); one each: society size, medals, cafeteria, F vs FA, lab credit hours, swimming pool, cum laude, plagiarism, degree attestation | same |
 | E4 round 1: 8 new golden questions (g031-g038: clubs, transport, scholarships, two absent topics) | coverage **0.595 to 0.738** (out-of-domain 0.286 to 0.714), still below 0.85: `COVERAGE GAP`, exit 1 | `E/E2-coverage-after.txt`, `E/e4-questions.draft.jsonl` |
 | E4 round 2: 7 more (g039-g045: medals, FA grade, lab credit hours, retake, late exam, cum laude, cheating in a project) | coverage **0.905** (in-domain 1.000, out-of-domain 0.714): `COVERAGE OK`, Job `Complete`; tau -0.05 gives 0.976, +0.05 gives 0.690. Still uncovered: late bus, financial aid, swimming pool, degree attestation | `E/E2-coverage-after-round2.txt`, `E/e4-round2.jsonl` |
-| E4 suite on the new questions | «MEASURE: result of `--only-added E4` (15 questions), `eval/results/*_e4-added.md`» | |
+| E4 suite on the new questions (15 run, g008 retired) | 13 answerable: recall@3 0.769, **recall@5 0.846** (11 of 13), MRR 0.712, faithfulness 1.000, abstention 2 of 2, citation validity 1.000, false abstention 0.077 (one question). Two misses, both reported: **g032** (club events end by 10 pm) abstained because the page that holds the answer (page 2 of the clubs PDF) was not retrieved; **g041** (lab credit hours) retrieved the wrong page and answered "1 credit hour" against the expected "1 or 2", which the judge still called supported (a case for short answer (d)). Latency p95 736 s is not comparable with the baseline: part of this run was on battery power, around a reboot (`docs/a3-evidence/F/F9-reboot-and-disk.md`) | `eval/results/20261125T135400Z_e4-added.md`, `.json` |
 
 The E4 questions were written by Claude Code from the uncovered topics, each checked against the page that answers it, and worded differently from the live queries; a member should spot-check them. Writing questions for the uncovered topics is what E4 asks, and it raises the share by construction: the number shows the gap closed for those topics, not that the golden set is representative.
 
 **The E1 live queries were drafted by Claude Code (header of `eval/live_queries.jsonl`) and the coverage pair labels were labelled by Claude Code (`eval/coverage-calibration.jsonl`); a member still has to spot-check both.** Tau is only as good as those labels. **Drift** (`E/E3-drift-diff.txt`, `eval/results/20261125T101514Z_drift-AB.md`; corpus A+B, 558 chunks): backward compatibility on the 25 common questions, recall@5 **0.7895 to 0.7895, 0 per-question changes**; the 4 new Batch-B questions (g027 to g030) retrieved, forward recall@5 **1.0**; g008 retired because the 2022 policy is archived. Overall recall@5 went 0.800 to 0.826 only because the question mix changed (23 answerable instead of 20); the common-subset figure is the fair one. p95 latency 153.0 to 186.4 s.
+
+![Part E coverage](fig-coverage.png)
+
+*Figure 2: coverage before and after the E4 questions (`E/E1-coverage-before.txt`, `E/E2-coverage-after.txt`, `E/E2-coverage-after-round2.txt`).*
 
 ### 3.6 Part F: Kubernetes
 
@@ -134,7 +144,7 @@ The E4 questions were written by Claude Code from the uncovered topics, each che
 | Gate result after a ConfigMap edit | Job on the stored `cand-llama1b` result: `GATE_FAIL` (exit 1); after setting `recall5_drop` 0.02 to 0.25 and `faithfulness_min` 0.89 to 0.80 in `ragops-gate`, the same manifest: `GATE_PASS` (exit 0); the image printed both times is `rahbar-ragops:dev`; thresholds restored afterwards. The demo writes to `gate-demo.decision.json`: an earlier version overwrote the real decision and was fixed (`docs/AI-USAGE.md` item 6) | `F/F4-configmap-edit-flips-gate.txt` |
 | Volumes survive pod deletion | ledger hash, 14 quarantined files, archive, 34 reports identical before and after deleting the loader, API and Chroma pods; Chroma 558 chunks again | `F/F8-pvc-survival.txt` |
 | Resources (measured peak / steady, request, limit) | api 9m/75Mi peak, 3m/72Mi steady: 100m/80Mi, 500m/256Mi (A2 startup peak 151m); chroma 8m/99Mi, 2m/97Mi: 10m/96Mi, 500m/512Mi; ingest Job 1377m/1206Mi, 1219m/824Mi: 1250m/896Mi, 2 CPU/1792Mi; eval Job 36m/30Mi, 20m/23Mi: 50m/64Mi, 1 CPU/768Mi; redis 19m/9Mi: 20m/16Mi, 250m/256Mi; ui, loader unchanged; candidate sized like the api (no separate sample); coverage Job not measured. Applied to the cluster: the api, chroma and redis rollouts completed | `F5-resources.md`, `F/F5-apply-measured-resources.txt` |
-| Clean-cluster rehearsal | «MEASURE: time to rebuild from a clean cluster» | |
+| Clean-cluster rehearsal (`scripts/ragops/rehearsal.sh`: fresh clone of `f3afd60`, `minikube delete`, README commands only) | **2,909 s (48.5 min) from the clone to a working pipeline**, exit 0: tests 145+182+14+66+143 passed; cluster 5.6 min; four images from the real Dockerfiles 7.9 min; first ingest (downloads and checks the corpus, then 9 documents, 532 chunks, 0 quarantined) 20 min; the API answered the withdrawal question and declined the hostel fee; `make eval-demo` (3-question evaluation Job) 7.2 min. The Ingress controller image was still downloading, so questions went through a port-forward to the Service | `F/F10-clean-cluster-rehearsal.txt` |
 
 ## 4. Short answers
 
@@ -164,7 +174,17 @@ The E4 questions were written by Claude Code from the uncovered topics, each che
 
 ## 5. Contribution and AI statement
 
-Git history only (`git log --format='%an' | sort | uniq -c`, `git shortlog -sn`, at `0b98546`; later commits are Taimoor's): 170 commits `T361` and 7 `Taimoor Shaukat` (one account, 177); 48 `IfBilal` and 16 `8BitNinja` (one email, 64). Commits touching each path (Bilal / Taimoor): `ragops/` 2 / 19; `indexer/pipeline/` 3 / 9; `k8s/` 1 / 24; `scripts/ragops/` 1 / 18; `api/app/` 11 / 22; `docs/a3-ragops/` 7 / 1; `corpus/batch-b/` 1 / 0. A commit author is the configured git user, not necessarily who wrote the change. **Bilal merged PR #24 (`a9a845b`) himself.** He has not reviewed the 11 synthetic golden questions (`docs/AI-USAGE.md` item 4); both members must read the other's half before the demo. The questions were read by Taimoor: his statement, recorded by Claude Code in `docs/a3-evidence/synthetic-spot-check.md`.
+| Area | Taimoor Shaukat (24I-3015) | Muhammad Bilal Tahir (24I-3166) |
+|---|---|---|
+| Plan, contracts, paper digest (`docs/a3-ragops/`) | reviewed; hand-off executed | wrote, with an AI chat assistant (7 commits) |
+| Part A code: verify, incremental update, lake, ledger, ops; Batch B fixtures | ran on the cluster; found and fixed 3 bugs (embedding-window overflow, Chroma start race, count flag) | wrote and unit-tested (3 commits to `indexer/pipeline/` against Taimoor's 9) |
+| Parts B, C, E code: suite, gate, coverage, trace tools | ran every measurement; fixed 4 integration bugs; derived the two thresholds; judge and coverage labels with Claude Code | wrote and unit-tested (2 commits to `ragops/` against Taimoor's 19) |
+| Part D: API traces, `/api/retrieve`, eval headers | token guard, metrics series, `trace.show` prompt output | wrote traces, retrieval endpoint, release id (11 commits to `api/app/` against Taimoor's 22) |
+| Part F: Kubernetes objects, scripts, CI changes, evidence runs, rehearsal | wrote all (24 commits to `k8s/`, 18 to `scripts/ragops/`) | merged PR #24; has not reviewed the later work (1 commit each) |
+| Data: golden set, pairs, live queries | reviewed against the pages with Claude Code; read the 11 synthetic questions | first drafts with the AI assistant; the Assignment-02 questions are both members' |
+| Report, README, demo runbook | wrote with Claude Code | not yet reviewed |
+
+Commit counts are from git history (`git shortlog -sn`, at `0b98546`; later commits are Taimoor's): `T361` and `Taimoor Shaukat` are one person (177 commits), `IfBilal` and `8BitNinja` another (64). A commit author is the configured git user, not necessarily who wrote the change. **Bilal merged PR #24 (`a9a845b`) himself.** He has not reviewed the synthetic golden questions (`docs/AI-USAGE.md` item 4); both members must read the other's half before the demo. The v1 synthetic questions were read by Taimoor: his statement, recorded by Claude Code in `docs/a3-evidence/synthetic-spot-check.md`.
 
 **AI statement.** Claude Code (on both laptops) and an AI chat assistant (planning and first drafts, Bilal's laptop) drafted the plans, code, tests, manifests, the synthetic golden questions, the E1 live queries, the coverage pair labels, the 16 judge labels and this report; the full list, including OpenAI Codex in Assignment 02, is in `docs/AI-USAGE.md`. Every metric, trace and screenshot comes from our runs on our cluster; the AI-made labels (judge, coverage pairs, live queries) are marked above and await a member's check.
 
@@ -214,8 +234,13 @@ Each shows the command and its output; raw text is next to each in `docs/a3-evid
 ### F1 namespace overview
 ![F1](../a3-evidence/F/screenshots/F1-namespace-overview-1.png)
 
+![F1 continued](../a3-evidence/F/screenshots/F1-namespace-overview-2.png)
+
 ### F2 logs of the completed ingestion Job
-![F2](../a3-evidence/F/screenshots/F2-ingest-first-run.png)
+![F2](../a3-evidence/F/screenshots/F2-ingest-job-full-log.png)
+
+### F3 logs of a completed evaluation Job
+![F3](../a3-evidence/F/screenshots/F3-eval-job-log.png)
 
 ### F4 gate result changing after a ConfigMap edit
 ![F4](../a3-evidence/F/screenshots/F4-configmap-edit-flips-gate.png)

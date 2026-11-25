@@ -1,0 +1,139 @@
+$ scripts/ragops/rehearsal.sh
+
+######## [+   0s] 0. a fresh clone of f3afd60 into /home/dns/rahbar-rehearsal (15:15:31 UTC)
+f3afd60 fix(indexer): the ingest Job waits for Chroma's heartbeat before writing (the Job and Chroma start together; a fast pod exhausted its retries and left a half-written index); test for the exit-code mapping and the wait
+
+######## [+   1s] 1. make install (15:15:31 UTC)
+/home/dns/rahbar-rehearsal/.venv/bin/pip install -q --upgrade pip
+/home/dns/rahbar-rehearsal/.venv/bin/pip install -q -r api/requirements-dev.txt -r indexer/requirements-dev.txt
+
+######## [+ 146s] 2. make test (no cluster, no model, no network) (15:17:56 UTC)
+145 passed, 1 skipped, 1 warning in 4.59s
+182 passed, 1 skipped in 20.31s
+14 passed in 0.12s
+66 passed in 0.88s
+143 passed in 2.00s
+
+######## [+ 177s] 3. wipe: minikube delete (15:18:27 UTC)
+* Removed all traces of the "minikube" cluster.
+
+######## [+ 200s] 4. make cluster (minikube + Calico + metrics-server + ingress) (15:18:50 UTC)
+  - Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.9
+  - Using image registry.k8s.io/ingress-nginx/controller:v1.15.1
+* Verifying ingress addon...
+* The 'ingress' addon is enabled
+node/minikube condition met
+
+######## [+ 535s] 5. Ollama on the minikube gateway (README step 2) (15:24:25 UTC)
+{"version":"0.17.6"}
+
+######## [+ 542s] 6. make images (real Dockerfiles: api, indexer, ui, ragops) (15:24:32 UTC)
+#9 DONE 0.1s
+#10 DONE 0.0s
+#11 DONE 0.0s
+#12 DONE 0.3s
+#13 naming to docker.io/library/rahbar-ragops:dev done
+#13 DONE 0.9s
+4
+
+######## [+1014s] 7. make apply (token Secret + kubectl apply -k k8s/overlays/dev) (15:32:24 UTC)
+ingress.networking.k8s.io/rahbar created
+networkpolicy.networking.k8s.io/allow-dns-egress created
+networkpolicy.networking.k8s.io/api-policy created
+networkpolicy.networking.k8s.io/candidate-policy created
+networkpolicy.networking.k8s.io/chroma-from-api-and-indexer created
+networkpolicy.networking.k8s.io/coverage-policy created
+networkpolicy.networking.k8s.io/default-deny-all created
+networkpolicy.networking.k8s.io/eval-policy created
+networkpolicy.networking.k8s.io/indexer-policy created
+networkpolicy.networking.k8s.io/loader-isolation created
+networkpolicy.networking.k8s.io/redis-from-api created
+networkpolicy.networking.k8s.io/ui-from-ingress created
+
+######## [+1016s] 8. wait for the first ingestion Job (seed from the committed sources, verify, index) (15:32:26 UTC)
+job.batch/ingest condition met
+{"chunks_deleted": 0, "chunks_embedded": 532, "chunks_reused": 0, "chunks_written": 532, "command": "sync", "docs_deleted": 0, "docs_new": 9, "docs_quarantined": 0, "docs_renamed": 0, "docs_seen": 9, "docs_superseded": 1, "docs_unchanged": 0, "docs_updated": 0, "exit": 0, "indexes": {"rahbar": {"chunks_deleted": 0, "chunks_embedded": 532, "chunks_written": 532, "revision": "r0001", "revision_bumped": true}}, "repairs
+
+######## [+2216s] 9. rollout status deployment/api (15:52:26 UTC)
+deployment "api" successfully rolled out
+
+######## [+2216s] 10. ask a question and a decline (port-forward to the Service: the Ingress controller image may still be downloading) (15:52:26 UTC)
+Q: What is the deadline to withdraw from a course?
+  answered_from_context: True | release R1-nomic | The deadline to withdraw from a course is the last day of the makeup week of every semester, as stated in section 4.25 of the Academic Rules
+Q: What is the monthly hostel fee?
+  answered_from_context: False | release R1-nomic | The documents do not cover this question.
+
+######## [+2473s] 11. the loader pod, then the baseline back onto the results volume and a reduced evaluation Job (make eval-demo) (15:56:43 UTC)
+pod/ragops-loader condition met
+scripts/ragops/eval.sh suite demo --suite-args "--batches A --levels component,endpoint --limit 3 --no-judge"
+job/eval started: mode=suite label=demo target=http://api:8000
+RAGOps suite  label=demo  2026-11-25T15:56:48Z  git=f3afd60  embed=nomic-embed-text  collection=ok: rahbar (532 chunks)  corpus=A (ledger 0f1f81...)
+LEVEL      METRIC                           VALUE              N
+component  recall@3 / recall@5              1.000 / 1.000     3
+component  MRR / nDCG@5                     1.000 / 1.000     3
+component  noisy recall@5 (delta)           1.000 (0.000) 3
+endpoint   faithfulness (judge / proxy)     - / 1.000     3
+endpoint   abstention correctness           -                  0
+endpoint   false abstention rate            0.000              3
+endpoint   citation validity                1.000              3
+endpoint   latency p50 / p95 (s)            124.4 / 191.0     3
+skipped 10 question(s): g027 (requires batch ['B'] not ingested), g028 (requires batch ['B'] not ingested), g029 (requires batch ['B'] not ingested), g030 (requires batch ['B'] not ingested), g031 (re
+RESULT=/results/20261125T155648Z_demo.json
+result file: /results/20261125T155648Z_demo.json
+RESULT=SUITE_DONE file=/results/20261125T155648Z_demo.json
+
+######## [+2908s] 12. namespace overview (16:03:58 UTC)
+NAME                        READY   STATUS      RESTARTS   AGE
+pod/api-695f5bc65-s9q6f     1/1     Running     0          31m
+pod/api-695f5bc65-xv5v8     1/1     Running     0          31m
+pod/api-695f5bc65-z5cwr     1/1     Running     0          31m
+pod/chroma-0                1/1     Running     0          31m
+pod/eval-k9php              0/1     Completed   0          7m13s
+pod/ingest-gr5tl            0/1     Completed   0          31m
+pod/ragops-loader           1/1     Running     0          7m16s
+pod/redis-fdbcf9975-7ztz9   1/1     Running     0          31m
+pod/ui-b84f8ffd9-s5mbk      1/1     Running     0          31m
+
+NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/api      ClusterIP   10.101.36.136    <none>        8000/TCP   31m
+service/chroma   ClusterIP   10.96.24.5       <none>        8000/TCP   31m
+service/redis    ClusterIP   10.96.225.107    <none>        6379/TCP   31m
+service/ui       ClusterIP   10.100.206.188   <none>        8080/TCP   31m
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api     3/3     3            3           31m
+deployment.apps/redis   1/1     1            1           31m
+deployment.apps/ui      1/1     1            1           31m
+
+NAME                              DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-695f5bc65     3         3         3       31m
+replicaset.apps/redis-fdbcf9975   1         1         1       31m
+replicaset.apps/ui-b84f8ffd9      1         1         1       31m
+
+NAME                      READY   AGE
+statefulset.apps/chroma   1/1     31m
+
+NAME                                      REFERENCE        TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/api   Deployment/api   cpu: 5%/70%   3         8         3          31m
+
+NAME                   SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cronjob.batch/ingest   0 3 * * 0   <none>     False     0        <none>          31m
+
+NAME               STATUS     COMPLETIONS   DURATION   AGE
+job.batch/eval     Complete   1/1           7m10s      7m13s
+job.batch/ingest   Complete   1/1           19m        31m
+
+NAME                                   STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-chroma-0    Bound    pvc-6d2685bf-e8fb-40ae-9c5e-e462727c0c11   2Gi        RWO            standard       <unset>                 31m
+persistentvolumeclaim/ragops-data      Bound    pvc-29385904-ba8b-4f74-9c59-94cb40d0a47c   2Gi        RWO            standard       <unset>                 31m
+persistentvolumeclaim/ragops-results   Bound    pvc-264ea032-b057-4eba-8626-684e6b4f7a0f   512Mi      RWO            standard       <unset>                 31m
+persistentvolumeclaim/ragops-traces    Bound    pvc-b69a0fc2-b6d0-400a-9b32-3e76e681473d   1Gi        RWO            standard       <unset>                 31m
+persistentvolumeclaim/redis-data       Bound    pvc-02b86d7e-801f-4540-8ca7-2ba5fbf70339   1Gi        RWO            standard       <unset>                 31m
+
+NAME                           DATA   AGE
+configmap/kube-root-ca.crt     1      31m
+configmap/ragops-config        12     31m
+
+######## [+2909s] DONE: 2909 seconds from a fresh clone to a working pipeline (16:03:59 UTC)
+
+[exit 0 at 2026-11-25T16:03:59 UTC]

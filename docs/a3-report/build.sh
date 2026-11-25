@@ -5,7 +5,7 @@
 # page count is the page on which <div class="appendix"> begins, minus one.
 set -euo pipefail
 cd "$(dirname "$0")"
-pandoc report.md -f markdown+pipe_tables+raw_html -t html5 -s --metadata title="RAHBAR RAGOps report" -c report.css -o report.html --resource-path=../..:. 2>&1 | grep -v "^\[WARNING\] This document format requires a nonempty <title>" || true
+pandoc report.md -f markdown+pipe_tables+raw_html -t html5 -s --metadata pagetitle="RAHBAR RAGOps report" -c report.css -o report.html --resource-path=../..:. 2>&1 | grep -v "^\[WARNING\] This document format requires a nonempty <title>" || true
 weasyprint report.html report.pdf 2>/dev/null
 total=$(pdfinfo report.pdf | awk '/^Pages:/{print $2}')
 # body pages = pages before the first page whose text begins the appendix heading
