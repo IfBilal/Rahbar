@@ -54,10 +54,11 @@ spec:
             tcpSocket: {port: 6379}
             periodSeconds: 20
           # kubectl top (docs/evidence/kubectl-top-steady.txt): 9m / 10Mi; limit covers maxmemory 200mb + AOF rewrite
+          # A3 (top-eval-drift.txt): 19m / 9Mi peak, 12m / 4Mi steady
           resources:
             requests:
               cpu: 20m
-              memory: 32Mi
+              memory: 16Mi
             limits:
               cpu: 250m
               memory: 256Mi
