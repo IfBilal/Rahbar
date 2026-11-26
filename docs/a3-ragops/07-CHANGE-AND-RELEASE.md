@@ -54,6 +54,7 @@ embed_version: ""                      # filled from `ollama show` digest at bui
 chunk_size: 300                        # unchanged from baseline (only the model changes)
 chunk_overlap: 40
 top_k: 5                               # unchanged
+calibrates_floor_for: embed_model     # the floor moves WITH the embedding model; the validator rejects it otherwise
 relevance_floor: 0.0                   # CALIBRATE (see 2.3); never reuse nomic's 0.60 blindly
 cache_threshold: null                  # cache is off for the candidate
 prompt_version: same                   # unchanged
@@ -227,7 +228,7 @@ Explain why undo restores the collection and embedding: they live in the Deploym
 | Area | Cases |
 |---|---|
 | Gate | each rule type: pass, fail, exactly at limit, 1e-4 beyond; missing metric → fail; incomparable runs → exit 2; rounding; config hash changes with any threshold; threshold edit flips the outcome with the **same** result files (the F2-05 principle at unit level) |
-| Candidate spec | rejects a spec that changes more than one dimension (`change` must name exactly one and the others equal the baseline) |
+| Candidate spec | rejects a spec that changes more than one dimension (`change` must name exactly one and the others equal the baseline). `relevance_floor` is a tracked dimension: it may differ only together with `embed_model` and `calibrates_floor_for: embed_model` (a per-model calibration, part of that one change); a floor change alone is rejected |
 | Release script | refuses without a decision; refuses on a decision for another release id; refuses on a stale decision; `--dry-run` output stable |
 | Embed profiles | doc vs query preparation share the profile; unknown model → no prefix, no lowercasing, flagged in the result |
 | Manifests | the live Deployment's `env` contains the release-scoped keys; the candidate has `REDIS_URL` empty; strategy `maxSurge 1`, `maxUnavailable 0`; distinct selector labels |

@@ -241,5 +241,9 @@ def test_report_has_four_checks_per_document_and_failure_counts(env: Env) -> Non
     assert fb["quality"] == 1 and set(fb) == {"quality", "completeness", "recency", "uniqueness"}
     from pipeline.report import render_markdown
     md = render_markdown(res.verification)
-    assert "| document | quality | complete | recency | unique | outcome | reason |" in md
+    assert "| document | quality | complete | recency | unique | outcome |" in md
     assert "junk.txt" in md and "FAIL" in md and "PASS" in md
+    block = md.split("**junk.txt**")[1].split("**")[0]      # every check has a status and a reason
+    for c in ("quality", "completeness", "recency", "uniqueness"):
+        assert f"- {c}: " in block
+    assert md.count("Q-OK") >= 1 and "…" not in md

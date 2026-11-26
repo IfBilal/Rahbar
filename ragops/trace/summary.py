@@ -21,7 +21,7 @@ from ragops.suite.metrics import percentile
 
 
 def load(traces_dir: Path, since: str | None, route: str | None,
-         release: str | None = None) -> list[dict[str, Any]]:
+         release: str | None = None, until: str | None = None) -> list[dict[str, Any]]:
     rows = []
     for f in sorted(traces_dir.glob("*.jsonl*")):
         for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -32,6 +32,8 @@ def load(traces_dir: Path, since: str | None, route: str | None,
             if rec.get("type") != "trace":
                 continue
             if since and rec.get("ts", "") < since:
+                continue
+            if until and rec.get("ts", "") >= until:
                 continue
             if route and rec.get("route") != route:
                 continue
@@ -84,6 +86,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Summarise traces.")
     ap.add_argument("--traces", type=Path, required=True)
     ap.add_argument("--since")
+    ap.add_argument("--until", help="exclusive upper bound on ts (ISO 8601)")
     ap.add_argument("--route")
     ap.add_argument("--release", help="only traces of this release id, e.g. R1-nomic")
     ap.add_argument("--json", action="store_true")
@@ -91,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.traces.is_dir():
         print(f"traces directory {args.traces} not found", file=sys.stderr)
         return 2
-    rows = load(args.traces, args.since, args.route, args.release)
+    rows = load(args.traces, args.since, args.route, args.release, args.until)
     if not rows:
         print("no traces in the window", file=sys.stderr)
         return 3

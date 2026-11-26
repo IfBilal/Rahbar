@@ -130,3 +130,17 @@ def test_a_candidate_that_changes_two_things_is_rejected() -> None:
     assert any("exactly one" in p for p in validate(cand, base))
     assert any("own collection" in p for p in validate({**cand, "collection": "rahbar",
                                                          "chunk_size": 300}, base))
+
+
+def test_the_floor_moves_only_with_the_embedding_model_and_says_so() -> None:
+    from ragops.gate.candidate import validate
+    base = {"collection": "rahbar", "embed_model": "a", "relevance_floor": 0.6, "top_k": 5}
+    cand = {"name": "x", "release_id": "R9", "change": "embedding_model", "collection": "c",
+            "expected": "pass", "embed_model": "b", "relevance_floor": 0.5, "top_k": 5,
+            "calibrates_floor_for": "embed_model"}
+    assert validate(cand, base) == []
+    undeclared = {k: v for k, v in cand.items() if k != "calibrates_floor_for"}
+    assert any("calibrates_floor_for" in p for p in validate(undeclared, base))
+    floor_only = {**cand, "embed_model": "a", "change": "relevance_floor"}
+    assert any("without an embed_model" in p for p in validate(floor_only, base))
+    assert any("exactly one" in p for p in validate({**cand, "top_k": 8}, base))

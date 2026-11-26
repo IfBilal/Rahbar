@@ -200,7 +200,8 @@ data lifecycle, a three-level offline suite, a release gate, traces and metrics,
 release, all on Kubernetes. Team: Taimoor Shaukat (24I-3015), Muhammad Bilal Tahir (24I-3166). Report:
 `docs/a3-report/report.pdf`. The fresh-cluster order and the object-by-object responsibilities are in
 [`k8s/README.md`](k8s/README.md); design and plan in [`docs/a3-ragops/`](docs/a3-ragops/README.md); raw outputs
-behind every number and screenshot in [`docs/a3-evidence/`](docs/a3-evidence/host.md).
+behind every number and screenshot in [`docs/a3-evidence/`](docs/a3-evidence/host.md). Requirement-by-requirement status, caveats and what only a member can do:
+[`docs/a3-ragops/16-RUBRIC-TRACEABILITY.md`](docs/a3-ragops/16-RUBRIC-TRACEABILITY.md).
 
 ```bash
 make cluster                                   # see k8s/README.md (8 GB minikube, Calico)

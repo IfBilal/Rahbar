@@ -9,6 +9,7 @@ embed_version: "1b226e2802db"
 chunk_size: 300
 chunk_overlap: 40
 top_k: 5
+calibrates_floor_for: embed_model   # the floor is part of the embedding change (per-model score scale)
 relevance_floor: 0.25           # calibrated: docs/a3-evidence/C/C0-floor-minilm.txt (lowest best-gold score 0.2997)
 cache_threshold: null
 prompt_version: same

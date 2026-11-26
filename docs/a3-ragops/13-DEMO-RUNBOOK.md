@@ -131,10 +131,15 @@ read by `indexer/pipeline/catalog.py::_batch_from_path` (see section 3); the exa
 scripts/ragops/job.sh sync
 ```
 Evidence `A/A1-sync-batch-b.txt`: Job `ingest-sync-<ts>`; last log line is the run summary: for Batch B `docs_new 6, docs_quarantined 6,
-docs_superseded 1, docs_unchanged 9, chunks_embedded 52` on two indexes (26 + 26), `seconds 42.13`, `run_id ingest-20261125T100821Z-sgc8`,
-`revision r0002, revision_bumped true`. The log line `exit: 1 mapped to 0` means "finished, some quarantined": the Job is
+docs_superseded 1, docs_unchanged 9, chunks_embedded 26` on the one index `rahbar` (the rebuilt cluster has no candidate
+collections), `seconds 95.43`, `run_id ingest-20261125T180050Z-4znr`, `revision r0002, revision_bumped true`. The run_id and the
+seconds differ on every run; read your own from the last log line. The log line `exit: 1 mapped to 0` means "finished, some quarantined": the Job is
 Complete on purpose. (The same output shows a line `EOF marker not found` from the script's wait step; the Job still
 succeeded, cause not investigated.) Write down `run_id`.
+
+**Note, rebuilt cluster.** It has no candidate collections (the earlier runs wrote a second one per candidate). Before showing a
+release run, build the candidate's index first: `scripts/ragops/job.sh build-index -- build-index --collection <c> --embed-model <m>`
+and serve it with `scripts/ragops/candidate.sh <name>` (values in `ragops/config/candidates/<name>.yaml`).
 
 **Step 8 (2 min).** Read the verification report.
 ```bash

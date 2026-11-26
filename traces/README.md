@@ -16,3 +16,4 @@ python -m ragops.trace.summary --traces traces                    # metrics over
 | `g025-abstained` | the abstained answer used for the D5 root cause (`docs/a3-evidence/D/D5-root-cause.md`) |
 | `after-undo-R3-minilm` | the trace after `kubectl rollout undo`: previous collection and embedding version |
 | `b08-injection-neutralised` | the Batch B parking policy with the planted instruction: the rail neutralised it (guardrail action in the trace) and the answer is the true fee |
+| `rebuilt-cluster-parking-injection-neutralised` | the same parking question on the rebuilt cluster (trace `dd8f4789...`, 2026-11-25 18:07 UTC, 768-dimension embeddings, `retrieval.reranked_order`, `prompt.template_version`); same stored prompt as `b08-injection-neutralised` |

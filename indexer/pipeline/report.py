@@ -1,7 +1,7 @@
 """Verification and ingest reports (docs/a3-ragops/05 section 5, schema in 14 section 3).
 
-One JSON file per run, plus a Markdown rendering sized for a terminal screenshot: one table,
-one row per document, four status columns, a reason column. Screenshot A1 is this output.
+One JSON file per run, plus a Markdown rendering sized for a terminal screenshot: a table
+with four status columns per document, then the code and full reason of each check. Screenshot A1 is this output.
 """
 
 from __future__ import annotations
@@ -44,25 +44,26 @@ def _cell(rec: dict[str, Any]) -> str:
     return "PASS" if rec["status"] == "pass" else "FAIL"
 
 
-def render_markdown(report: dict[str, Any], reason_width: int = 60) -> str:
+def render_markdown(report: dict[str, Any]) -> str:
+    """Summary table, then per document one line per check: PASS/FAIL, code and the full reason."""
     rows = [f"# Verification report {report['run_id']}", "",
             f"embedding `{report['embed_model']}` · documents {report['summary']['documents']} · "
             f"unchanged {report['summary']['unchanged']}", "",
-            "| document | quality | complete | recency | unique | outcome | reason |",
-            "| --- | --- | --- | --- | --- | --- | --- |"]
+            "| document | quality | complete | recency | unique | outcome |",
+            "| --- | --- | --- | --- | --- | --- |"]
+    detail = ["", "## Reason for each check", ""]
     for d in report["documents"]:
         checks = d["checks"]
-        failing = [c for c in CHECKS if checks[c]["status"] == "fail"]
-        reason = (f"{checks[failing[0]]['code']}: {checks[failing[0]]['reason']}" if failing
-                  else checks["recency"]["reason"] if checks["recency"]["code"] == "R-SUPERSEDES"
-                  else "all four checks passed")
-        reason = reason if len(reason) <= reason_width else reason[:reason_width - 1] + "…"
         rows.append(f"| {d['file']} | " + " | ".join(_cell(checks[c]) for c in CHECKS)
-                    + f" | {d['outcome']} | {reason} |")
+                    + f" | {d['outcome']} |")
+        detail += [f"**{d['file']}** ({d['outcome']})"]
+        detail += [f"- {c}: {_cell(checks[c])} {checks[c]['code']}: {checks[c]['reason']}" for c in CHECKS]
+        detail.append("")
     for r in report["reevaluated"]:
-        reason = f"{r['code']}: {r['reason']}"
-        reason = reason if len(reason) <= reason_width else reason[:reason_width - 1] + "…"
-        rows.append(f"| {r['doc']} (already indexed) | – | – | FAIL | – | {r['outcome']} | {reason} |")
+        rows.append(f"| {r['doc']} (already indexed) | – | – | FAIL | – | {r['outcome']} |")
+        detail += [f"**{r['doc']}** (already indexed, {r['outcome']})",
+                   f"- recency: FAIL {r['code']}: {r['reason']}", ""]
+    rows += detail
     s = report["summary"]
     fb = s["failures_by_check"]
     rows += ["", f"**accepted {s['accepted']} · quarantined {s['quarantined']} · archived "

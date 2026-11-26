@@ -21,6 +21,7 @@ from typing import Any
 
 from .config import Settings
 from .evalctl import EvalControls
+from .services.prompt import REMINDER, SYSTEM
 
 log = logging.getLogger("rahbar.trace")
 _lock = threading.Lock()
@@ -38,6 +39,11 @@ def note(**values: Any) -> None:
     ctx = ctx_var.get()
     if ctx is not None:
         ctx.update(values)
+
+
+def template_version(settings: Settings) -> str:
+    """PROMPT_VERSION if set, else a short hash of the fixed prompt text, so it changes when the prompt does."""
+    return settings.prompt_version or "t-" + hashlib.sha256((SYSTEM + REMINDER).encode()).hexdigest()[:12]
 
 
 def prompt_hash(messages: list[dict[str, str]]) -> str:
@@ -107,14 +113,14 @@ def build(settings: Settings, *, trace_id: str, route: str, question: str, statu
     prompt: dict[str, Any] | None = None
     if messages and settings.trace_dir and settings.trace_enabled:
         try:
-            sha = store_prompt(Path(settings.trace_dir), messages, settings.prompt_version)
-            prompt = {"sha256": sha, "template_version": settings.prompt_version,
+            sha = store_prompt(Path(settings.trace_dir), messages, template_version(settings))
+            prompt = {"sha256": sha, "template_version": template_version(settings),
                       "chunk_ids": [p.chunk_id for p in (ctx.get("relevant") or [])],
                       "stored": True, "from_cache": False}
         except Exception as exc:
             log.warning("prompt not stored", extra={"error": f"{type(exc).__name__}"})
     elif messages:
-        prompt = {"sha256": prompt_hash(messages), "template_version": settings.prompt_version,
+        prompt = {"sha256": prompt_hash(messages), "template_version": template_version(settings),
                   "chunk_ids": [p.chunk_id for p in (ctx.get("relevant") or [])],
                   "stored": False, "from_cache": False}
     cache = ctx.get("cache") or {"enabled": False, "hit": False, "similarity": None, "scope": None}
@@ -139,7 +145,10 @@ def build(settings: Settings, *, trace_id: str, route: str, question: str, statu
         "retrieval": None if passages is None else {
             "top_k": settings.top_k,
             "filters": {"superseded_filter": settings.superseded_filter},
-            "candidates": candidates(passages), "from_cache": bool(cache.get("hit")),
+            "candidates": candidates(passages),
+            # no reranker: the retriever order (incl. exact-term/table assists) is the final order
+            "reranker": "none", "reranked_order": [p.chunk_id for p in passages],
+            "from_cache": bool(cache.get("hit")),
             "origin_trace_id": None},
         "guardrails": rails,
         "prompt": prompt,

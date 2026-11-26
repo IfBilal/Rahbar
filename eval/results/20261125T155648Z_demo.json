@@ -1,0 +1,319 @@
+{
+  "schema": 1,
+  "status": "complete",
+  "run_id": "suite-20261125T155648Z-1",
+  "label": "demo",
+  "started_at": "2026-11-25T15:56:48Z",
+  "finished_at": "2026-11-25T16:03:53Z",
+  "git_sha": "f3afd60",
+  "images": {
+    "api": "",
+    "ragops": ""
+  },
+  "config_hash": "27392c78f79b42df",
+  "golden_hash": "2b5a9cb039364bb6",
+  "pairs_hash": "e7c844e97c48ee7a",
+  "corpus_digest": "0f1f810c9ed48047476fac9d06a5825f56aebe3c73ff1950b4a6281d073f8331",
+  "batches": [
+    "A"
+  ],
+  "seed": 20261122,
+  "seeds": {
+    "typo": 20261123,
+    "judge": 7,
+    "e2e": 20261122,
+    "sample": 20261124
+  },
+  "profile": "full",
+  "profile_hash": "cada4e7909c171f6",
+  "target": {
+    "url": "http://api:8000",
+    "release_id": "R1-nomic",
+    "collection": "ok: rahbar (532 chunks)",
+    "revision": "r0001",
+    "embed_model": "nomic-embed-text",
+    "embed_version": "0a109f422b47",
+    "app_version": "dev"
+  },
+  "levels": {
+    "component": {
+      "n": 3,
+      "clean": {
+        "recall@3": 1.0,
+        "recall@5": 1.0,
+        "mrr": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 0.2,
+        "retrieval_ms_mean": 235.601,
+        "retrieval_ms_p95": 274.0773
+      },
+      "noisy": {
+        "recall@3": 1.0,
+        "recall@5": 1.0,
+        "mrr": 1.0,
+        "ndcg@5": 1.0,
+        "typo_rate": 0.06
+      },
+      "delta_noisy": {
+        "recall@5": 0.0,
+        "mrr": 0.0,
+        "ndcg@5": 0.0
+      },
+      "by_category": {
+        "answerable": {
+          "n": 3,
+          "recall@5": 1.0
+        },
+        "hard": {
+          "n": 0,
+          "recall@5": null,
+          "by_kind": {}
+        }
+      },
+      "top1_similarity": {
+        "min": 0.7692,
+        "p10": 0.7692,
+        "p50": 0.8301,
+        "p90": 0.8906,
+        "max": 0.8906,
+        "unanswerable_p50": null
+      }
+    },
+    "endpoint": {
+      "n": 3,
+      "n_answerable": 3,
+      "n_unanswerable": 0,
+      "faithfulness": null,
+      "faithfulness_partial": null,
+      "faithfulness_unsupported": null,
+      "faithfulness_proxy": 1.0,
+      "abstention_correctness": null,
+      "false_abstention_rate": 0.0,
+      "citation_validity": 1.0,
+      "citations_checked": 3,
+      "answered_without_citation": 0,
+      "citation_gold_hit": 1.0,
+      "latency_p50_s": 124.41,
+      "latency_p95_s": 190.99,
+      "fallback_rate": 0.0,
+      "injection_obeyed": [],
+      "tokens_in_mean": null,
+      "tokens_out_mean": null,
+      "judge": {
+        "model": null,
+        "unparseable": 0,
+        "judged": 0
+      }
+    }
+  },
+  "per_question": [
+    {
+      "id": "g001",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 24,
+          "score": 0.8906,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "grading-page.html",
+          "page": 1,
+          "score": 0.8352,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 30,
+          "score": 0.7578,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 2,
+          "score": 0.7517,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 2,
+          "score": 0.7511,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "What miinimum CGPA does an undergraduate need to avoid acdaemic warning?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "ef75faaf762b457388b2d0cf58bdf18c",
+      "category": "answerable",
+      "seconds": 107.58,
+      "cached": false,
+      "answer": "To avoid academic warning, an undergraduate needs to maintain a minimum CGPA of 2.00 [academic-rules-handbook-jun-2026.pdf / 5. Academic Assessment > Academic Warning/Probation].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0
+    },
+    {
+      "id": "g002",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 24,
+          "score": 0.7692,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 17,
+          "score": 0.7034,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 2,
+          "score": 0.6773,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 12,
+          "score": 0.6692,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 14,
+          "score": 0.6321,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "What happens if a student's CGPA says bellow 2.00 for three consecutive semesers?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "007eead26cd94f2886408663aee404dd",
+      "category": "answerable",
+      "seconds": 124.41,
+      "cached": false,
+      "answer": "If a student's CGPA stays below 2.00 for three consecutive semesters, their admission will be automatically closed [academic-rules-handbook-jun-2026.pdf / 5. Academic Assessment > Academic Warning/Probation].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0
+    },
+    {
+      "id": "g003",
+      "retrieved": [
+        {
+          "rank": 1,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 28,
+          "score": 0.8301,
+          "hit": true
+        },
+        {
+          "rank": 2,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 3,
+          "score": 0.812,
+          "hit": false
+        },
+        {
+          "rank": 3,
+          "doc": "prospectus-2026-academic-rules-and-regulations.pdf",
+          "page": 3,
+          "score": 0.7687,
+          "hit": false
+        },
+        {
+          "rank": 4,
+          "doc": "academic-rules-handbook-jun-2026.pdf",
+          "page": 22,
+          "score": 0.7514,
+          "hit": false
+        },
+        {
+          "rank": 5,
+          "doc": "grading-page.html",
+          "page": 1,
+          "score": 0.7433,
+          "hit": false
+        }
+      ],
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "rr": 1.0,
+      "ndcg@5": 1.0,
+      "noisy_query": "How many coursees can a student repeat in a summer senester?",
+      "noisy_recall@5": 1.0,
+      "trace_id": "e546d81cbc8f407aa89fcff80eaa7ec1",
+      "category": "answerable",
+      "seconds": 190.99,
+      "cached": false,
+      "answer": "A student can repeat a maximum of 2 courses in a summer semester, [academic-rules-handbook-jun-2026.pdf / 6. Rules for Summer Semester].",
+      "answered_from_context": true,
+      "citations": 1,
+      "citation_validity": 1.0,
+      "proxy": 1.0
+    }
+  ],
+  "skipped": [
+    {
+      "id": "g027",
+      "reason": "requires batch ['B'] not ingested"
+    },
+    {
+      "id": "g028",
+      "reason": "requires batch ['B'] not ingested"
+    },
+    {
+      "id": "g029",
+      "reason": "requires batch ['B'] not ingested"
+    },
+    {
+      "id": "g030",
+      "reason": "requires batch ['B'] not ingested"
+    },
+    {
+      "id": "g031",
+      "reason": "requires batch ['B'] not ingested"
+    },
+    {
+      "id": "g032",
+      "reason": "requires batch ['B'] not ingested"
+    },
+    {
+      "id": "g033",
+      "reason": "requires batch ['B'] not ingested"
+    },
+    {
+      "id": "g034",
+      "reason": "requires batch ['B'] not ingested"
+    },
+    {
+      "id": "g035",
+      "reason": "requires batch ['B'] not ingested"
+    },
+    {
+      "id": "g036",
+      "reason": "requires batch ['B'] not ingested"
+    }
+  ],
+  "notes": ""
+}

@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "run_at": "2026-11-25T18:14:39Z",
+  "golden_hash": "2b5a9cb039364bb6",
+  "live_hash": "7cbf3031c3145220",
+  "embed_model": "nomic-embed-text",
+  "similarity_threshold": 0.6448,
+  "min_share": 0.85,
+  "n_live": 42,
+  "covered": 38,
+  "share": 0.9048,
+  "share_in_domain": 1.0,
+  "share_out_of_domain": 0.7143,
+  "verdict": "OK",
+  "sensitivity": {
+    "-0.05": 0.9762,
+    "+0.05": 0.6905
+  },
+  "tfidf_cross_check": {
+    "share": 0.0238
+  },
+  "uncovered": [
+    {
+      "id": "l036",
+      "query": "is there a late evening bus",
+      "best_golden_id": "g034",
+      "best_similarity": 0.5784,
+      "domain": "out"
+    },
+    {
+      "id": "l039",
+      "query": "is financial aid available if my parents cant pay",
+      "best_golden_id": "g043",
+      "best_similarity": 0.6081,
+      "domain": "out"
+    },
+    {
+      "id": "l040",
+      "query": "is there a swimming pool membership fee",
+      "best_golden_id": "g038",
+      "best_similarity": 0.6172,
+      "domain": "out"
+    },
+    {
+      "id": "l042",
+      "query": "how do i get my degree attested by the foreign office",
+      "best_golden_id": "g022",
+      "best_similarity": 0.6428,
+      "domain": "out"
+    }
+  ],
+  "topics": [
+    {
+      "name": "late / evening / bus",
+      "queries": [
+        "l036"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "financial / aid / available",
+      "queries": [
+        "l039"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "swimming / pool / membership",
+      "queries": [
+        "l040"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    },
+    {
+      "name": "get / degree / attested",
+      "queries": [
+        "l042"
+      ],
+      "single": true,
+      "in_corpus": null,
+      "document": null
+    }
+  ]
+}
